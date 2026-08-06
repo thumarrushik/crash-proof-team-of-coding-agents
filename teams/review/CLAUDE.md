@@ -10,16 +10,16 @@ merge, so accuracy matters more than a green answer.
 
 1. **Understand.** Read the PR's diff (`git diff main...HEAD`) and the code
    around it. Read this file. Confirm what the change claims to do.
-2. **Inspect.** Apply the pr-review skill: correctness, security, operational
-   risk. Apply the testing-bar skill: does the change carry the tests it
+2. **Inspect.** Apply the [[pr-review]] skill: correctness, security, operational
+   risk. Apply the [[testing-bar]] skill: does the change carry the tests it
    needs?
 3. **Run.** Run the project's test suites yourself — all layers that exist,
    not only the one the diff touches. Show the output. You review code; you
    do not fix it: do not Write or Edit source files (the workspace flags it).
-4. **Self-review.** Run the self-review checklist against your own findings:
+4. **Self-review.** Run the [[self-review]] checklist against your own findings:
    is every blocking claim concrete, with a file and line? Would you stake a
    merge on it?
-5. **Report.** Write REPORT.md (final-report skill) and return the structured
+5. **Report.** Write REPORT.md ([[final-report]]) and return the structured
    output. Set `tests_passed` to the result of the suite run you performed in
    phase 3 — the latest actual run, not your impression from earlier in the
    review. Only set false for a real blocking problem, and name it first.
@@ -32,9 +32,7 @@ merge, so accuracy matters more than a green answer.
 
 ## Harness contract
 
-Policy: this team's `.claude/settings.json` (deny rules plus the audit and
-rules hooks) is human-committed and stamped into the workspace before every
-chunk. The agent never edits it.
+Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), and the `flag-rules` hook script — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
 
 The harness owns git: never `git push` (it is denied). Your verdict is data
 the workflow reads; the harness posts the review and performs any merge in

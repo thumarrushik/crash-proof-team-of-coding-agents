@@ -20,7 +20,7 @@ POLLER_TASK_QUEUE = "claude-code-poller"
 TEAM_PROFILES: dict[str, tuple[str, ...]] = {
     "service-design": ("service-design", "lean-service", "final-report"),
     "backend": ("backend-delivery", "lean-service", "tdd", "self-review", "final-report"),
-    "frontend": ("frontend-delivery", "lean-service", "frontend-ui", "tdd", "self-review", "final-report"),
+    "frontend": ("frontend-delivery", "lean-service", "design-ui", "frontend-ui", "tdd", "self-review", "final-report"),
     "testing": ("testing-delivery", "testing-bar", "tdd", "self-review", "final-report"),
     "review": ("pr-review", "testing-bar", "self-review", "final-report"),
     "issues": ("issue-delivery", "tdd", "self-review", "final-report"),
@@ -481,3 +481,54 @@ WORKSPACE_SETTINGS = {
         ]
     },
 }
+
+# Team rules, enforced as data: the flag-rules hook checks every tool call
+# against the lane's rules.json. Single source of truth — teams/sync.py
+# materializes rules.json + the hook script into every teams/<team>/.claude/.
+DEFAULT_RULES: list[dict[str, str]] = [
+    {"name": "redundant_orientation_ls", "kind": "bash_regex", "pattern": r"^\s*ls(\s|$)"},
+]
+TEAM_RULES: dict[str, list[dict[str, str]]] = {
+    "review": [
+        {"name": "review_lane_edits_code", "kind": "tool_use", "tools": "Write,Edit"},
+    ],
+}
+
+FLAG_RULES_SCRIPT = '''import sys, json, re
+try:
+    d = json.load(sys.stdin)
+    rules = json.load(open(".claude/rules.json"))
+except Exception:
+    sys.exit(0)
+tool = d.get("tool_name", "")
+cmd = (d.get("tool_input") or {}).get("command", "")
+cmd = re.sub(r"^\\s*cd\\s+\\S+\\s*&&\\s*", "", cmd)   # ignore a leading `cd X &&`
+for r in rules:
+    hit = None
+    if r.get("kind") == "bash_regex" and tool == "Bash" and re.match(r["pattern"], cmd):
+        hit = {"rule": r["name"], "cmd": cmd[:120]}
+    elif r.get("kind") == "tool_use" and tool in r.get("tools", "").split(","):
+        hit = {"rule": r["name"], "tool": tool}
+    if hit:
+        with open(".claude/rule-flags.jsonl", "a") as f:
+            f.write(json.dumps(hit) + "\\n")
+'''
+
+# Per-team settings overlays on the base policy. The review lane never commits
+# (it reads, runs, and reports; even conflict resolution happens in the owning
+# lane), so its git-commit is denied outright — a genuinely lane-specific rule.
+TEAM_SETTINGS: dict[str, dict] = {
+    "review": {"extra_deny": ["Bash(git commit:*)"]},
+}
+
+
+def settings_for_team(team: str | None) -> dict:
+    """The lane's settings.json content: the shared base policy plus the
+    team's overlay. Pure; teams/sync.py materializes it per folder and the
+    bootstrap falls back to it when a team folder is absent."""
+    import copy
+    base = copy.deepcopy(WORKSPACE_SETTINGS)
+    overlay = TEAM_SETTINGS.get(normalize_team(team), {})
+    base["permissions"]["deny"] = list(base["permissions"]["deny"]) + list(overlay.get("extra_deny", []))
+    return base
+

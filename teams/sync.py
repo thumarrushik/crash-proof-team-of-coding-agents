@@ -21,7 +21,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from shared import TEAM_PROFILES, WORKSPACE_SETTINGS  # noqa: E402
+from shared import (  # noqa: E402
+    DEFAULT_RULES,
+    FLAG_RULES_SCRIPT,
+    TEAM_PROFILES,
+    TEAM_RULES,
+    settings_for_team,
+)
 
 CANONICAL = ROOT / "skills"
 TEAMS = ROOT / "teams"
@@ -40,10 +46,13 @@ def sync() -> int:
         if dest.exists():
             shutil.rmtree(dest)
         dest.mkdir(parents=True)
-        # the team's settings: the same human-committed policy for every lane,
-        # materialized so each team folder is the complete governance unit
-        (claude_dir / "settings.json").write_text(json.dumps(WORKSPACE_SETTINGS, indent=2) + "\n")
-        print(f"  {team}: .claude/settings.json <- shared.WORKSPACE_SETTINGS")
+        # the team's full governance unit, human-committed and team-specific:
+        # settings (base policy + the lane's overlay), the lane's behavioral
+        # rules, and the hook script that enforces them on every tool call
+        (claude_dir / "settings.json").write_text(json.dumps(settings_for_team(team), indent=2) + "\n")
+        (claude_dir / "rules.json").write_text(json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2) + "\n")
+        (claude_dir / "flag-rules.py").write_text(FLAG_RULES_SCRIPT)
+        print(f"  {team}: settings.json + rules.json + flag-rules.py")
         for name in names:
             if name not in available:
                 print(f"  {team}: {name} (operator-resolved at run time; not materialized)")

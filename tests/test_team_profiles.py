@@ -61,16 +61,23 @@ class TeamFolderTests(unittest.TestCase):
                 self.assertIn("Harness contract", text)
                 self.assertTrue((TEAMS / team / ".claude" / "skills").is_dir(),
                                 f"teams/{team}/.claude/skills missing")
-                # Every team carries its settings.json, in sync with the
-                # human-committed constant (teams/sync.py materializes it).
+                # Every team carries its full governance unit, in sync with the
+                # human-committed sources (teams/sync.py materializes them) and
+                # team-specific where the lane warrants it.
                 import json as _json
-                from shared import WORKSPACE_SETTINGS
-                team_settings = TEAMS / team / ".claude" / "settings.json"
-                self.assertTrue(team_settings.exists(),
-                                f"teams/{team}/.claude/settings.json missing; run teams/sync.py")
-                self.assertEqual(_json.loads(team_settings.read_text()), WORKSPACE_SETTINGS,
+                from shared import (DEFAULT_RULES, FLAG_RULES_SCRIPT, TEAM_RULES,
+                                    settings_for_team)
+                claude = TEAMS / team / ".claude"
+                self.assertEqual(_json.loads((claude / "settings.json").read_text()),
+                                 settings_for_team(team),
                                  f"teams/{team} settings drifted; run teams/sync.py")
+                self.assertEqual(_json.loads((claude / "rules.json").read_text()),
+                                 DEFAULT_RULES + TEAM_RULES.get(team, []),
+                                 f"teams/{team} rules drifted; run teams/sync.py")
+                self.assertEqual((claude / "flag-rules.py").read_text(), FLAG_RULES_SCRIPT,
+                                 f"teams/{team} hook script drifted; run teams/sync.py")
                 self.assertIn("settings.json", text)   # the mandate names its policy
+                self.assertIn("rules.json", text)
 
     def test_team_bundles_match_canonical_sources(self) -> None:
         """Drift guard: an edit to skills/ without running teams/sync.py (or a
@@ -103,6 +110,28 @@ class TeamFolderTests(unittest.TestCase):
             # The review lane's mandate carries the self-grade lesson: the
             # verdict is the latest actual run, reported after phase 3.
             self.assertIn("latest actual run", mandate)
+
+    def test_team_specific_policy_reaches_the_workspace(self) -> None:
+        """The lane-specific parts actually land: review's extra git-commit
+        deny and its review-lane rule; frontend's design-ui skill; the hook
+        script and rules stamped from the team folder."""
+        import json as _json
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            _bootstrap_workspace(work_dir, "review")
+            settings = _json.loads((work_dir / ".claude" / "settings.json").read_text())
+            self.assertIn("Bash(git commit:*)", settings["permissions"]["deny"])
+            rules = _json.loads((work_dir / ".claude" / "rules.json").read_text())
+            self.assertIn("review_lane_edits_code", [r["name"] for r in rules])
+            self.assertTrue((work_dir / ".claude" / "flag-rules.py").exists())
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            _bootstrap_workspace(work_dir, "frontend")
+            settings = _json.loads((work_dir / ".claude" / "settings.json").read_text())
+            self.assertNotIn("Bash(git commit:*)", settings["permissions"]["deny"])
+            self.assertTrue((work_dir / ".claude" / "skills" / "design-ui" / "SKILL.md").exists())
+            self.assertTrue((work_dir / ".claude" / "skills" / "lean-service" / "HARD-RULES.md").exists(),
+                            "lean-service should materialize from the repo, topic files included")
 
     def test_unknown_team_still_gets_a_mandate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

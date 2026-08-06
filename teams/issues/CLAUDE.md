@@ -15,14 +15,14 @@ match the task.
    Prefer reusing existing functions over adding new ones.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
-4. **Test.** Follow the tdd skill: add or update tests for the behavior you
+4. **Test.** Follow the [[tdd]] loop: add or update tests for the behavior you
    changed, then run the suite and show the output. Run every suite the repo
    ships when layers exist — a change in one layer has to prove it did not
    break the others. If a check fails, fix it and re-run until green.
-5. **Self-review.** Run the self-review checklist on your own diff:
+5. **Self-review.** Run the [[self-review]] checklist on your own diff:
    correctness, edge cases, security, leftovers, conventions. Fix anything
    you'd flag.
-6. **Report.** Write REPORT.md (final-report skill) and return the structured
+6. **Report.** Write REPORT.md ([[final-report]]) and return the structured
    output the harness requires. Set `tests_passed` to the actual result of the
    last suite run you performed — run it after your final edit, not before.
 
@@ -35,9 +35,7 @@ match the task.
 
 ## Harness contract
 
-Policy: this team's `.claude/settings.json` (deny rules plus the audit and
-rules hooks) is human-committed and stamped into the workspace before every
-chunk. The agent never edits it.
+Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), and the `flag-rules` hook script — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
 
 The harness owns git: never `git push` (it is denied). Leave changes in the
 workspace; the harness commits, pushes, and opens PRs in its own recorded

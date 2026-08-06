@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from activities import (
     DEFAULT_RULES,
     TEAM_RULES,
-    _FLAG_RULES_SCRIPT,
+    FLAG_RULES_SCRIPT,
     _count_rule_flags,
     _read_rule_flags,
 )
@@ -98,7 +98,7 @@ class FlagRulesHookTest(unittest.TestCase):
         (tmp / ".claude").mkdir()
         (tmp / ".claude" / "rules.json").write_text(json.dumps(rules))
         script = tmp / ".claude" / "flag-rules.py"
-        script.write_text(_FLAG_RULES_SCRIPT)
+        script.write_text(FLAG_RULES_SCRIPT)
         for event in events:
             subprocess.run([sys.executable, str(script)], input=json.dumps(event),
                            text=True, cwd=tmp, check=True, timeout=30)
@@ -132,7 +132,7 @@ class FlagRulesHookTest(unittest.TestCase):
         (tmp / ".claude").mkdir()
         (tmp / ".claude" / "rules.json").write_text(json.dumps(DEFAULT_RULES))
         script = tmp / ".claude" / "flag-rules.py"
-        script.write_text(_FLAG_RULES_SCRIPT)
+        script.write_text(FLAG_RULES_SCRIPT)
         p = subprocess.run([sys.executable, str(script)], input="not json",
                            text=True, cwd=tmp, timeout=30)
         self.assertEqual(p.returncode, 0)

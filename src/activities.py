@@ -31,6 +31,10 @@ from temporalio.exceptions import ApplicationError
 
 from shared import (
     WORKSPACE_SETTINGS,
+    DEFAULT_RULES,
+    TEAM_RULES,
+    FLAG_RULES_SCRIPT,
+    settings_for_team,
     ChunkInput,
     ChunkResult,
     OpenPRInput,
@@ -67,42 +71,7 @@ REPORT_SCHEMA = {
     },
 }
 
-# Team rules, enforced as data. The bootstrap writes each lane's rules into
-# .claude/rules.json, and ONE PostToolUse hook flags every violation into
-# .claude/rule-flags.jsonl — deterministic evidence on every run and retry. The
-# first rule was LEARNED from a corpus review of prior runs (agents re-`ls`ing
-# work they had just finished); the review-lane rule keeps a reviewer reading
-# the code under review instead of rewriting it. After each chunk the activity
-# tallies the new flags into the typed ChunkResult, where the workflow's
-# governor reads them: the guardrail plane reporting to the orchestration plane.
-DEFAULT_RULES: list[dict[str, str]] = [
-    {"name": "redundant_orientation_ls", "kind": "bash_regex", "pattern": r"^\s*ls(\s|$)"},
-]
-TEAM_RULES: dict[str, list[dict[str, str]]] = {
-    "review": [
-        {"name": "review_lane_edits_code", "kind": "tool_use", "tools": "Write,Edit"},
-    ],
-}
 
-_FLAG_RULES_SCRIPT = '''import sys, json, re
-try:
-    d = json.load(sys.stdin)
-    rules = json.load(open(".claude/rules.json"))
-except Exception:
-    sys.exit(0)
-tool = d.get("tool_name", "")
-cmd = (d.get("tool_input") or {}).get("command", "")
-cmd = re.sub(r"^\\s*cd\\s+\\S+\\s*&&\\s*", "", cmd)   # ignore a leading `cd X &&`
-for r in rules:
-    hit = None
-    if r.get("kind") == "bash_regex" and tool == "Bash" and re.match(r["pattern"], cmd):
-        hit = {"rule": r["name"], "cmd": cmd[:120]}
-    elif r.get("kind") == "tool_use" and tool in r.get("tools", "").split(","):
-        hit = {"rule": r["name"], "tool": tool}
-    if hit:
-        with open(".claude/rule-flags.jsonl", "a") as f:
-            f.write(json.dumps(hit) + "\\n")
-'''
 
 # Workspace-owned policy: destructive commands denied even though Bash is
 # allowed; every tool call is appended to an audit log by a `*` PostToolUse hook
@@ -265,16 +234,20 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     claude_dir = work_dir / ".claude"
     skills_dir = claude_dir / "skills"
     skills_dir.mkdir(parents=True, exist_ok=True)
+    # The team folder is the authoritative governance unit: settings.json,
+    # rules.json, and the flag-rules hook are loaded from teams/<team>/.claude
+    # (materialized there by teams/sync.py); the shared constants are only the
+    # fallback for a team without a folder.
     repo_root = Path(__file__).resolve().parents[1]
-    team_settings = repo_root / "teams" / team / ".claude" / "settings.json"
-    if team_settings.exists():
-        (claude_dir / "settings.json").write_text(team_settings.read_text())
-    else:
-        (claude_dir / "settings.json").write_text(json.dumps(WORKSPACE_SETTINGS, indent=2))
-    (claude_dir / "flag-rules.py").write_text(_FLAG_RULES_SCRIPT)
-    (claude_dir / "rules.json").write_text(
-        json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2)
-    )
+    team_claude = repo_root / "teams" / team / ".claude"
+
+    def _stamp(name: str, fallback: str) -> None:
+        src = team_claude / name
+        (claude_dir / name).write_text(src.read_text() if src.exists() else fallback)
+
+    _stamp("settings.json", json.dumps(settings_for_team(team), indent=2))
+    _stamp("flag-rules.py", FLAG_RULES_SCRIPT)
+    _stamp("rules.json", json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2))
     installed: dict[str, str] = {}
     for name in TEAM_PROFILES.get(team, TEAM_PROFILES["backend"]):
         installed[name] = _install_skill(skills_dir, name, team)
