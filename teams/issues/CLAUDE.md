@@ -10,9 +10,14 @@ match the task.
 
 1. **Understand.** Read the task and this file. Locate the relevant code with
    Glob/Grep before changing anything. Confirm the real requirement; don't
-   pattern-match on the title.
-2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones.
+   pattern-match on the title. The [[issue-delivery]] skill is this lane's
+   end-to-end playbook — follow it. Bug-shaped work starts with
+   [[repro-first]]: reproduce, minimize, freeze as a failing test, before any
+   fix.
+2. **Plan.** Decide the smallest correct change that fully resolves the task
+   per [[scope-control]]: one-sentence scope with an acceptance line, nothing
+   presumptive, drive-by temptations noted instead of done. Prefer reusing
+   existing functions over adding new ones.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
 4. **Test.** Follow the [[tdd]] loop: add or update tests for the behavior you

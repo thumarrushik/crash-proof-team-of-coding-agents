@@ -16,8 +16,9 @@ match the task.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
 4. **Test.** Follow the [[tdd]] loop: add or update tests (including a browser
-   test for user-visible behavior, per the [[frontend-ui]] and [[design-ui]] skills), then run the
-   suite and show the output. A frontend change must also run the backend and
+   test for user-visible behavior, per [[browser-e2e]]), then run the suite and
+   show the output. Surfaces follow [[design-ui]]; data handling follows
+   [[state-and-errors]] — all four render states get an assertion. A frontend change must also run the backend and
    end-to-end suites when they exist — a change in one layer has to prove it
    did not break the others. If a check fails, fix it and re-run until green.
 5. **Self-review.** Run the [[self-review]] checklist on your own diff:

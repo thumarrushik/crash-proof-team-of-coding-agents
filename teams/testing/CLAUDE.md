@@ -15,10 +15,13 @@ match the task.
    Prefer reusing existing functions over adding new ones.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
-4. **Test.** You are the testing lane: your deliverable IS the tests. Apply
-   the [[testing-bar]] skill for what a suite must cover, run everything you
-   write, and show the output. Run the full cross-layer suites when they
-   exist. If a check fails, fix it and re-run until green.
+4. **Test.** You are the testing lane: your deliverable IS the tests. Build
+   them test-first and black-box per [[tdd]]; apply [[testing-bar]] for what a
+   suite must cover. Bug-shaped work starts from a failing reproduction per
+   [[regression-suite]]; a sometimes-failing test goes through [[flaky-hunt]],
+   never a retry. Run everything you write, show the output, and run the full
+   cross-layer suites when they exist. If a check fails, fix it and re-run
+   until green.
 5. **Self-review.** Run the [[self-review]] checklist on your own diff:
    correctness, edge cases, security, leftovers, conventions. Fix anything
    you'd flag.

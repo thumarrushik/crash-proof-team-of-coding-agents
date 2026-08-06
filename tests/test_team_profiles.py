@@ -88,7 +88,26 @@ class TeamSelfSufficiencyTests(unittest.TestCase):
             settings = json.loads((work_dir / ".claude" / "settings.json").read_text())
             self.assertNotIn("Bash(git commit:*)", settings["permissions"]["deny"])
             self.assertTrue((work_dir / ".claude" / "skills" / "design-ui" / "SKILL.md").exists())
-            self.assertTrue((work_dir / ".claude" / "skills" / "lean-service" / "HARD-RULES.md").exists())
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            _bootstrap_workspace(work_dir, "backend")
+            self.assertTrue((work_dir / ".claude" / "skills" / "lean-service" / "HARD-RULES.md").exists(),
+                            "lean-service topic files should reach the backend workspace")
+
+    def test_every_mandate_ref_resolves_to_an_owned_skill(self) -> None:
+        """No dangling [[skill]] references: every skill a mandate tells the
+        agent to apply must exist in that team's own folder — the working set
+        and the mandate move together."""
+        import re
+        for team in known_teams():
+            with self.subTest(team=team):
+                mandate = (TEAMS / team / "CLAUDE.md").read_text()
+                owned = {d.name for d in (TEAMS / team / ".claude" / "skills").iterdir()
+                         if (d / "SKILL.md").exists()}
+                for ref in set(re.findall(r"\[\[([a-z0-9-]+)\]\]", mandate)):
+                    self.assertIn(ref, owned,
+                                  f"teams/{team}/CLAUDE.md references [[{ref}]] "
+                                  f"but the team does not own that skill")
 
     def test_unknown_team_borrows_the_default_folder(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

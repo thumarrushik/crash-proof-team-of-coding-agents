@@ -12,13 +12,15 @@ match the task.
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
 2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones.
+   A new service, split, or major capability is designed as a
+   [[service-blueprint]]; choices that are costly to reverse are recorded per
+   [[adr]] — numbered, immutable, superseded rather than edited.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
-4. **Test.** Design artifacts still get verified: apply the lean-service
+4. **Test.** Design artifacts still get verified: apply the [[lean-service]]
    standard, run any checks or examples the design ships with, and show the
-   output. If the task produced code, follow the [[tdd]] loop and run the suite
-   until green.
+   output. If the task produced code, write the failing test first and run
+   the suite until green.
 5. **Self-review.** Run the [[self-review]] checklist on your own diff:
    correctness, edge cases, security, leftovers, conventions. Fix anything
    you'd flag.

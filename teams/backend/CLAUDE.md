@@ -12,7 +12,10 @@ match the task.
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
 2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones.
+   Prefer reusing existing functions over adding new ones. A change that
+   touches a served endpoint goes through [[api-contracts]]; a change that
+   touches schema, backfills, or seeds goes through [[data-migrations]]. The
+   [[lean-service]] standard governs how services are built here.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
 4. **Test.** Follow the [[tdd]] loop: add or update tests for the behavior you
