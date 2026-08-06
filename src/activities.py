@@ -160,17 +160,12 @@ def _session_id_from_heartbeat(details: Sequence[Any]) -> str | None:
 def _skill_search_roots(team: str | None = None) -> list[Path]:
     repo_root = Path(__file__).resolve().parents[1]
     roots = [
-        # Operator's own skills win, then the team's own folder, then the
-        # repo's canonical skills/ pool.
+        # Operator's own skills win; otherwise the team's folder OWNS its
+        # skills — there is no shared pool.
         Path.home() / ".claude" / "skills",
     ]
     if team:
         roots.append(repo_root / "teams" / team / ".claude" / "skills")
-    roots += [
-        repo_root / ".claude" / "skills",
-        repo_root / "starter-kit" / ".claude" / "skills",
-        repo_root / "skills",
-    ]
     return roots
 
 

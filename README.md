@@ -36,17 +36,17 @@ teams/<team>/
                      (Understand -> Plan -> Implement -> Test -> Self-review
                      -> Report), "do not skip", per-lane duties, the harness
                      contract (the harness owns git)
-  .claude/skills/    the team's skill bundle, materialized from the canonical
-                     skills/ pool by teams/sync.py (a drift test goes red if
-                     they diverge)
+  .claude/skills/    the team's skills — OWNED by the team folder (no shared
+                     pool); plus settings.json, rules.json, and the flag-rules
+                     hook, materialized from src/shared.py by teams/sync.py
+                     (drift tests go red if they diverge)
 ```
 
 Six lanes: `backend`, `frontend`, `testing`, `review`, `issues`,
 `service-design`. The workspace bootstrap (`src/activities.py`) installs the
 team folder into every run: the mandate becomes the workspace `CLAUDE.md`, the
 bundle becomes `.claude/skills`, and the same deny rules + audit hooks are
-re-stamped before every chunk. After editing any skill or profile:
-`python3 teams/sync.py`.
+re-stamped before every chunk. After editing the policy sources in `src/shared.py`: `python3 teams/sync.py`. Skills are edited directly in the owning team's folder.
 
 ## The system (`src/`)
 

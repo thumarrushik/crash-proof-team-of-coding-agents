@@ -11,7 +11,6 @@ from shared import TEAM_PROFILES, task_queue_for_team
 
 REPO = Path(__file__).resolve().parent.parent
 TEAMS = REPO / "teams"
-CANONICAL = REPO / "skills"
 
 
 class TeamProfileTests(unittest.TestCase):
@@ -79,25 +78,15 @@ class TeamFolderTests(unittest.TestCase):
                 self.assertIn("settings.json", text)   # the mandate names its policy
                 self.assertIn("rules.json", text)
 
-    def test_team_bundles_match_canonical_sources(self) -> None:
-        """Drift guard: an edit to skills/ without running teams/sync.py (or a
-        hand-edit inside a team bundle) goes red here instead of shipping
-        stale playbooks."""
+    def test_teams_own_every_profile_skill(self) -> None:
+        """Skills live in the team folder, full stop: every skill a profile
+        names must exist there (no shared pool to fall back on)."""
         for team, names in TEAM_PROFILES.items():
             for name in names:
-                src = CANONICAL / name
-                if not (src / "SKILL.md").exists():
-                    continue  # operator-resolved (e.g. lean-service): not materialized
-                dst = TEAMS / team / ".claude" / "skills" / name
                 with self.subTest(team=team, skill=name):
-                    self.assertTrue((dst / "SKILL.md").exists(),
-                                    f"teams/{team} missing {name}; run teams/sync.py")
-                    for p in src.rglob("*"):
-                        if p.is_file():
-                            rel = p.relative_to(src)
-                            self.assertEqual(
-                                p.read_text(), (dst / rel).read_text(),
-                                f"teams/{team}/{name}/{rel} drifted; run teams/sync.py")
+                    self.assertTrue(
+                        (TEAMS / team / ".claude" / "skills" / name / "SKILL.md").exists(),
+                        f"teams/{team} does not own skill {name}")
 
     def test_bootstrap_memory_is_the_team_mandate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

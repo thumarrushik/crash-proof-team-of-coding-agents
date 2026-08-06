@@ -1,20 +1,18 @@
-"""Materialize each team's skill bundle: teams/<team>/.claude/skills/<name>/.
+"""Materialize each team's governance files from the human-committed sources.
 
-The canonical skill sources live in skills/ (one place to edit); TEAM_PROFILES
-in src/shared.py says which skills each team carries. This script copies each
-team's bundle into its folder so the team directory is the complete, physical
-"who we are and how we work" unit the bootstrap installs. Run it after editing
-any skill or profile:
+Skills LIVE in each team's folder (teams/<team>/.claude/skills/) — the team
+owns its playbooks outright; there is no shared pool to sync from. What this
+script keeps in sync are the three policy files whose single source of truth
+is src/shared.py:
 
-    python3 teams/sync.py
+    settings.json   base policy + the lane's overlay (settings_for_team)
+    rules.json      the lane's behavioral rules (DEFAULT_RULES + TEAM_RULES)
+    flag-rules.py   the hook script that enforces rules.json on every call
 
-tests/test_team_profiles.py fails if a team folder drifts from its sources, so
-an un-synced edit goes red instead of shipping stale playbooks. Skills that
-resolve from the operator's machine (e.g. lean-service, from ~/.claude/skills)
-are intentionally NOT materialized — the bootstrap resolves them at run time so
-the operator override keeps working.
+Run after editing any of those sources:  python3 teams/sync.py
+tests/test_team_profiles.py fails if a team's policy files drift.
 """
-import shutil
+import json
 import sys
 from pathlib import Path
 
@@ -29,39 +27,24 @@ from shared import (  # noqa: E402
     settings_for_team,
 )
 
-CANONICAL = ROOT / "skills"
 TEAMS = ROOT / "teams"
 
 
-def repo_skills() -> set[str]:
-    return {p.name for p in CANONICAL.iterdir() if (p / "SKILL.md").exists()}
-
-
 def sync() -> int:
-    import json
-    available = repo_skills()
     for team, names in TEAM_PROFILES.items():
         claude_dir = TEAMS / team / ".claude"
-        dest = claude_dir / "skills"
-        if dest.exists():
-            shutil.rmtree(dest)
-        dest.mkdir(parents=True)
-        # the team's full governance unit, human-committed and team-specific:
-        # settings (base policy + the lane's overlay), the lane's behavioral
-        # rules, and the hook script that enforces them on every tool call
-        (claude_dir / "settings.json").write_text(json.dumps(settings_for_team(team), indent=2) + "\n")
-        (claude_dir / "rules.json").write_text(json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2) + "\n")
-        (claude_dir / "flag-rules.py").write_text(FLAG_RULES_SCRIPT)
-        print(f"  {team}: settings.json + rules.json + flag-rules.py")
-        for name in names:
-            if name not in available:
-                print(f"  {team}: {name} (operator-resolved at run time; not materialized)")
-                continue
-            shutil.copytree(CANONICAL / name, dest / name)
-            print(f"  {team}: {name} <- skills/{name}")
+        skills = claude_dir / "skills"
         if not (TEAMS / team / "CLAUDE.md").exists():
             print(f"  WARNING: teams/{team}/CLAUDE.md missing — every team needs a mandate")
             return 1
+        missing = [n for n in names if not (skills / n / "SKILL.md").exists()]
+        if missing:
+            print(f"  WARNING: teams/{team} missing skills {missing} — the team folder owns them")
+            return 1
+        (claude_dir / "settings.json").write_text(json.dumps(settings_for_team(team), indent=2) + "\n")
+        (claude_dir / "rules.json").write_text(json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2) + "\n")
+        (claude_dir / "flag-rules.py").write_text(FLAG_RULES_SCRIPT)
+        print(f"  {team}: settings.json + rules.json + flag-rules.py (skills: {len(names)} team-owned)")
     return 0
 
 
