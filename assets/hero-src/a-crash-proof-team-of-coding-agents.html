@@ -1,0 +1,174 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/a-crash-proof-team-of-coding-agents.md.
+  Render: assets/hero-src/render.sh -> assets/medium-heroes/a-crash-proof-team-of-coding-agents.png
+  Editorial style, single metaphor taken from the article's own line "the other
+  eight carry the delivery pipeline around it": an amber core (Claude Code, the
+  judgment work) inside one indigo orbit carrying eight satellite jobs — nine in
+  all. A red Kill -9 bolt snaps the orbit; a green heartbeat weld re-closes it.
+  The woven conversation/job thread enters from the left and leaves the system
+  to a merged ring. Plain-text wordmarks; Title Case labels; tag is only the
+  parallel line.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --amber2:#f59e0b;
+    --indigo:#818cf8; --indigo2:#6366f1;
+    --pulse:#34d399; --red:#f87171;
+    --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 78% 46%, rgba(99,102,241,.22), transparent 60%),
+      radial-gradient(900px 480px at 12% 78%, rgba(245,158,11,.14), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;
+  }
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  svg{position:absolute;inset:0}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.72) 32%, rgba(2,6,23,0) 55%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:740px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  /* plain text wordmarks — deliberately no vendor logo lockup */
+  .lockup{display:flex;align-items:baseline;gap:16px;margin-bottom:28px;
+    font-family:"SF Mono",Menlo,monospace;letter-spacing:.06em}
+  .lockup .bname{font-size:21px;font-weight:700;color:var(--t2)}
+  .lockup .cross{font-size:18px;color:var(--t3)}
+  h1{font-size:78px;line-height:1.02;font-weight:800;color:var(--t1);letter-spacing:-.02em}
+  h1 .glow{background:linear-gradient(90deg,var(--amber),#fcd34d 40%,var(--indigo));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .rule{width:88px;height:4px;margin:32px 0 28px;border-radius:3px;
+    background:linear-gradient(90deg,var(--amber2),var(--indigo2))}
+  .tag{font-size:28px;line-height:1.42;color:var(--t1);font-weight:600;max-width:640px}
+  .cap{position:absolute;z-index:3;font-family:"SF Mono",Menlo,monospace;
+    font-size:16px;letter-spacing:.04em;font-weight:600}
+  .cap.crash{left:1288px;top:96px;color:var(--red)}
+  .cap.beat{left:1146px;top:242px;color:var(--pulse)}
+  .cap.ship{left:1496px;top:252px;color:var(--t1)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <svg width="1600" height="640" viewBox="0 0 1600 640" fill="none">
+    <defs>
+      <filter id="glow" x="-30%" y="-60%" width="160%" height="220%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="soft" x="-40%" y="-120%" width="180%" height="340%">
+        <feGaussianBlur stdDeviation="3.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <radialGradient id="coreglow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fbbf24" stop-opacity=".28"/>
+        <stop offset="1" stop-color="#fbbf24" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- faint event-history ledger ticks along the base -->
+    <g opacity=".22" stroke="#334155" stroke-width="2">
+      <path d="M120 560 h1360" stroke="#1e293b" stroke-width="2"/>
+      <g stroke="#475569">
+        <path d="M160 548 v24"/><path d="M240 548 v24"/><path d="M320 548 v24"/><path d="M400 548 v24"/>
+        <path d="M480 548 v24"/><path d="M560 548 v24"/><path d="M640 548 v24"/><path d="M720 548 v24"/>
+        <path d="M800 548 v24"/><path d="M880 548 v24"/><path d="M960 548 v24"/><path d="M1040 548 v24"/>
+        <path d="M1120 548 v24"/><path d="M1200 548 v24"/><path d="M1280 548 v24"/><path d="M1360 548 v24"/><path d="M1440 548 v24"/>
+      </g>
+    </g>
+
+    <!-- incoming woven thread: conversation (amber) + job (indigo) -->
+    <g filter="url(#glow)" fill="none" stroke-linecap="round">
+      <path d="M70 322 C 340 292, 640 356, 893 330" stroke="#f59e0b" stroke-width="5" opacity=".95"/>
+      <path d="M70 344 C 340 372, 640 308, 893 336" stroke="#818cf8" stroke-width="5" opacity=".95"/>
+    </g>
+    <!-- outgoing thread to the merged ring -->
+    <g filter="url(#glow)" fill="none" stroke-linecap="round">
+      <path d="M1266 328 C 1352 314, 1468 342, 1546 332" stroke="#f59e0b" stroke-width="5" opacity=".95"/>
+      <path d="M1266 336 C 1352 350, 1468 322, 1546 332" stroke="#818cf8" stroke-width="5" opacity=".95"/>
+    </g>
+
+    <!-- ambient glow behind the system -->
+    <circle cx="1080" cy="332" r="250" fill="url(#coreglow)"/>
+
+    <!-- the orbit: one ring, snapped at the strike and welded by the heartbeat.
+         Long elliptical arc from the gap edge at 320deg clockwise to 295deg. -->
+    <path d="M 1222 237 A 185 148 0 1 1 1158 198"
+          stroke="#6366f1" stroke-width="4" opacity=".85" fill="none" filter="url(#soft)"/>
+    <!-- heartbeat weld bridging the snapped orbit -->
+    <polyline filter="url(#soft)" fill="none" stroke="#34d399" stroke-width="4"
+      stroke-linecap="round" stroke-linejoin="round" opacity=".95"
+      points="1222,237 1207,230 1200,210 1188,244 1178,214 1168,204 1158,198"/>
+
+    <!-- eight satellite jobs riding the orbit -->
+    <g filter="url(#soft)">
+      <g fill="#818cf8">
+        <circle cx="1254" cy="383" r="9"/><circle cx="1158" cy="466" r="9"/>
+        <circle cx="1017" cy="471" r="9"/><circle cx="912" cy="395" r="9"/>
+        <circle cx="906" cy="281" r="9"/><circle cx="1002" cy="198" r="9"/>
+        <circle cx="1143" cy="193" r="9"/><circle cx="1248" cy="269" r="9"/>
+      </g>
+      <g fill="none" stroke="#6366f1" stroke-width="1.6" opacity=".55">
+        <circle cx="1254" cy="383" r="15"/><circle cx="1158" cy="466" r="15"/>
+        <circle cx="1017" cy="471" r="15"/><circle cx="912" cy="395" r="15"/>
+        <circle cx="906" cy="281" r="15"/><circle cx="1002" cy="198" r="15"/>
+        <circle cx="1143" cy="193" r="15"/><circle cx="1248" cy="269" r="15"/>
+      </g>
+    </g>
+
+    <!-- the core: Claude Code, the judgment work -->
+    <g filter="url(#glow)">
+      <circle cx="1080" cy="332" r="44" fill="#fbbf24"/>
+      <circle cx="1080" cy="332" r="58" fill="none" stroke="#f59e0b" stroke-width="2" opacity=".55"/>
+      <g stroke="#78350f" stroke-width="5" stroke-linecap="round">
+        <path d="M1080 308 v48"/>
+        <path d="M1059 320 l42 24"/>
+        <path d="M1101 320 l-42 24"/>
+      </g>
+    </g>
+
+    <!-- the kill bolt striking the orbit -->
+    <g transform="translate(1180,98)" filter="url(#soft)">
+      <path d="M64 20 L44 66 h20 l-8 34 34-48 h-22 z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"/>
+      <g stroke="#fca5a5" stroke-width="3" stroke-linecap="round">
+        <path d="M28 44 l-20 -8"/><path d="M96 30 l20 -12"/><path d="M92 92 l18 12"/>
+      </g>
+    </g>
+
+    <!-- merged / shipped node -->
+    <circle cx="1546" cy="332" r="12" fill="#e2e8f0" filter="url(#glow)"/>
+    <circle cx="1546" cy="332" r="22" fill="none" stroke="#34d399" stroke-width="2.5" opacity=".8"/>
+    <!-- origin node: the filed issue -->
+    <circle cx="70" cy="332" r="7" fill="#94a3b8"/>
+  </svg>
+
+  <div class="scrim"></div>
+
+  <div class="text">
+    <div class="lockup">
+      <span class="bname">Claude&nbsp;Code</span>
+      <span class="cross">×</span>
+      <span class="bname">Temporal</span>
+    </div>
+    <h1>A Crash-Proof Team<br><span class="glow">of Coding Agents</span></h1>
+    <div class="rule"></div>
+    <div class="tag">Claude Code remembers the conversation;<br>Temporal remembers the job.</div>
+  </div>
+
+  <div class="cap crash">Kill&nbsp;-9</div>
+  <div class="cap beat">Heartbeat</div>
+  <div class="cap ship">Merged</div>
+</div>
+</body>
+</html>

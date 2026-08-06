@@ -1,0 +1,106 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/the-agent-grades-its-own-homework.md.
+  Render: assets/hero-src/render.sh -> assets/medium-heroes/the-agent-grades-its-own-homework.png
+  Editorial style: two cards side by side — the agent's own report card reading
+  FAIL, and the harness's re-run of the same work reading all green with a
+  VERIFIED stamp. The false alarm, caught. Title Case labels; plain wordmarks.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --amber2:#f59e0b;
+    --indigo:#818cf8; --indigo2:#6366f1;
+    --pulse:#34d399; --red:#f87171;
+    --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 80% 45%, rgba(52,211,153,.14), transparent 60%),
+      radial-gradient(900px 480px at 12% 78%, rgba(245,158,11,.12), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;
+  }
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.70) 30%, rgba(2,6,23,0) 52%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:700px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .lockup{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;
+    font-family:"SF Mono",Menlo,monospace;letter-spacing:.06em}
+  .lockup .bname{font-size:20px;font-weight:700;color:var(--t2)}
+  .lockup .cross{font-size:17px;color:var(--t3)}
+  h1{font-size:66px;line-height:1.04;font-weight:800;color:var(--t1);letter-spacing:-.02em}
+  h1 .glow{background:linear-gradient(90deg,var(--amber),#fcd34d 40%,var(--pulse));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .rule{width:88px;height:4px;margin:28px 0 24px;border-radius:3px;
+    background:linear-gradient(90deg,var(--amber2),var(--pulse))}
+  .tag{font-size:25px;line-height:1.45;color:var(--t1);font-weight:600;max-width:620px}
+  .card{position:absolute;z-index:2;width:330px;border-radius:18px;padding:26px 28px;
+    background:linear-gradient(rgba(255,255,255,.05),rgba(255,255,255,.015));
+    font-family:"SF Mono",Menlo,monospace}
+  .card h3{font:700 17px "SF Mono",Menlo,monospace;letter-spacing:.06em;margin-bottom:16px}
+  .row{font-size:16px;line-height:1.9;color:var(--t2)}
+  .self{left:830px;top:150px;border:1.5px solid rgba(251,191,36,.5);transform:rotate(-2deg)}
+  .self h3{color:#fbc98a}
+  .grade{font:800 56px "SF Pro Display",Arial,sans-serif;color:var(--red);margin:10px 0 2px;
+    text-shadow:0 0 18px rgba(239,68,68,.5)}
+  .harness{left:1210px;top:130px;border:1.5px solid rgba(52,211,153,.55);transform:rotate(1.4deg)}
+  .harness h3{color:#8fe9c2}
+  .ok{color:#6ee7b7}
+  .stamp{position:absolute;right:-14px;bottom:-16px;transform:rotate(-12deg);
+    border:3px solid #34d399;color:#6ee7b7;border-radius:10px;padding:6px 12px;
+    font:800 18px "SF Mono",Menlo,monospace;letter-spacing:.1em;
+    box-shadow:0 0 18px rgba(52,211,153,.35);background:rgba(2,6,23,.6)}
+  .verdictline{position:absolute;left:830px;top:520px;z-index:3;width:700px;
+    font:600 17px "SF Mono",Menlo,monospace;color:var(--t3)}
+  .verdictline b{color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="scrim"></div>
+
+  <div class="text">
+    <div class="lockup">
+      <span class="bname">Claude&nbsp;Code</span>
+      <span class="cross">×</span>
+      <span class="bname">Temporal</span>
+    </div>
+    <h1>The Agent Grades<br><span class="glow">Its Own Homework</span></h1>
+    <div class="rule"></div>
+    <div class="tag">The merge switch is the agent's own claim.
+      Measured, it failed 3 in 10 — every miss a false alarm.</div>
+  </div>
+
+  <!-- the agent's self-grade card -->
+  <div class="card self">
+    <h3>Self-Grade</h3>
+    <div class="row">tests_passed:</div>
+    <div class="grade">false</div>
+    <div class="row" style="color:#8b95a6">(its own report)</div>
+  </div>
+
+  <!-- the harness re-run card -->
+  <div class="card harness">
+    <h3>Harness Re-Run</h3>
+    <div class="row ok">Pass test_add</div>
+    <div class="row ok">Pass test_reverse</div>
+    <div class="row ok">Pass test_median ×3</div>
+    <div class="stamp">VERIFIED GREEN</div>
+  </div>
+
+  <div class="verdictline">the same work, graded twice — <b>the false alarm, caught by one re-run</b></div>
+</div>
+</body>
+</html>

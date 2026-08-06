@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+.env
+experiment-results*/
+
+# experiment run logs (raw; curated results live in deploy/*-results.md)
+deploy/*.log
+
+# Claude Code local state (git worktrees, session scratch — never committed)
+.claude/
