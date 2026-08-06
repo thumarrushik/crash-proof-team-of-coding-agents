@@ -8,13 +8,13 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from activities import (
-    DEFAULT_RULES,
-    TEAM_RULES,
-    FLAG_RULES_SCRIPT,
-    _count_rule_flags,
-    _read_rule_flags,
-)
+TEAMS = Path(__file__).resolve().parent.parent / "teams"
+FLAG_RULES_SCRIPT = (TEAMS / "backend" / ".claude" / "flag-rules.py").read_text()
+DEFAULT_RULES = json.loads((TEAMS / "backend" / ".claude" / "rules.json").read_text())
+TEAM_RULES = {"review": [r for r in json.loads((TEAMS / "review" / ".claude" / "rules.json").read_text())
+                         if r["name"] != "redundant_orientation_ls"]}
+
+from activities import _count_rule_flags, _read_rule_flags
 from shared import TaskInput, corrective_instruction, model_for_chunk, unanimous_failures
 
 

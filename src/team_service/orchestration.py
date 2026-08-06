@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 import re
 from typing import Iterable
 
-from shared import TEAM_PROFILES, normalize_team, task_queue_for_team
+from shared import known_teams, normalize_team, task_queue_for_team
 
 
 TEAM_LABEL_PREFIX = "team/"
@@ -60,7 +60,7 @@ def team_for_labels(labels: Iterable[str], default: str = "issues") -> str:
         if not normalized.startswith(TEAM_LABEL_PREFIX):
             continue
         team = normalize_team(normalized.removeprefix(TEAM_LABEL_PREFIX))
-        if team in TEAM_PROFILES:
+        if team in known_teams():
             return team
     return default
 

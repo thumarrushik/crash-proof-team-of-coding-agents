@@ -7,7 +7,7 @@ from pathlib import Path
 
 from temporalio.client import Client
 
-from shared import DEFAULT_TEAM, TEAM_PROFILES, TEMPORAL_ADDRESS, TaskInput, namespace_for_team, normalize_team, task_queue_for_team
+from shared import DEFAULT_TEAM, known_teams, TEMPORAL_ADDRESS, TaskInput, namespace_for_team, normalize_team, task_queue_for_team
 from workflows import RunClaudeTask
 
 
@@ -26,7 +26,7 @@ async def main() -> None:
     parser.add_argument(
         "--team",
         default=DEFAULT_TEAM,
-        choices=sorted(TEAM_PROFILES),
+        choices=sorted(known_teams()),
         help="Team profile / task queue / skill bundle to use",
     )
     parser.add_argument("--max-chunks", type=int, default=8, help="Resume-chunks before giving up (default 8)")

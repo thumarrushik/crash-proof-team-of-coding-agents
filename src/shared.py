@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 import os
 import re
+from pathlib import Path
 from typing import Any
 
 # Env-overridable so the same image runs locally (localhost) and on GCP
@@ -14,17 +15,31 @@ DEFAULT_TEAM = "backend"
 # Dedicated task queue for the GitHub poll workflow/activity (see poller.py).
 POLLER_TASK_QUEUE = "claude-code-poller"
 
-# Each team installs its own delivery playbook (how this team works a task, incl.
-# cross-team testing duty) plus the disciplines it applies. `lean-service` comes
-# from the operator's ~/.claude/skills; the rest ship in the repo's skills/.
-TEAM_PROFILES: dict[str, tuple[str, ...]] = {
-    "service-design": ("service-design", "lean-service", "final-report"),
-    "backend": ("backend-delivery", "lean-service", "tdd", "self-review", "final-report"),
-    "frontend": ("frontend-delivery", "lean-service", "design-ui", "frontend-ui", "tdd", "self-review", "final-report"),
-    "testing": ("testing-delivery", "testing-bar", "tdd", "self-review", "final-report"),
-    "review": ("pr-review", "testing-bar", "self-review", "final-report"),
-    "issues": ("issue-delivery", "tdd", "self-review", "final-report"),
-}
+# Teams are DISCOVERED from teams/<team>/ folders — each folder is owned by an
+# engineering team and is self-sufficient (mandate, skills, settings, rules,
+# hook, OWNERS). Adding a team = adding a folder; no central edit required.
+TEAMS_DIR = Path(__file__).resolve().parents[1] / "teams"
+
+
+def known_teams() -> tuple[str, ...]:
+    """The teams that exist: one folder each under teams/. Falls back to the
+    legacy profile keys if the folders are unavailable (e.g. odd cwd)."""
+    try:
+        found = tuple(sorted(
+            d.name for d in TEAMS_DIR.iterdir()
+            if d.is_dir() and (d / "CLAUDE.md").exists()
+        ))
+        if found:
+            return found
+    except OSError:
+        pass
+    return (DEFAULT_TEAM,)
+
+
+# The org-wide policy FLOOR: every team may extend its own settings.json but
+# these denies are non-negotiable and validated by teams/validate.py + tests.
+ORG_FLOOR_DENY: tuple[str, ...] = ("Bash(rm -rf:*)", "Bash(sudo:*)", "Bash(git push:*)")
+
 
 
 def normalize_team(team: str | None) -> str:
@@ -449,86 +464,4 @@ class PostReviewResult:
     posted: bool
     event: str = ""  # APPROVE | REQUEST_CHANGES | COMMENT
     message: str = ""
-
-# Workspace-owned policy: destructive commands denied even though Bash is
-# allowed; every tool call is appended to an audit log by a `*` PostToolUse hook
-# and a second `*` PostToolUse hook checks every call against the lane's
-# rules.json. Single source of truth: teams/sync.py materializes this into
-# every teams/<team>/.claude/settings.json, and the bootstrap stamps the
-# team's file into each workspace chunk.
-WORKSPACE_SETTINGS = {
-    "permissions": {
-        "deny": [
-            "Bash(rm -rf:*)",
-            "Bash(sudo:*)",
-            "Bash(git push:*)",
-        ]
-    },
-    "hooks": {
-        "PostToolUse": [
-            {
-                "matcher": "*",
-                "hooks": [
-                    {"type": "command", "command": "cat >> .claude/hook-log.jsonl"}
-                ],
-            },
-            {
-                "matcher": "*",
-                "hooks": [
-                    {"type": "command", "command": "python3 .claude/flag-rules.py"}
-                ],
-            },
-        ]
-    },
-}
-
-# Team rules, enforced as data: the flag-rules hook checks every tool call
-# against the lane's rules.json. Single source of truth — teams/sync.py
-# materializes rules.json + the hook script into every teams/<team>/.claude/.
-DEFAULT_RULES: list[dict[str, str]] = [
-    {"name": "redundant_orientation_ls", "kind": "bash_regex", "pattern": r"^\s*ls(\s|$)"},
-]
-TEAM_RULES: dict[str, list[dict[str, str]]] = {
-    "review": [
-        {"name": "review_lane_edits_code", "kind": "tool_use", "tools": "Write,Edit"},
-    ],
-}
-
-FLAG_RULES_SCRIPT = '''import sys, json, re
-try:
-    d = json.load(sys.stdin)
-    rules = json.load(open(".claude/rules.json"))
-except Exception:
-    sys.exit(0)
-tool = d.get("tool_name", "")
-cmd = (d.get("tool_input") or {}).get("command", "")
-cmd = re.sub(r"^\\s*cd\\s+\\S+\\s*&&\\s*", "", cmd)   # ignore a leading `cd X &&`
-for r in rules:
-    hit = None
-    if r.get("kind") == "bash_regex" and tool == "Bash" and re.match(r["pattern"], cmd):
-        hit = {"rule": r["name"], "cmd": cmd[:120]}
-    elif r.get("kind") == "tool_use" and tool in r.get("tools", "").split(","):
-        hit = {"rule": r["name"], "tool": tool}
-    if hit:
-        with open(".claude/rule-flags.jsonl", "a") as f:
-            f.write(json.dumps(hit) + "\\n")
-'''
-
-# Per-team settings overlays on the base policy. The review lane never commits
-# (it reads, runs, and reports; even conflict resolution happens in the owning
-# lane), so its git-commit is denied outright — a genuinely lane-specific rule.
-TEAM_SETTINGS: dict[str, dict] = {
-    "review": {"extra_deny": ["Bash(git commit:*)"]},
-}
-
-
-def settings_for_team(team: str | None) -> dict:
-    """The lane's settings.json content: the shared base policy plus the
-    team's overlay. Pure; teams/sync.py materializes it per folder and the
-    bootstrap falls back to it when a team folder is absent."""
-    import copy
-    base = copy.deepcopy(WORKSPACE_SETTINGS)
-    overlay = TEAM_SETTINGS.get(normalize_team(team), {})
-    base["permissions"]["deny"] = list(base["permissions"]["deny"]) + list(overlay.get("extra_deny", []))
-    return base
 

@@ -1,0 +1,9 @@
+# Each team folder is owned by its engineering team. Replace the placeholder
+# handle with the real GitHub team when one exists.
+/teams/backend/         @thumarrushik
+/teams/frontend/        @thumarrushik
+/teams/testing/         @thumarrushik
+/teams/review/          @thumarrushik
+/teams/issues/          @thumarrushik
+/teams/service-design/  @thumarrushik
+/src/                   @thumarrushik

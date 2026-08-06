@@ -46,7 +46,7 @@ from shared import (
     DEFAULT_NAMESPACE,
     DEFAULT_TEAM,
     POLLER_TASK_QUEUE,
-    TEAM_PROFILES,
+    known_teams,
     TEMPORAL_ADDRESS,
     namespace_for_team,
     normalize_team,
@@ -106,7 +106,7 @@ async def _run_team_worker(namespace: str, team: str) -> None:
         f'Worker listening on namespace "{namespace}", '
         f'team "{team}", task queue "{task_queue}"'
     )
-    print(f"Team skills: {', '.join(TEAM_PROFILES[team])}")
+    print(f"Team folder: teams/{team} (self-sufficient: mandate + skills + policy)")
     await worker.run()
 
 
@@ -120,7 +120,7 @@ async def main() -> None:
     parser.add_argument(
         "--team",
         default=DEFAULT_TEAM,
-        choices=sorted(TEAM_PROFILES),
+        choices=sorted(known_teams()),
         help="Team profile / task queue / skill bundle to host",
     )
     parser.add_argument(

@@ -30,18 +30,13 @@ from temporalio import activity
 from temporalio.exceptions import ApplicationError
 
 from shared import (
-    WORKSPACE_SETTINGS,
-    DEFAULT_RULES,
-    TEAM_RULES,
-    FLAG_RULES_SCRIPT,
-    settings_for_team,
     ChunkInput,
     ChunkResult,
     OpenPRInput,
     OpenPRResult,
     PushBranchInput,
     PushBranchResult,
-    TEAM_PROFILES,
+    DEFAULT_TEAM,
     TranscriptExportInput,
     TranscriptExportResult,
     UpdateBranchInput,
@@ -229,23 +224,26 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     claude_dir = work_dir / ".claude"
     skills_dir = claude_dir / "skills"
     skills_dir.mkdir(parents=True, exist_ok=True)
-    # The team folder is the authoritative governance unit: settings.json,
-    # rules.json, and the flag-rules hook are loaded from teams/<team>/.claude
-    # (materialized there by teams/sync.py); the shared constants are only the
-    # fallback for a team without a folder.
+    # The team folder is the ONLY governance source — settings.json,
+    # rules.json, the flag-rules hook, and the skills all come from
+    # teams/<team>/ (owned by that engineering team). A team without a folder
+    # borrows the DEFAULT_TEAM folder wholesale: still files, never code.
     repo_root = Path(__file__).resolve().parents[1]
     team_claude = repo_root / "teams" / team / ".claude"
+    if not team_claude.is_dir():
+        team_claude = repo_root / "teams" / DEFAULT_TEAM / ".claude"
 
-    def _stamp(name: str, fallback: str) -> None:
+    for name in ("settings.json", "flag-rules.py", "rules.json"):
         src = team_claude / name
-        (claude_dir / name).write_text(src.read_text() if src.exists() else fallback)
+        if src.exists():
+            (claude_dir / name).write_text(src.read_text())
 
-    _stamp("settings.json", json.dumps(settings_for_team(team), indent=2))
-    _stamp("flag-rules.py", FLAG_RULES_SCRIPT)
-    _stamp("rules.json", json.dumps(DEFAULT_RULES + TEAM_RULES.get(team, []), indent=2))
     installed: dict[str, str] = {}
-    for name in TEAM_PROFILES.get(team, TEAM_PROFILES["backend"]):
-        installed[name] = _install_skill(skills_dir, name, team)
+    team_skills = team_claude / "skills"
+    if team_skills.is_dir():
+        for skill_dir in sorted(team_skills.iterdir()):
+            if (skill_dir / "SKILL.md").exists():
+                installed[skill_dir.name] = _install_skill(skills_dir, skill_dir.name, team)
     _write_team_memory(work_dir, claude_dir, team, installed)
 
 
