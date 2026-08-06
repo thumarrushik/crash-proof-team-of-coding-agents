@@ -198,21 +198,19 @@ assumption in REPORT.md.
 
 
 def _write_team_memory(work_dir: Path, claude_dir: Path, team: str, installed: dict[str, str]) -> None:
-    """The workspace memory IS the team's mandate: teams/<team>/CLAUDE.md, the
-    version-controlled 'every task follows these phases' playbook, plus a
-    dynamic appendix recording which skills this worker actually installed."""
+    """The workspace memory IMPORTS the live team mandate (teams/<team>/CLAUDE.md)
+    rather than copying it — the owning team's edits reach the next chunk with no
+    re-stamp. Only the task-local appendix is written here."""
     repo_root = Path(__file__).resolve().parents[1]
     mandate_file = repo_root / "teams" / team / "CLAUDE.md"
-    if mandate_file.exists():
-        mandate = mandate_file.read_text()
-    else:  # unknown team: a minimal mandate so the run is never memory-less
-        mandate = (f"# {team} — Workspace Mandate\n\nTeam: `{team}`\n\n"
-                   "This workspace is owned by a Temporal workflow. Work in bounded "
-                   "chunks, keep side effects inside this workspace, follow the "
-                   "installed skills, and finish with REPORT.md and the structured "
-                   "output the harness requires.\n")
+    if not mandate_file.exists():
+        mandate_file = repo_root / "teams" / DEFAULT_TEAM / "CLAUDE.md"
     skills = "\n".join(f"- {name}: {source}" for name, source in installed.items())
-    memory = f"{mandate}\n## Installed skills (this worker)\n\n{skills}\n"
+    memory = (
+        f"Team: `{team}` — this workspace is bound to its owning team's folder.\n\n"
+        f"@{mandate_file}\n\n"
+        f"## Installed skills (this worker)\n\n{skills}\n"
+    )
     (work_dir / "CLAUDE.md").write_text(memory)
     (claude_dir / "CLAUDE.md").write_text(memory)
 
@@ -224,26 +222,40 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     claude_dir = work_dir / ".claude"
     skills_dir = claude_dir / "skills"
     skills_dir.mkdir(parents=True, exist_ok=True)
-    # The team folder is the ONLY governance source — settings.json,
-    # rules.json, the flag-rules hook, and the skills all come from
-    # teams/<team>/ (owned by that engineering team). A team without a folder
-    # borrows the DEFAULT_TEAM folder wholesale: still files, never code.
+    # BINDING, not copying: the task checks out into the team, the team is
+    # never photocopied into the task.
+    #   knowledge (mandate, skills)  -> bound LIVE to teams/<team>/ (an @import
+    #       and a symlink), so the owning team's edits reach the very next chunk
+    #   policy (settings, rules, hook) -> STAMPED per chunk on purpose: an
+    #       immutable snapshot the agent can scribble on but never keep — and
+    #       the stamp injects absolute-path denies so nothing in the workspace
+    #       can write through into the teams/ source itself.
     repo_root = Path(__file__).resolve().parents[1]
-    team_claude = repo_root / "teams" / team / ".claude"
-    if not team_claude.is_dir():
-        team_claude = repo_root / "teams" / DEFAULT_TEAM / ".claude"
+    team_dir = repo_root / "teams" / team
+    if not team_dir.is_dir():
+        team_dir = repo_root / "teams" / DEFAULT_TEAM
+    team_claude = team_dir / ".claude"
 
-    for name in ("settings.json", "flag-rules.py", "rules.json"):
-        src = team_claude / name
-        if src.exists():
-            (claude_dir / name).write_text(src.read_text())
+    # -- policy: stamp, with deployment-specific source protection injected --
+    settings = json.loads((team_claude / "settings.json").read_text())
+    deny = settings.setdefault("permissions", {}).setdefault("deny", [])
+    for guard in (f"Write(//{team_dir.parent}/**)", f"Edit(//{team_dir.parent}/**)"):
+        if guard not in deny:
+            deny.append(guard)
+    (claude_dir / "settings.json").write_text(json.dumps(settings, indent=2))
+    for name in ("flag-rules.py", "rules.json"):
+        (claude_dir / name).write_text((team_claude / name).read_text())
 
-    installed: dict[str, str] = {}
-    team_skills = team_claude / "skills"
-    if team_skills.is_dir():
-        for skill_dir in sorted(team_skills.iterdir()):
-            if (skill_dir / "SKILL.md").exists():
-                installed[skill_dir.name] = _install_skill(skills_dir, skill_dir.name, team)
+    # -- knowledge: bind live --
+    ws_skills = claude_dir / "skills"
+    if ws_skills.is_symlink() or ws_skills.is_file():
+        ws_skills.unlink()
+    elif ws_skills.is_dir():
+        shutil.rmtree(ws_skills)
+    ws_skills.symlink_to(team_claude / "skills", target_is_directory=True)
+
+    installed = {d.name: f"live:{d}" for d in sorted((team_claude / "skills").iterdir())
+                 if (d / "SKILL.md").exists()}
     _write_team_memory(work_dir, claude_dir, team, installed)
 
 

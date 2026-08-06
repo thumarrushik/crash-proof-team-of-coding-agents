@@ -43,10 +43,13 @@ teams/<team>/
 ```
 
 Six lanes: `backend`, `frontend`, `testing`, `review`, `issues`,
-`service-design`. The workspace bootstrap (`src/activities.py`) installs the
-team folder into every run: the mandate becomes the workspace `CLAUDE.md`, the
-bundle becomes `.claude/skills`, and the same deny rules + audit hooks are
-re-stamped before every chunk. After editing the policy sources in `src/shared.py`: `python3 teams/sync.py`. Skills are edited directly in the owning team's folder.
+`service-design` — discovered from the folders (adding a team = adding a
+folder). At run time a task **checks out into its team**, it never copies the
+team: the workspace `CLAUDE.md` `@import`s the live mandate and `.claude/skills`
+is a symlink into the team folder, so the owning team's edits reach the very
+next chunk. Only *policy* (`settings.json`, `rules.json`, the hook) is stamped
+per chunk — an immutable, tamper-healing snapshot, with absolute-path denies
+injected so no workspace can write through into `teams/` itself. After editing the policy sources in `src/shared.py`: `python3 teams/sync.py`. Skills are edited directly in the owning team's folder.
 
 ## The system (`src/`)
 

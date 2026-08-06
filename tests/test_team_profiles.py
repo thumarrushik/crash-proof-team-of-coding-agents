@@ -49,22 +49,30 @@ class TeamSelfSufficiencyTests(unittest.TestCase):
                 self.assertTrue(owned, f"{team} owns no skills")
                 self.assertEqual(task_queue_for_team(team), f"claude-code-tasks-{team}")
 
-    def test_bootstrap_installs_the_team_folder(self) -> None:
+    def test_bootstrap_binds_the_team_folder_live(self) -> None:
+        """Bind, don't copy: the workspace mandate IMPORTS the live team file,
+        and skills are a symlink into the team folder — the owning team's edits
+        reach the next chunk without any re-stamp."""
         for team in known_teams():
             with self.subTest(team=team), tempfile.TemporaryDirectory() as tmp:
                 work_dir = Path(tmp)
                 _bootstrap_workspace(work_dir, team)
                 memory = (work_dir / "CLAUDE.md").read_text()
-                mandate = (TEAMS / team / "CLAUDE.md").read_text()
-                self.assertTrue(memory.startswith(mandate))
-                self.assertIn("## Installed skills (this worker)", memory)
-                ws_settings = json.loads((work_dir / ".claude" / "settings.json").read_text())
-                self.assertEqual(ws_settings,
-                                 json.loads((TEAMS / team / ".claude" / "settings.json").read_text()))
-                for owned in (TEAMS / team / ".claude" / "skills").glob("*/SKILL.md"):
-                    name = owned.parent.name
-                    self.assertTrue((work_dir / ".claude" / "skills" / name / "SKILL.md").exists(),
-                                    f"{team} did not install {name}")
+                self.assertIn(f"Team: `{team}`", memory)
+                self.assertIn(f"@{TEAMS / team / 'CLAUDE.md'}", memory)   # live import
+                ws_skills = work_dir / ".claude" / "skills"
+                self.assertTrue(ws_skills.is_symlink())
+                self.assertTrue(ws_skills.resolve().samefile(TEAMS / team / ".claude" / "skills"))
+                # policy is stamped (a real file, not a link) with source guards injected
+                ws_settings = work_dir / ".claude" / "settings.json"
+                self.assertFalse(ws_settings.is_symlink())
+                settings = json.loads(ws_settings.read_text())
+                deny = settings["permissions"]["deny"]
+                self.assertTrue(any(d.startswith("Write(") and "teams" in d for d in deny))
+                self.assertTrue(any(d.startswith("Edit(") and "teams" in d for d in deny))
+                team_deny = json.loads((TEAMS / team / ".claude" / "settings.json").read_text())["permissions"]["deny"]
+                for rule in team_deny:                      # team policy fully carried
+                    self.assertIn(rule, deny)
 
     def test_team_specific_policy_reaches_the_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -88,10 +96,10 @@ class TeamSelfSufficiencyTests(unittest.TestCase):
             _bootstrap_workspace(work_dir, "no-such-team")
             memory = (work_dir / "CLAUDE.md").read_text()
             self.assertIn("Team: `no-such-team`", memory)
+            self.assertIn("@", memory)                       # still binds a real mandate
             settings = json.loads((work_dir / ".claude" / "settings.json").read_text())
             for rule in ORG_FLOOR_DENY:
                 self.assertIn(rule, settings["permissions"]["deny"])
-
 
 if __name__ == "__main__":
     unittest.main()
