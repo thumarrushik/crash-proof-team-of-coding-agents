@@ -8,11 +8,11 @@
 
 A long headless run of an AI coding agent (headless: one command in a terminal, no chat window) gets interrupted routinely: a worker restarts, the API returns an overload error, a stream drops. There is a moment in every infrastructure demo where you stop trusting the slides and ask the presenter to pull the plug, so we opened this project by pulling it ourselves.
 
-We killed the worker's whole process tree three minutes into a task, with no completed result saved anywhere. A different process on a restarted worker picked up the same half-finished conversation and ran it to completion as the same session.
+We killed the worker's whole process tree minutes into a task, with no completed result saved anywhere. A different process on a restarted worker picked up the same half-finished conversation and ran it to completion as the same session.
 
 That is the durability half of this article, and it is the smaller half. The bigger half is what durability buys: a durable team of nine single-purpose jobs, one mandate apiece. One runs Claude Code itself and does all the judgment work: building the feature, reviewing the diff, resolving the conflict; the other eight carry the delivery pipeline around it. Each lane's agent runs under its team's skills (playbook files it discovers and invokes, not adjectives in a prompt) and under hooks and deny rules re-asserted before every chunk, a bounded slice of a run capped at a fixed number of turns. The team carried a filed GitHub issue to a merged pull request, resolving a real merge conflict, with no human decision in the loop.
 
-*The fine print, up front: one engineer ran everything here, and the "we" throughout is editorial. The agent model in every measured run is `haiku`, Claude's cheap fast tier, in July 2026; the tasks are benchmark-sized and the run counts are single-digit, so every number is a point estimate, not a distribution. Every number also traces to an evidence file in the public repository, [thumarrushik/temporal-claude-demo](https://github.com/thumarrushik/temporal-claude-demo), with the runners under `deploy/`. The dollar figures are haiku-priced, too: on a stronger model tier, every absolute number here scales up roughly an order of magnitude.*
+*The fine print, up front: one engineer ran everything here, and the "we" throughout is editorial. The agent model in every measured run is `haiku`, Claude's cheap fast tier, in July and August 2026; the tasks are benchmark-sized and the run counts are single-digit, so every number is a point estimate, not a distribution. Every number also traces to an evidence file in the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), with the runners under `deploy/`. The dollar figures are haiku-priced, too: on a stronger model tier, every absolute number here scales up roughly an order of magnitude.*
 
 ## Claude Code Is Already Half a Durable System
 
@@ -72,71 +72,34 @@ Kill the worker and the pulses stop; after the two-minute heartbeat timeout, the
 ![Recovering a Crashed Run: attempt 1 heartbeats the live session ID; a SIGKILL kills the whole worker; attempt 2 reads the session ID from the last heartbeat and resumes the same conversation](../../assets/diagrams/heartbeat.png)
 *Recovering a Crashed Run. Attempt 2 recovers the session ID from the dead attempt's final pulse. A re-read, not a re-run.*
 
-We proved it the blunt way: mid-task, the agent actively writing files, we killed the worker's **entire process tree** with an unblockable signal, leaving no completed result to fall back on. A restarted worker was already polling; after the timeout, Temporal retried the step, and the evidence is one line the recovered run left in its workspace:[^7]
+We proved it the blunt way: mid-task, the agent actively writing files, we killed the worker's **entire process tree** with an unblockable signal, leaving no completed result to fall back on. A restarted worker was already polling; after the timeout, Temporal retried the step, and the evidence is one line the recovered run left in its workspace:
 
 ```json
 {"event": "resume_session_from_heartbeat", "attempt": 2,
  "input_session_id": null, "heartbeat_session_id": "698c432a-…"}
 ```
 
-The input session ID is null: no completed chunk existed to hand back; the ID came *only* from the heartbeat. The run finished as the **same** session in one chunk, at $0.0404 total: not a recovery penalty, just the resumed session re-reading its own context at the cache rate and finishing the work. (One accounting honesty: whatever the dead attempt burned before the kill never returned a result, so it appears in no ledger; the figure is the surviving attempt's bill.)
+The input session ID is null: no completed chunk existed to hand back; the ID came *only* from the heartbeat. The run finished as the **same** session in one chunk, at $0.0404 total: not a recovery penalty, just the resumed session re-reading its own context at the cache rate and finishing the work.[^7]
 
-Three things have to be right. **The heartbeat has to be recorded before the crash**: the SDK's default throttle on recording heartbeat details is too coarse for a short chunk, so this project's worker tightens it on purpose.[^8] **The worker has to die as a whole group**: kill only the parent and the agent's child process is orphaned, finishes the work anyway, and *masks* the recovery: our first recovery demos "succeeded" exactly this way, and they were lying, more than once, before we caught it. **And the crash has to land while the chunk is genuinely in flight.**
+Three things have to be right. **The heartbeat has to be recorded before the crash**: the SDK's default throttle on recording heartbeat details is too coarse for a short chunk, so this project's worker tightens it on purpose.[^8] **The worker has to die as a whole group**: kill only the parent and the agent's child process is orphaned, finishes the work anyway, and *masks* the recovery: our first recovery demos "succeeded" exactly this way, and they were lying before we caught it. **And the crash has to land while the chunk is genuinely in flight.**
 
 The everyday value is less dramatic: what actually stops a headless run is the API, an overload, a rate limit, a dropped stream. Each becomes a typed, retryable failure whose backed-off retry (five seconds, doubling to a two-minute cap, six attempts) *resumes* the conversation, so an overload window becomes added latency, not a failed run.
 
 The same heartbeat, resume, and declared retries will carry a whole *team* of agents from a filed issue to a merged pull request; every agent on that team runs inside the sealed box you just watched recover.
 
-## What Durability Actually Costs
+## What Durability Costs, in Three Numbers
 
-We measured it directly: the same fixed test-driven task, on a small fast model, everything **observed rather than modeled**, run one at a time. Three numbers matter: a **continuous** run, what a **resume** adds after a crash, and what **fine chunking** costs.
+We measured the whole bill — same fixed task, small fast model, everything **observed rather than modeled** — and three numbers carry it. A continuous run costs about eleven cents. Resuming after a crash adds about a third of a cent, because a resume only re-reads the accumulated conversation at the cache rate: the recovery you just watched is a re-read, not a re-run. And fine-chunking the same task cost $0.034, $0.25, and $2.13 on identical code — a sixty-three-fold spread caused not by any per-boundary cache tax but by a tight turn cap changing what the model *does with its turns*. Hence two defaults: big chunks, and durability treated as effectively free. One law compresses everything we measured and recurs through this whole family: **the mechanics cost cents; the behavior costs dollars.**[^9]
 
-![What Durability Costs: two measured panels relative to the roughly eleven-cent continuous base. Left: an interrupted run adds $0.0035 warm ($0.117 total) or $0.021 cold ($0.134 total) to resume. Right: fine-chunking the same task adds from near-zero to about two dollars ($0.034, $0.25, $2.13 at 1, 8, and 14 chunks)](../../assets/diagrams/cost-comparison.png)
-*What Durability Costs (measured, small model). Left: a resume only re-reads context at the cache rate. Right: fine chunking adds near-zero to two dollars, unpredictably.*
-
-**A continuous run costs about eleven cents (`deploy/chunk-cost-results.md`)**: three runs came in at six, thirteen, and fifteen cents, the agent taking three to nine turns for the identical task. **Durability adds no tokens; a resume only re-reads context** at the cheap cache-read rate: about a third of a cent warm, roughly 3% of the base run. Even a *cold* first touch, after sixty-five minutes idle, paid only a partial cache-write, about two cents; extended-lifetime prompt caching keeps resumes cheap far past the usual five-minute window. That third-of-a-cent figure *is* the heartbeat-recovery number: a resume, not a restart from zero. (The live worker-kill from earlier, a separate and smaller task, landed at four cents total.)[^10]
-
-**Fine chunking is where the bill gets dangerous.** The same task, sliced into back-to-back two-turn chunks, cost $0.034, $0.25, and $2.13 across runs that took one, eight, and fourteen chunks: identical task, identical code, a sixty-three-fold spread, the worst run nineteen times the continuous base. The culprit is not the per-boundary cache re-read, which stays a cheap fraction of a cent; it is **behavioral**: a tight turn cap can send the agent to fourteen chunks and twenty-eight turns to finish what a continuous run did in nine.
-
-So the rule is **large chunks by default**: fine chunking is the only lever that meaningfully moves the total, and it moves it unpredictably. The bare loop pays the same eleven cents while nothing breaks, but a crash costs a full re-run, because the session ID died with the process; the durable coarse run pays the same bill and recovers for a fraction of a cent (a live issue-to-pull-request job confirmed it, a clean eleven cents). The durability itself is effectively free, and every number here shares the pattern that recurs across everything we measured: **the mechanics cost cents; the behavior costs dollars.** The two-dollar surprise was something a model *chose to do with its turns*.
-
-One honesty note: "effectively free" is a pricing snapshot, not an architecture property; it leans on cache-read rates and lifetimes that can change under you. The repo runs an economics canary that re-probes exactly these invariants on a schedule; its latest pass held every one (`deploy/canary-results.md`, about nine cents a pass).
-
-## When Bare Claude Code Is Enough
-
-Durability is insurance, and you do not insure a cheap errand. The alternative to this harness is Claude Code's own considerable durability, and sometimes that is the right answer.
-
-- **The task is cheap to re-run from scratch.** A one-chunk, two-minute job needs a retry button, not an engine.
-- **One developer, one machine, interactive.** The transcript plus a resume by hand *is* the durability layer.
-- **You would rather buy the orchestration than own it.** A managed agent runner is a legitimate answer to the same problem.
-
-The threshold is crisp: the moment a task **outlives the process that started it** (an overnight run, a queue of issues, anything whose re-run from zero is a real bill), something has to remember the job. Then you have three options: lose the state and eat the tokens; hand-build the state machine and debug it by incident; or use an engine whose entire product is that state machine.
+Durability is still insurance, and you do not insure a cheap errand; the threshold is the moment a task **outlives the process that started it** — an overnight run, a queue of issues, anything whose re-run from zero is a real bill. The full ledger — the method, the cold-resume probes, the bare-loop baseline, the experiment that fooled us once, and the pricing canary that re-checks every number on a schedule — is the economics companion, [*Mechanics Cost Cents, Behavior Costs Dollars*](mechanics-cost-cents.md).
 
 ## The Team, in One Breath
 
-Everything above is one durable agent. The other half of this project is what
-happens when you scale that agent into a delivery team, and the short version
-fits in a breath. The work is split into single-purpose durable jobs — nine in
-the runs measured here; the repo now ships twelve activities across six team
-lanes — and only one of them runs Claude Code. It does all the judgment work:
-building the feature, reviewing the diff, resolving the conflict. The rest are
-plumbing with receipts: open the PR, push the branch, merge on a green verdict.
+Everything above is one durable agent. The other half of this project is what happens when you scale that agent into a delivery team, and the short version fits in a breath. The work is split into single-purpose durable jobs — nine in the runs measured here; the repo now ships twelve activities across six team lanes — and only one of them runs Claude Code. It does all the judgment work: building the feature, reviewing the diff, resolving the conflict. The rest are plumbing with receipts: open the PR, push the branch, merge on a green verdict.
 
-Each team is its own queue on the workflow engine, and that sentence is doing
-more work than it looks like. A backend worker is trusted to do backend work
-not because its prompt says *act like a backend engineer*, but because it
-listens on the backend queue, runs under the backend team's own committed
-playbooks, emits backend audit artifacts, and answers to the same retry and
-cost machinery as every other lane. **It is trusted by the queue it polls, not
-by the prompt it was handed.** The formula for a team member is four files in
-version control: a mandate (the one job it owns), skills (the playbooks it
-actually follows), hooks (rules enforced on every tool call), and a settings
-file stamped from human-committed sources — none of it lives in the model.
+Each team is its own queue on the workflow engine. A backend worker is trusted to do backend work not because its prompt says *act like a backend engineer*, but because it listens on the backend queue, runs under that team's committed playbooks, and answers to the same retry and cost machinery as every other lane. **It is trusted by the queue it polls, not by the prompt it was handed.** What makes a team member is four files in version control — mandate, skills, hooks, stamped settings — none of it living in the model.
 
-The full anatomy — lanes and namespaces, the chunk mechanics, the audit
-plane, how a filed issue becomes a merged PR — is one click away in the
-engineering companion, [How It's Built](how-its-built.md). What belongs here
-is the one story that proves the team is real.
+The full anatomy — lanes and namespaces, the chunk mechanics, the audit plane, how a filed issue becomes a merged PR — is one click away in the engineering companion, [How It's Built](how-its-built.md). What belongs here is the one story that proves the team is real.
 
 ## The Conflict That Resolved Itself
 
