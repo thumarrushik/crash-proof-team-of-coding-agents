@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Kill the worker mid-task and the agent finishes the job anyway — same session, four cents. This is what durability buys when one coding agent becomes a governed team.
+### Kill the worker mid-task and the agent finishes the job anyway — same session, four cents. This is what durability buys when one coding agent becomes a team governed by committed skills and hooks.
 
 ---
 
@@ -99,7 +99,7 @@ Everything above is one durable agent. The other half of this project is what ha
 
 Each team is its own queue on the workflow engine, with its own committed playbooks and the same retry and cost machinery as every other lane. **A worker is trusted by the queue it polls, not by the prompt it was handed.** What makes a team member is four files in version control — mandate, skills, hooks, stamped settings — none of it living in the model.
 
-The full anatomy — lanes and namespaces, the chunk mechanics, the audit plane, how a filed issue becomes a merged PR — is one click away in the engineering companion, [How It's Built](how-its-built.md). What belongs here is the one story that proves the team is real.
+The full anatomy — lanes and namespaces, the chunk mechanics, the audit plane, how a filed issue becomes a merged PR — is one click away in the engineering companion, [Anatomy of a Crash-Proof Agent Harness](how-its-built.md). What belongs here is the one story that proves the team is real.
 
 One more property makes the team compound rather than merely repeat: it learns from its own runs. Every run leaves a corpus — the audit log of every tool call, the rule flags, the task board, the report — and the corpus gets mined — the repo calls this the learn-loop — with each lesson landing back in version control as a committed rule, skill, or gate. The pattern has held from the first corpus mining (a written rule nudged the waste ~20% at best while the hook flagged twelve of twelve instances) to the latest fleet night, where the audit trail those hooks write was the record that debugged five live failures into five same-evening commits (`deploy/fleet-run-results.md`, `deploy/session-learnings.md`). A line in a prompt is a suggestion; a hook is a law — and a mined corpus is how the laws get written. The system's job is not to avoid failure; it is to convert failure into a commit.
 

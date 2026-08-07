@@ -21,7 +21,7 @@ The bug underneath all of that is a category error, and naming it is most of the
 
 ## Four Primitives Make a Human
 
-Every operator capability in this system — ask a running job a question, steer it, cancel it — is built from the same small set of moves the workflow engine gives you for talking to a running job ([How It's Built](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
+Every operator capability in this system — ask a running job a question, steer it, cancel it — is built from the same small set of moves the workflow engine gives you for talking to a running job ([Anatomy of a Crash-Proof Agent Harness](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
 
 **The human reads: a query.** A running job can already answer questions from its live state without touching a database. We added one: *what are you blocked on, and how long until your deadline?* Point a small operator command-line tool at the fleet and you have an approvals inbox assembled from the workflows themselves, with no side store to keep in sync.¹
 

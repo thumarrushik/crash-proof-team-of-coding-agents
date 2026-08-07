@@ -76,7 +76,7 @@ Memory steers; only hooks enforce; and the one thing you most need to enforce ab
 
 One honest boundary: these are single-digit runs on one cheap model against one skippable step, point estimates reproducible from the repo, not a benchmark, and the gate's edge over the baseline is a two-run gap widened by a consistent mechanism, not a proof. But the mechanism is the point, and it is the same one the companion found from the other side: a hard *no* is neither good nor bad on its own. Where you place it decides whether it saves the task or costs it.
 
-*The measured runs, the `Stop`-gate hook, and its offline tests are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The gate's production descendant guards every lane of the team built in [How It's Built](how-its-built.md); this is the benchmark behind it.*
+*The measured runs, the `Stop`-gate hook, and its offline tests are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The gate's production descendant guards every lane of the team built in [Anatomy of a Crash-Proof Agent Harness](how-its-built.md); this is the benchmark behind it.*
 
 ---
 
