@@ -53,6 +53,19 @@ class PhaseGateTests(unittest.TestCase):
                 self.assertEqual(gate_phases(team), mandate_phases,
                                  f"{team}: gate and mandate phases drifted")
 
+    def test_each_lane_owns_distinct_phases(self) -> None:
+        """Each kind of work needs its own kind of steps: no two lanes may
+        share an identical phase list, every lane self-reviews, and every
+        lane's last phase is Report (the harness reads what Report produces)."""
+        all_phases = {team: gate_phases(team) for team in known_teams()}
+        as_tuples = {tuple(p) for p in all_phases.values()}
+        self.assertEqual(len(as_tuples), len(all_phases),
+                         f"lanes share a phase list: {all_phases}")
+        for team, phases in all_phases.items():
+            self.assertIn("Self-review", phases, f"{team} never self-reviews")
+            self.assertEqual(phases[-1], "Report",
+                             f"{team} must end at Report, got {phases[-1]}")
+
     def test_no_task_list_blocks_the_stop(self) -> None:
         for team in known_teams():
             with self.subTest(team=team), tempfile.TemporaryDirectory() as tmp:
