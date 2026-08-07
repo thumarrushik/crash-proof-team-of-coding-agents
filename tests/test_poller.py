@@ -94,8 +94,11 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(task_input.branch, "claude/issue-1")
 
     async def test_merge_pull_request_reports_merged(self) -> None:
+        import contextlib
+        import io
         with mock.patch.dict("os.environ", {"GITHUB_TOKEN": "tok"}), \
-             mock.patch.object(poller, "_gh_put", return_value=(200, {"merged": True, "sha": "abc123"})):
+             mock.patch.object(poller, "_gh_put", return_value=(200, {"merged": True, "sha": "abc123"})), \
+             contextlib.redirect_stdout(io.StringIO()):
             result = await poller.merge_pull_request(MergeInput(repo="o/r", number=5))
         self.assertTrue(result.merged)
         self.assertEqual(result.sha, "abc123")
