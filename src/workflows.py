@@ -388,10 +388,15 @@ class RunClaudeTask:
                     report=result.structured,
                 )
 
-            if result.subtype != "error_max_turns":
-                # Only genuinely terminal subtypes reach here (budget or
-                # structured-output exhaustion) — API errors and execution
-                # errors already raised inside the activity and were retried.
+            if result.subtype not in ("error_max_turns",
+                                       "error_max_structured_output_retries"):
+                # Only genuinely terminal subtypes reach here — API errors and
+                # execution errors already raised inside the activity and were
+                # retried. Structured-output exhaustion is NOT terminal: the
+                # fleet run showed the work complete in the session every time
+                # (REPORT.md written, conflict resolved) with only the report
+                # handshake failing — so it resumes like error_max_turns and
+                # the next chunk re-asks for the report with fresh attempts.
                 detail = "; ".join(result.errors) if result.errors else result.subtype
                 raise ApplicationError(
                     f"Claude Code failed: {detail}",

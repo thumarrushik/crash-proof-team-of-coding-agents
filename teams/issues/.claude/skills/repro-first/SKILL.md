@@ -9,47 +9,42 @@ A fix without a reproduction is a guess with a commit message. Stack
 Overflow's bar for even *asking* about a bug is a minimal reproducible
 example; the bar for fixing one is not lower.
 
-1. **Reproduce exactly, first.** Run the issue's own steps in this workspace
-   before reading the suspect code. Record the exact command and the observed
-   wrong behavior — output, traceback, wrong value — verbatim. Pattern-
-   matching the title to a likely cause is how wrong fixes ship.
-2. **Minimize.** Shrink toward the smallest input, shortest step sequence,
-   and fewest components that still fail: cut flags, halve inputs, inline
-   fixtures, drop services from the loop — re-running after each cut and
-   keeping only cuts that preserve the failure. Complete means the repro
-   carries everything needed to fail on its own; minimal means nothing more.
-   Do not sacrifice clarity for brevity — a readable ten-line repro beats an
-   inscrutable three-line one.
-3. **Freeze it as a failing test** in the repo's suite. Run it; watch it
-   fail; confirm it fails for the reported reason (the right assertion or
-   exception), not a setup error. This test is the issue's acceptance line:
-   the fix greens it, and it pins the bug against regression permanently.
-4. **Only now open the fix loop** (tdd skill): the smallest change that
-   greens the frozen test, then the full suite.
-5. **If you cannot reproduce, the trail is the deliverable.** Report exactly
-   what you ran (commands, environment, versions), what you observed instead,
-   and your best hypothesis for the gap (data, version, config, race). An
-   honest "not reproducible, with this evidence" beats a speculative patch.
-   Never ship a code change for a failure you never saw.
+## How to use this skill
 
-## Blocked on sight
+1. Read this file when picking up any bug-shaped issue, before reading the
+   suspect code.
+2. Open the topic file for the phase you are in (below): reproduce and
+   minimize, freeze, or the honest exit when the bug won't show.
 
-- A code edit before any recorded reproduction attempt.
-- A "fix" for a bug never observed failing in this workspace.
-- A repro test that passes before the fix, or fails for a setup reason.
-- "Could not reproduce" with no command trail behind it.
-- **Building the missing feature to have something to fix.** If the code the
-  bug describes does not exist in this repo, the issue is blocked on the
-  feature that ships it — report that (name the missing module and, if known,
-  the issue that builds it) and stop. A live run showed an agent implementing
-  a whole export feature to "fix" a bug filed against it, racing the real
-  implementation into a merge conflict.
+## Topic map (load on demand)
 
-## Grounding
+| Task | File |
+|---|---|
+| Reproduce exactly, then minimize to the smallest failing repro | **[MRE.md](MRE.md)** |
+| Freeze the repro as a failing test, then open the fix loop | **[FREEZE.md](FREEZE.md)** |
+| Can't reproduce — the trail deliverable, and the missing-feature trap | **[NOT-REPRODUCIBLE.md](NOT-REPRODUCIBLE.md)** |
 
-- Stack Overflow, "How to create a Minimal, Reproducible Example": minimal,
-  complete, reproducible — and verify the repro actually fails.
-- TDD bug-fix practice: regression test first, watch it fail for the right
-  reason, then fix.
-- Bug-triage practice: works-for-me is a legitimate resolution only when the
-  attempt trail is documented.
+## The rules in one breath
+
+1. Reproduce exactly, first: run the issue's own steps in this workspace and
+   record command plus observed wrong behavior verbatim, before reading the
+   suspect code.
+2. Minimize: shrink input, steps, and components, re-running after each cut
+   and keeping only cuts that preserve the failure. Complete and minimal —
+   and readable beats short.
+3. Freeze the repro as a failing test in the repo's suite; watch it fail for
+   the reported reason, not a setup error. That test is the acceptance line.
+4. Only then open the fix loop (tdd skill): smallest change that greens the
+   frozen test, then the full suite.
+5. If you cannot reproduce, the trail is the deliverable — commands,
+   environment, observations, hypothesis. Never ship a code change for a
+   failure you never saw.
+6. If the code the bug describes does not exist, the issue is blocked on the
+   feature that ships it — report the missing module and stop. Never build
+   the feature to have something to fix.
+
+**Blocked on sight:** a code edit before any recorded reproduction attempt ·
+a "fix" for a bug never observed failing in this workspace · a repro test
+that passes before the fix, or fails for a setup reason · "could not
+reproduce" with no command trail behind it · building the missing feature to
+have something to fix.

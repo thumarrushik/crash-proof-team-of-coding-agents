@@ -9,41 +9,38 @@ Your product is not code — it is findings plus a verdict that triggers or
 blocks a merge. This lane cannot edit source, so a sloppy review is your only
 way to ship a defect. Audit the review the way you audited the diff.
 
-1. **Re-read every blocking finding as the author will.** Each blocker must
-   carry file:line, what is wrong, why it blocks (the consequence), and where
-   possible what fixed looks like. A blocker the author cannot act on without
-   asking you a question is not finished.
-2. **Audit your severity labels.** For each `issue (blocking)`: would you
-   stake the merge on it — a real correctness, security, or data problem, not
-   a preference in costume? For each nitpick and suggestion: genuinely
-   ignorable? Relabel now, not after pushback.
-3. **Verify you ran what you claim.** For every "I ran X" in the draft
-   report, find the actual command in your transcript. Not there: run it now
-   or rewrite the claim as "not verified". Then confirm the run backing
-   `tests_passed` is your LAST workspace action (verdict-discipline) — if
+## How to use this skill
+
+1. Read this file immediately before writing REPORT.md, after the review
+   work itself is done.
+2. Open the topic file for the step you are on (below): audit the findings
+   first, then hold the report to its contract.
+
+## Topic map (load on demand)
+
+| Task | File |
+|---|---|
+| Audit findings, labels, claimed runs, coverage, and scope | **[AUDITS.md](AUDITS.md)** |
+| Write REPORT.md the way the workflow will read it | **[REPORT-CONTRACT.md](REPORT-CONTRACT.md)** |
+
+## The rules in one breath
+
+1. Re-read every blocking finding as the author will — file:line, what is
+   wrong, the consequence, and where possible what fixed looks like.
+2. Audit severity labels: every blocker merge-stakeable, every nitpick
+   genuinely ignorable. Relabel now, not after pushback.
+3. For every "I ran X" in the draft, find the actual command in your
+   transcript — or run it now, or rewrite the claim as "not verified".
+4. The run backing `tests_passed` must be your LAST workspace action; if
    anything came after it, run again.
-4. **Check coverage of the whole diff.** Compare `git diff main...HEAD
-   --stat` against the files your review discusses or consciously cleared. A
-   file you never opened is an unreviewed file — open it or disclose it.
-5. **Check the review's own scope.** Findings are about this diff, not a
-   wishlist for the codebase. Pre-existing problems you noticed go in a
-   clearly separated non-blocking note, never in the blocker list.
-6. **Read the report as the workflow will.** Structured output parses;
-   `tests_passed` matches the cited run; blockers first; the verdict sentence
-   is unambiguous — approve or block, with the deciding reason named.
+5. Compare the diff stat against the files your review discusses — a file
+   you never opened is an unreviewed file; open it or disclose it.
+6. Findings are about this diff; pre-existing problems go in a separated
+   non-blocking note, never the blocker list.
+7. The report parses, blockers come first, and the verdict sentence is
+   unambiguous — approve or block, with the deciding reason named.
 
-## Blocked on sight
-
-- A blocker without file:line, or whose "why" amounts to "I don't like it".
-- Any claimed run with no matching command in the transcript.
-- `tests_passed` backed by a run that is not your final workspace action.
-- Diff files neither reviewed nor disclosed as unreviewed.
-
-## Grounding
-
-- Google eng-practices, "The Standard of Code Review": comments grounded in
-  technical facts; Nit-labeled polish never blocks a change.
-- Conventional Comments: labeled severity is the reviewer's contract with
-  the author — mislabeling breaks it.
-- This repo's 3/10 tests_passed misreport finding: the claim audit in step 3
-  is the countermeasure.
+**Blocked on sight:** a blocker without file:line, or whose "why" amounts to
+"I don't like it" · any claimed run with no matching command in the
+transcript · `tests_passed` backed by a run that is not your final workspace
+action · diff files neither reviewed nor disclosed as unreviewed.

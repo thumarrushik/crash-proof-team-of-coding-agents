@@ -10,44 +10,36 @@ thoroughly, and carry fewer bugs — and this lane's diffs face a review gate
 that treats out-of-scope changes as findings. The issue defines the blast
 radius; stay inside it.
 
-1. **Restate the issue in one sentence before editing**, ending with its
-   acceptance line: "done when <observable check> passes". That sentence is
-   your scope contract. If you cannot write it, the issue is ambiguous —
-   flag that in the report instead of guessing.
-2. **Choose the smallest correct change — correct first, small second.**
-   Smallest means fewest files, existing functions edited over parallel ones
-   added, existing abstractions reused over new ones invented. It never means
-   half a fix: handling the reported case while leaving its obvious sibling
-   broken is small and wrong.
-3. **Build nothing presumptive (YAGNI).** No parameter "for later", no
-   extension point with one caller, no generalization the issue does not
-   require. Speculative code costs even when it turns out right: it is carry
-   cost — every future change in this file now reads, reviews, and tests
-   around it.
-4. **No drive-by refactors — note them instead.** Renames, cleanups,
-   dependency upgrades, and formatting churn you were tempted by go in
-   REPORT.md under "Noticed, not changed". That converts scope creep into
-   triage input and keeps every diff line explainable. Sole exception: fix
-   what your change itself makes wrong — a now-lying comment, a now-dead
-   branch.
-5. **Close the loop: acceptance line to shown check.** The sentence from
-   step 1 must map to a test or command output that appears in your report.
-   An acceptance line with no check beside it means the issue is not
-   resolved — merely edited.
+## How to use this skill
 
-## Blocked on sight
+1. Read this file when planning an issue's change, and again when
+   self-reviewing the diff before the report.
+2. Open the topic file for the pressure you are under (below): pinning what
+   done means, or resisting what the issue never asked for.
 
-- Diff hunks no sentence in the issue requires.
-- A new abstraction, parameter, or config key with exactly one user and a
-  "we might need it" justification.
-- Formatting or rename churn mixed into a functional fix.
-- A report whose acceptance line points at no shown check.
+## Topic map (load on demand)
 
-## Grounding
+| Task | File |
+|---|---|
+| Pin the scope contract and close it with a shown check | **[ACCEPTANCE.md](ACCEPTANCE.md)** |
+| Refuse presumptive code and drive-by refactors | **[YAGNI.md](YAGNI.md)** |
 
-- Martin Fowler, "Yagni" (martinfowler.com/bliki/Yagni.html): presumptive
-  features cost build, carry, and delay — even when built right.
-- Google eng-practices, "Small CLs": small changes review faster, more
-  thoroughly, and breed fewer bugs.
-- SmartBear/Cisco: defect discovery collapses beyond ~400 changed lines —
-  scope creep literally makes your bugs harder to catch.
+## The rules in one breath
+
+1. Restate the issue in one sentence before editing, ending with its
+   acceptance line: "done when <observable check> passes". Can't write it —
+   the issue is ambiguous; flag it instead of guessing.
+2. Choose the smallest correct change — correct first, small second. Small
+   never means half a fix.
+3. Build nothing presumptive: no parameter "for later", no extension point
+   with one caller, no generalization the issue does not require.
+4. No drive-by refactors — tempting cleanups go in REPORT.md under
+   "Noticed, not changed". Sole exception: fix what your change itself makes
+   wrong.
+5. Close the loop: the acceptance line must map to a test or command output
+   shown in your report — otherwise the issue was edited, not resolved.
+
+**Blocked on sight:** diff hunks no sentence in the issue requires · a new
+abstraction, parameter, or config key with exactly one user and a "we might
+need it" justification · formatting or rename churn mixed into a functional
+fix · a report whose acceptance line points at no shown check.

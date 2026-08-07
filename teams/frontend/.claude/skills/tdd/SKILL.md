@@ -6,42 +6,43 @@ description: Test-driven UI development — failing behavior test first, Testing
 # tdd (frontend lane)
 
 Red, green, refactor — where "red" is a user-shaped behavior test, not a
-snapshot.
+snapshot. Write the behavior test first, watch it fail for the right
+reason, implement the minimum to pass, then refactor with the suite green.
 
-## Phases — in order
+## How to use this skill
 
-1. **Red.** Write the behavior test first and run it to watch it fail for
-   the right reason. Render the component, find elements the way a user
-   would (getByRole with name, getByLabel), interact via userEvent, assert
-   the visible outcome. A bug fix starts the same way: a failing test that
-   reproduces it.
-2. **Green.** Minimum implementation to pass. Nothing speculative.
-3. **Refactor with confidence.** Good UI tests survive markup and styling
-   refactors; if renaming a class or reshuffling divs breaks a test, the
-   test asserted the wrong thing — fix the test's altitude.
-4. **Pick altitude by the trophy — mostly integration.** Default: component
-   integration tests (component + children + hooks, network mocked at the
-   HTTP boundary, MSW-style handlers). Unit-test pure logic extracted from
-   components (formatting, validation, reducers). One e2e per changed user
-   story — hand that to browser-e2e. Static analysis (types, lint) is the
-   base layer, not a substitute for any of the above.
-5. **Cover all four render states.** Loading, empty, error, success each
-   get a behavior assertion (see design-ui) — error paths are not optional.
-6. **Suite green before the next behavior.** Run the whole suite and show
-   the output; never report done on an unrun or red suite.
+1. Read this file before implementing or fixing any component, hook, or
+   user-visible behavior — the failing test comes before the code, and a
+   bug fix starts with a failing test that reproduces it.
+2. Open TROPHY.md when deciding what kind of test to write and at what
+   altitude; open RENDER-STATES.md when writing the tests for a component
+   that fetches or can fail.
 
-## Blocked on sight
+## Topic map (load on demand)
 
-- Snapshot tests standing in as behavior verification.
-- Querying by class or test-id when a role or label exists.
-- Asserting component internals (state, props, instance methods).
-- Tests written after the code just to raise coverage.
-- Skipping the watch-it-fail run.
+| Task | File |
+|---|---|
+| Choose test altitude — trophy shape, integration default, what to unit-test, when e2e | **[TROPHY.md](TROPHY.md)** |
+| Cover loading/empty/error/success — driving and asserting each render state | **[RENDER-STATES.md](RENDER-STATES.md)** |
 
-## Grounding
+## The rules in one breath
 
-- Kent C. Dodds: "Write tests. Not too many. Mostly integration." and the
-  Testing Trophy.
-- Testing Library Guiding Principles and query priority (role first).
-- Kent C. Dodds, "Common Mistakes with React Testing Library".
-- Kent Beck, Test-Driven Development: By Example (red/green/refactor).
+1. Red: write the behavior test first and run it to watch it fail for the
+   right reason — render, query like a user (getByRole with name,
+   getByLabel), interact via userEvent, assert the visible outcome.
+2. Green: minimum implementation to pass. Nothing speculative.
+3. Refactor with confidence: good UI tests survive markup and styling
+   refactors — if reshuffling divs breaks a test, fix the test's altitude.
+4. Pick altitude by the trophy — mostly component integration tests, with
+   network mocked at the HTTP boundary; unit-test extracted pure logic;
+   one e2e per changed user story (hand that to browser-e2e).
+5. Cover all four render states: loading, empty, error, success each get
+   a behavior assertion — error paths are not optional.
+6. Suite green before the next behavior: run the whole suite and show the
+   output; never report done on an unrun or red suite.
+
+**Blocked on sight:** snapshot tests standing in as behavior
+verification · querying by class or test-id when a role or label exists ·
+asserting component internals (state, props, instance methods) · tests
+written after the code just to raise coverage · skipping the
+watch-it-fail run.

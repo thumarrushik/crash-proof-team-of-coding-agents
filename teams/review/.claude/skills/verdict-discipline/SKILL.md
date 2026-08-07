@@ -11,42 +11,34 @@ including agents reporting *false* on their own genuinely green code, because
 the verdict formed at first contact with a red suite and never updated after
 the last edit. A verdict is not a memory. It is the last run.
 
-1. **Run after the last workspace action.** The result you report must come
-   from a suite run performed AFTER every other command you executed. If
-   anything ran after your test run, that result is stale — run again before
-   reporting. Transcript order is the proof.
-2. **Cite command plus output tail.** Beside the verdict, paste the exact
-   command and the final summary lines (passed / failed / errored / skipped
-   counts). A verdict without its evidence line is an impression.
-3. **`tests_passed` is literal-green-only.** True iff that final run exited 0
-   with zero failures and zero errors. "Should pass", "passed earlier",
-   "failed for environmental reasons" — all report as false, with the reason
-   named. Skips are not failures, but a suite that skipped most of itself is
-   not green evidence — say so in the report.
-4. **Say "not verified" plainly.** Any suite you did not or could not run is
-   reported in exactly those words, with the reason — never an inferred pass,
-   never silence. An honest "not verified" is a correct verdict; a guessed
-   green is the failure this lane exists to prevent.
-5. **Distrust your certainty in both directions.** The measured failure here
-   was false-red: stale pessimism spins the fix loop on good work as surely
-   as false optimism merges bad work. The cure for both is one mechanical
-   rule — no run, no claim; last run, only claim.
+## How to use this skill
 
-## Blocked on sight
+1. Read this file before producing any review verdict or report.
+2. Open the topic file for the step you are on (below) — the run that
+   produces the evidence, then the claim that reports it.
 
-- `tests_passed` set either way with no command + output tail beside it.
-- A verdict citing a run that predates your last workspace action.
-- "Tests pass" taken from the author's REPORT.md instead of your own run.
-- A hedged verdict ("likely green") — the field is boolean; nuance lives in
-  the report text.
+## Topic map (load on demand)
 
-## Grounding
+| Task | File |
+|---|---|
+| When a run counts: freshness, staleness, the false-red trap | **[LAST-RUN-RULE.md](LAST-RUN-RULE.md)** |
+| How to state it: evidence lines, the boolean, "not verified" | **[CLAIMS.md](CLAIMS.md)** |
 
-- This repo's measured experiment (articles/final/the-agent-grades-its-own-
-  homework.md): tests_passed wrong 3/10 vs ground truth; 3/5 false-reds on
-  genuinely green fixes, from stale first-contact verdicts.
-- Parasuraman & Manzey 2010, Human Factors: automation bias yields omission
-  and commission errors, affects experts, and is not trained away — hence a
-  mechanical run-then-report rule instead of vigilance.
-- Google eng-practices review standard: decisions rest on technical facts
-  and evidence, not opinion.
+## The rules in one breath
+
+1. Run after the last workspace action — if anything ran after your test
+   run, that result is stale; run again before reporting.
+2. Cite command plus output tail beside every verdict; a verdict without its
+   evidence line is an impression.
+3. `tests_passed` is literal-green-only: true iff the final run exited 0 with
+   zero failures and zero errors. Everything else is false, reason named.
+4. Say "not verified" plainly for any suite you did not or could not run —
+   never an inferred pass, never silence.
+5. Distrust your certainty in both directions: the measured failure here was
+   false-red. No run, no claim; last run, only claim.
+
+**Blocked on sight:** `tests_passed` set either way with no command + output
+tail beside it · a verdict citing a run that predates your last workspace
+action · "tests pass" taken from the author's REPORT.md instead of your own
+run · a hedged verdict ("likely green") — the field is boolean; nuance lives
+in the report text.

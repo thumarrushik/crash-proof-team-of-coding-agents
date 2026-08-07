@@ -5,49 +5,47 @@ description: Design a new service or major capability as a decision-complete blu
 
 # service-blueprint
 
-The blueprint is the design doc a building team implements without the author
-in the room. Field-level request/response shapes belong downstream in
-CONTRACT.md — the blueprint decides what deserves a contract at all, and why.
-Write these sections in order — each has a falsifiable bar.
+The blueprint is the design doc a building team implements without the
+author in the room. Field-level request/response shapes belong downstream
+in CONTRACT.md — the blueprint decides what deserves a contract at all, and
+why. Seven sections, written in order, each with a falsifiable bar.
 
-1. **Context and scope; goals and non-goals.** Non-goals are plausible goals
-   deliberately rejected, one line of why each — not negated platitudes
-   ("shouldn't crash" is not a non-goal).
-2. **Boundary as a bounded context.** Name the domain terms this service
-   owns and what each means *here*. The same word meaning two things is two
-   contexts — never share a model across them. List owned capabilities, and
-   the near-misses a peer owns, by name.
-3. **Data ownership: one writer per fact.** For every entity and derived
-   fact, name the single service that writes it. Everyone else reads through
-   its API or consumes its events — never its tables. If the design needs
-   two writers for one fact, the boundary is wrong: redraw before going on.
-4. **Contract surface, summary level.** Operations and events exposed,
-   versioned, consumers named, house envelope assumed ([[lean-service]]).
-   Field-by-field detail is CONTRACT.md's job, not this doc's.
-5. **Failure modes, per dependency, enumerated.** For each dependency: down,
-   slow, and wrong — three rows, each with the chosen response: fail loud,
-   degrade (state the degraded behavior exactly), or queue (state the bound
-   and the behavior when full). "Retry" without a budget and a give-up
-   behavior is not a response. Never silently wrong.
-6. **Capacity with arithmetic.** Expected request rate and data volume,
-   growth assumption, back-of-envelope math down to the first bottleneck,
-   and the metric that will show that bottleneck approaching. Numbers, not
-   adjectives — "should scale fine" is a blocked phrase.
-7. **Alternatives considered.** The strongest rejected design and the
-   trade-off that killed it. Irreversible or constraining choices get an
-   ADR ([[adr]]), cited by number where the decision appears.
+## How to use this skill
 
-## Blocked on sight
+1. Read this file, then write the sections in order from
+   **[SECTIONS.md](SECTIONS.md)** — every section, no skipping, each
+   cleared against its bar.
+2. When you reach section 5, open **[FAILURE-MODES.md](FAILURE-MODES.md)**;
+   at section 6, open **[CAPACITY.md](CAPACITY.md)**. Load on demand.
 
-- Two writers for one fact, or any consumer reading a peer's tables.
-- A failure section reading "handle errors gracefully".
-- Capacity described in adjectives with no arithmetic.
-- A boundary drawn along the org chart or tech layers instead of the domain.
-- Field-level payload minutiae crowding out decisions (that's CONTRACT.md).
+## Topic map (load on demand)
 
-## Grounding
+| Task | File |
+|---|---|
+| The seven sections, in order, each with its falsifiable bar | **[SECTIONS.md](SECTIONS.md)** |
+| Enumerate down/slow/wrong per dependency; pick a real response | **[FAILURE-MODES.md](FAILURE-MODES.md)** |
+| Capacity by arithmetic — the NALSD method, to the first bottleneck | **[CAPACITY.md](CAPACITY.md)** |
 
-- "Design Docs at Google" — industrialempathy.com
-- BoundedContext (Evans's DDD; Fowler bliki) — martinfowler.com
-- Non-Abstract Large System Design (NALSD) — sre.google/workbook
-- Database-per-service and data ownership — learn.microsoft.com (Azure Architecture Center)
+## The seven sections in one breath
+
+1. Context and scope; goals and non-goals — non-goals are plausible goals
+   deliberately rejected, one line of why each.
+2. Boundary as a bounded context — the same word meaning two things is two
+   contexts; never share a model across them.
+3. Data ownership — one writer per fact; two writers means the boundary is
+   wrong: redraw before going on.
+4. Contract surface at summary level — operations, events, versions,
+   consumers named; field detail is CONTRACT.md's job.
+5. Failure modes per dependency — down, slow, wrong; each row with a chosen
+   response ("retry" without a budget and give-up behavior is not one).
+6. Capacity with arithmetic — numbers to the first bottleneck plus the
+   metric that shows it approaching; "should scale fine" is blocked.
+7. Alternatives considered — the strongest rejected design and the
+   trade-off that killed it; irreversible choices get an ADR ([[adr]]),
+   cited by number where the decision appears.
+
+**Blocked on sight:** two writers for one fact, or any consumer reading a
+peer's tables · a failure section reading "handle errors gracefully" ·
+capacity described in adjectives with no arithmetic · a boundary drawn
+along the org chart or tech layers instead of the domain · field-level
+payload minutiae crowding out decisions (that's CONTRACT.md).

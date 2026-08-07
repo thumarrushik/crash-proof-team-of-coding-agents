@@ -7,48 +7,44 @@ description: Attack your own design artifact before downstream teams inherit its
 
 A bug in a design ships as three teams' bugs, built confidently and in
 parallel. The review team exists to catch what a careful author could not
-see — not what you didn't look for. Run these hostile passes over the
-finished artifact (blueprint, CONTRACT.md, ADR) before declaring done.
+see — not what you didn't look for. Attack the finished artifact
+(blueprint, CONTRACT.md, ADR) before declaring done.
 
-1. **Unstated failure modes.** Kill each dependency in your head — down,
-   slow, wrong — and find the sentence that says what happens; no sentence
-   means the doc is incomplete, not that the failure is unlikely. Then the
-   quiet ones: duplicate submission, concurrent writers to one entity,
-   partial success (step two of three fails), replayed or out-of-order
-   events. Every named failure carries its exact contracted response.
-2. **Capacity hand-waves.** Grep the doc for adjectives standing where
-   numbers belong — "fast", "large", "scales", "should handle". Replace
-   each with an estimate, the arithmetic behind it, and the metric that
-   would verify it. If the math cannot be done yet, write that down as a
-   named unknown — an admitted gap is a design input; a hidden one is a
-   landmine.
-3. **Boundary leaks.** Any fact with two writers? Any read reaching into a
-   peer's tables instead of its API or events? Any operation quietly
-   requiring knowledge only a peer owns — a join across the boundary in
-   disguise? Any contract shape exposing internal storage structure,
-   welding consumers to the schema?
-4. **The two-engineer test.** Would two engineers, reading the artifact
-   independently, build identical behavior? Hunt "TBD", "probably", "etc.",
-   enums missing values, operations missing an error case, failures missing
-   status + code. Every ambiguity a downstream team finds later is a design
-   bug you chose not to find now.
-5. **Downstream dry-run.** Re-read the artifact once per consuming team —
-   backend, frontend, testing — asking only: can they start without asking
-   me anything? Write down each question they would ask; answer it in the
-   doc, not in a reply.
-6. **Record residual unknowns** in the doc and REPORT.md: unverified load
-   assumptions, unconfirmed dependency behavior, decisions deferred with
-   the trigger condition that will force them.
+## How to use this skill
 
-## Blocked on sight
+1. Run the hostile passes in **[PASSES.md](PASSES.md)** over the finished
+   artifact, in order — each comes with concrete grep-for phrases; search
+   the doc, don't skim it.
+2. Then run **[DRY-RUN.md](DRY-RUN.md)** once per consuming team. Done is
+   only claimable after both.
 
-- "Will be defined during implementation" for behavior the contract owns.
-- A capacity claim with no arithmetic behind it.
-- A failure mode listed without its contracted response.
-- Declaring done without the per-team dry-run.
+## Topic map (load on demand)
 
-## Grounding
+| Task | File |
+|---|---|
+| The hostile passes: failure modes, capacity hand-waves, boundary leaks, ambiguity — with grep-for phrases | **[PASSES.md](PASSES.md)** |
+| The per-consuming-team walkthrough: method and per-team checklists | **[DRY-RUN.md](DRY-RUN.md)** |
 
-- "Design Docs at Google" (review is the doc's function) — industrialempathy.com
-- NALSD iterative design review — sre.google/workbook
-- Consumer-driven contracts (design read from the consumer's seat) — pact.io
+## The passes in one breath
+
+1. Kill each dependency in your head — down, slow, wrong — and find the
+   sentence that says what happens; no sentence means the doc is
+   incomplete, not that the failure is unlikely.
+2. Grep for adjectives standing where numbers belong; replace each with an
+   estimate, its arithmetic, and the verifying metric — or a named
+   unknown. An admitted gap is a design input; a hidden one is a landmine.
+3. Hunt boundary leaks: two writers for a fact, reads into a peer's
+   tables, joins across the boundary in disguise, contract shapes exposing
+   internal storage.
+4. The two-engineer test: would two engineers, reading independently,
+   build identical behavior? Every ambiguity found later is a design bug
+   you chose not to find now.
+5. Dry-run the doc once per consuming team: can they start without asking
+   you anything? Answer every found question in the doc, not in a reply.
+6. Record residual unknowns in the doc and REPORT.md — unverified
+   assumptions, and deferred decisions with the trigger that forces them.
+
+**Blocked on sight:** "will be defined during implementation" for behavior
+the contract owns · a capacity claim with no arithmetic behind it · a
+failure mode listed without its contracted response · declaring done
+without the per-team dry-run.

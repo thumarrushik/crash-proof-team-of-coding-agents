@@ -5,44 +5,45 @@ description: Playwright-grounded browser verification — role-based locators, w
 
 # browser-e2e
 
-Test the way users use it: a user finds a button by its name, not by its CSS
-path — and never "waits 2000 ms".
+Test the way users use it: a user finds a button by its name, not by its
+CSS path — and never "waits 2000 ms". One test per user journey you
+changed: load -> act -> assert the visible outcome the user came for.
 
-## Phases — in order
+## How to use this skill
 
-1. **Test the story, not the DOM.** One test per user journey you changed:
-   load -> act (click, type) -> assert the visible outcome the user came
-   for. Assert rendered text and state, never internals or class names.
-2. **Locate like a user (and like assistive tech).** Priority: getByRole
-   with accessible name -> getByLabel / getByPlaceholder -> getByText ->
-   getByTestId as a deliberate escape hatch. Raw CSS/XPath chains are a
-   last resort and a smell. If getByRole cannot find it, the markup has an
-   accessibility bug — fix the markup, not the locator.
-3. **Web-first assertions only.** `await expect(locator).toBeVisible()`,
-   `.toHaveText()`, `.toHaveURL()` auto-retry until the app is ready.
-   Never `waitForTimeout` or sleeps; wait on conditions, not clocks.
-4. **Isolate every test.** Own browser context, own storage state, own data
-   (seeded via API or fixtures, not via other tests' leftovers). Every test
-   must pass alone, in parallel, and in any order.
-5. **Assert the sad path.** When the story has an error state, drive it
-   (route/mock the failing response) and assert the user-facing message.
-6. **Fall back honestly.** No browser runner in this workspace? Render and
-   assert on output as the minimum bar — and say so in the report.
+1. Read this file before writing or editing any browser test — one test
+   per user story, asserting rendered text and state, never internals.
+2. Open the topic file for the part you are writing: finding elements,
+   asserting outcomes, or keeping tests independent. Load what the test
+   needs, not all three.
+3. No browser runner in this workspace? Render and assert on output as
+   the minimum bar — and say so in the report.
 
-## Blocked on sight
+## Topic map (load on demand)
 
-- `waitForTimeout` / sleep as synchronization.
-- Brittle selectors: `.card > div:nth-child(2)`, auto-generated classes.
-- Tests sharing a login, account, or record that another test mutates.
-- Retries or widened timeouts papering over flake.
-- Asserting implementation details (store state, class names) instead of
-  what the user sees.
+| Task | File |
+|---|---|
+| Find elements like a user — role-first priority, escape hatches, a11y payoff | **[LOCATORS.md](LOCATORS.md)** |
+| Assert outcomes — web-first auto-retrying assertions, sad paths, no clocks | **[ASSERTIONS.md](ASSERTIONS.md)** |
+| Keep tests independent — own context, own data, parallel-safe, any order | **[ISOLATION.md](ISOLATION.md)** |
 
-## Grounding
+## The rules in one breath
 
-- Playwright docs, "Best Practices": test user-visible behavior, web-first
-  assertions, locator priority (role first), test isolation.
-- Testing Library Guiding Principles: "The more your tests resemble the way
-  your software is used, the more confidence they can give you."
-- Google Testing Blog flaky-test analyses: async waiting is the dominant
-  flake cause — hence conditions, never clocks.
+1. Test the story, not the DOM: one test per user journey — load, act,
+   assert the visible outcome. Never assert internals or class names.
+2. Locate like a user (and like assistive tech): getByRole with accessible
+   name first; getByTestId only as a deliberate escape hatch. If getByRole
+   cannot find it, fix the markup, not the locator.
+3. Web-first assertions only — they auto-retry until the app is ready.
+   Wait on conditions, never on clocks.
+4. Isolate every test: own browser context, own storage state, own data.
+   Every test passes alone, in parallel, and in any order.
+5. Assert the sad path: drive the error state and assert the user-facing
+   message.
+6. Fall back honestly when there is no browser runner — and say so.
+
+**Blocked on sight:** `waitForTimeout` / sleep as synchronization ·
+brittle selectors: `.card > div:nth-child(2)`, auto-generated classes ·
+tests sharing a login, account, or record that another test mutates ·
+retries or widened timeouts papering over flake · asserting implementation
+details (store state, class names) instead of what the user sees.

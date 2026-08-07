@@ -6,45 +6,41 @@ description: The bar every suite must clear — behavior coverage over line cove
 # testing-bar
 
 Tests are executable evidence. A suite passes this bar when a reader can
-trust green — not when a coverage number looks good.
+trust green — not when a coverage number looks good. Coverage finds
+untested code; it never proves tested code is verified.
 
-## Phases — in order
+## How to use this skill
 
-1. **Enumerate promises, not lines.** List the behaviors the code claims
-   (spec, docstrings, API contract) and write one test per promise —
-   including every failure branch (422/404/409/503, timeouts, rejections)
-   with its exact observable outcome. Line coverage only finds untested
-   code; it never proves tested code is verified. Treat it as a floor
-   detector, never a target.
-2. **Run the edge-case taxonomy** against every input: empty/null/missing;
-   boundaries (0, 1, max, max+1, off-by-one); duplicates and ordering;
-   hostile strings (unicode, whitespace, injection-shaped); huge inputs;
-   repeated and concurrent calls; wrong types. Then ask: "what input would
-   embarrass us in production?" — that input is the missing test. Add it.
-3. **Mutation-minded self-check.** For each assertion ask: what small code
-   change would this fail to catch? Mentally flip a comparison, off-by-one
-   a boundary, delete a guard — if no test would go red, the assertion is
-   decoration. Run a mutation tool (Stryker, PIT, mutmut) when the repo has
-   one; every survived mutant is a reproducible bug the suite would ship.
-4. **Behavior over implementation.** Assert inputs -> observable outputs at
-   the public boundary; a refactor that preserves behavior must not break
+1. Read this file when writing, fixing, or reviewing tests or quality
+   gates — before trusting any green, yours or anyone's.
+2. Open the topic file for the step you are on: enumerating what to
+   test, stress-testing the inputs, or stress-testing the assertions.
+
+## Topic map (load on demand)
+
+| Task | File |
+|---|---|
+| Decide what to test — one test per promise, failure branches, coverage as floor detector | **[PROMISES.md](PROMISES.md)** |
+| Generate the inputs that break code — the edge-case taxonomy, checklist form | **[EDGE-TAXONOMY.md](EDGE-TAXONOMY.md)** |
+| Prove assertions bite — mutation-minded self-check, mutation tools | **[MUTATION.md](MUTATION.md)** |
+
+## The rules in one breath
+
+1. Enumerate promises, not lines: one test per behavior the code claims,
+   including every failure branch with its exact observable outcome.
+2. Line coverage is a floor detector, never a target.
+3. Run the edge-case taxonomy against every input; then ask "what input
+   would embarrass us in production?" — that input is the missing test.
+4. Mutation-minded self-check: for each assertion, name the small code
+   change it would fail to catch; if none would go red, the assertion is
+   decoration. Run the repo's mutation tool when it has one.
+5. Behavior over implementation: assert inputs -> observable outputs at
+   the public boundary; a behavior-preserving refactor must not break
    the suite.
-5. **Report evidence.** Run the narrow test first, then the wide suite or
-   build gate that would catch integration breakage. State the exact
-   command and result.
+6. Report evidence: narrow test first, then the wide suite or build gate;
+   state the exact command and result.
 
-## Blocked on sight
-
-- `is not None` / `toBeDefined` as the only assertion.
-- Tests that still pass with the implementation gutted.
-- Chasing a coverage percentage with assertion-free tests.
-- Happy-path-only suites; sleeps added to "stabilize".
-
-## Grounding
-
-- Google Testing Blog, "Code Coverage Best Practices" (2020): high coverage
-  does not guarantee effective tests.
-- Stryker / PIT mutation-testing docs: killed vs. survived mutants as the
-  honest measure of assertion strength.
-- Martin Fowler, "TestCoverage" bliki: coverage finds untested code; as a
-  target it is gameable.
+**Blocked on sight:** `is not None` / `toBeDefined` as the only
+assertion · tests that still pass with the implementation gutted ·
+chasing a coverage percentage with assertion-free tests ·
+happy-path-only suites; sleeps added to "stabilize".
