@@ -36,10 +36,13 @@ teams/<team>/
                      (Understand -> Plan -> Implement -> Test -> Self-review
                      -> Report), "do not skip", per-lane duties, the harness
                      contract (the harness owns git)
-  .claude/skills/    the team's skills — OWNED by the team folder (no shared
-                     pool); plus settings.json, rules.json, and the flag-rules
-                     hook, materialized from src/shared.py by teams/sync.py
-                     (drift tests go red if they diverge)
+  .claude/skills/    the team's skills — OWNED by the team folder; skills live
+                     here and NOWHERE else (no shared pool, no operator pool)
+  .claude/           settings.json, rules.json, the flag-rules audit hook, and
+                     phase-gate.py — a Stop hook enforcing the work-issue
+                     discipline: every triggered run must create the SAME
+                     phase task list (one task per mandated phase) and
+                     complete it before the run is allowed to finish
 ```
 
 Six lanes: `backend`, `frontend`, `testing`, `review`, `issues`,

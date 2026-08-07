@@ -59,20 +59,30 @@ def validate() -> int:
             assert isinstance(rules, list) and all("name" in r and "kind" in r for r in rules)
         except Exception as e:
             failures.append(f"{name}: rules.json invalid ({e})")
-        hook = claude / "flag-rules.py"
-        if not hook.exists():
-            failures.append(f"{name}: flag-rules.py missing")
-        else:
-            try:
-                py_compile.compile(str(hook), cfile=tempfile.mktemp(), doraise=True)
-            except Exception as e:
-                failures.append(f"{name}: flag-rules.py does not compile ({e})")
+        for script in ("flag-rules.py", "phase-gate.py"):
+            hook = claude / script
+            if not hook.exists():
+                failures.append(f"{name}: {script} missing")
+            else:
+                try:
+                    py_compile.compile(str(hook), cfile=tempfile.mktemp(), doraise=True)
+                except Exception as e:
+                    failures.append(f"{name}: {script} does not compile ({e})")
+        gate = claude / "phase-gate.py"
+        if gate.exists():
+            import re as _re
+            declared = _re.search(r"PHASES = \[(.*?)\]", gate.read_text(), _re.S)
+            gate_phases = _re.findall(r"'([^']+)'", declared.group(1)) if declared else []
+            mandate_phases = _re.findall(r"^\d+\. \*\*([A-Za-z-]+)\.\*\*",
+                                         text, _re.M)
+            if gate_phases != mandate_phases:
+                failures.append(f"{name}: phase-gate phases {gate_phases} != mandate phases {mandate_phases}")
         skills = claude / "skills"
         owned = [d.name for d in skills.iterdir() if (d / "SKILL.md").exists()] if skills.is_dir() else []
         if not owned:
             failures.append(f"{name}: owns no skills")
         if not failures or all(not f.startswith(name + ":") for f in failures):
-            print(f"  {name}: OK ({len(owned)} skills, org floor intact)")
+            print(f"  {name}: OK ({len(owned)} skills, phase gate, org floor intact)")
     for f in failures:
         print(f"  FAIL {f}")
     return 1 if failures else 0

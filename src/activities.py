@@ -154,11 +154,9 @@ def _session_id_from_heartbeat(details: Sequence[Any]) -> str | None:
 
 def _skill_search_roots(team: str | None = None) -> list[Path]:
     repo_root = Path(__file__).resolve().parents[1]
-    roots = [
-        # Operator's own skills win; otherwise the team's folder OWNS its
-        # skills — there is no shared pool.
-        Path.home() / ".claude" / "skills",
-    ]
+    # Skills live in the teams folder and NOWHERE else — no operator pool,
+    # no shared pool, no fallback outside teams/.
+    roots = []
     if team:
         roots.append(repo_root / "teams" / team / ".claude" / "skills")
     return roots
@@ -243,7 +241,7 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
         if guard not in deny:
             deny.append(guard)
     (claude_dir / "settings.json").write_text(json.dumps(settings, indent=2))
-    for name in ("flag-rules.py", "rules.json"):
+    for name in ("flag-rules.py", "rules.json", "phase-gate.py"):
         (claude_dir / name).write_text((team_claude / name).read_text())
 
     # -- knowledge: bind live --
