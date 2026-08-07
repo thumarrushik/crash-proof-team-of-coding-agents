@@ -1,62 +1,51 @@
 ---
 name: design-ui
-description: Visual and UX discipline for user-facing surfaces — hierarchy, tokens, the four render states, WCAG 2.2 AA. Use when creating or changing anything a user sees.
+description: Visual and UX discipline for user-facing surfaces — hierarchy, tokens, the four render states, WCAG 2.2 AA, responsive. Use when creating or changing anything a user sees.
 ---
 
 # design-ui
 
-Design the surface before styling it. Reuse before inventing. Make every state
-of the data visible and every element reachable.
+Design the surface before styling it. Reuse before inventing. Make every
+state of the data visible and every element reachable. This is the frontend
+lane's house standard for anything a user sees; the [[state-and-errors]] and
+[[browser-e2e]] skills carry the data-handling and proving halves.
 
-## Phases — in order
+## How to use this skill
 
-1. **Inventory.** Find the repo's components, tokens (color, spacing, type
-   scale), and a reference page. Extend them; never fork a second style. New
-   UI must look like it was always there.
-2. **Hierarchy.** One primary action per view. Size, weight, and spacing come
-   from the existing scale — no hand-picked one-off values. Group related
-   controls; align to the grid already in use.
-3. **The four render states.** Every data-driven surface ships loading (space
-   reserved, no layout jump), empty (say why it is empty and offer the next
-   action), error, and success. Error messages follow NN/g: say what happened
-   in plain language, why (when known), and what the user can do next —
-   polite, precise, constructive; never a bare error code, never blame the
-   user. Form errors appear inline beside the field and preserve the user's
-   input.
-4. **Accessibility (WCAG 2.2 AA).**
-   - Semantic HTML first; ARIA only to fill real gaps (First Rule of ARIA).
-   - Every input labeled; every action keyboard-reachable in a logical order.
-   - Focus visible (SC 2.4.7) and not obscured (SC 2.4.11); if you restyle
-     the outline, the replacement must be at least as visible.
-   - Contrast: >=4.5:1 body text; >=3:1 large text, UI components, and
-     meaningful graphics (SC 1.4.3, 1.4.11).
-   - Pointer targets >=24x24 CSS px (SC 2.5.8); prefer 44px for primary
-     touch actions.
-   - Never color alone to convey state (SC 1.4.1); icons and images carry
-     text alternatives.
-5. **Responsive.** Content-first layout that reflows to 320px width without
-   horizontal scrolling or loss of function (SC 1.4.10); relative units;
-   verify at phone width, not just desktop.
-6. **Verify rendered.** User-visible behavior gets a browser test (see
-   browser-e2e) or at minimum a rendered assertion — markup alone is a
-   claim, not proof.
+1. Read this file before creating or changing any user-facing surface.
+2. Open the topic file for the phase you are in (below): plan the layout,
+   then the states, then accessibility, then responsiveness. Load what the
+   surface needs, not all four.
 
-## Blocked on sight
+## Topic map (load on demand)
 
-- A second styling system beside the existing one.
-- "Something went wrong" with no cause and no next step.
-- `div`/`span` with click handlers impersonating `button`/`a`.
-- Focus outline removed without an equal-or-better replacement.
-- Color as the only signal; desktop-only layouts; placeholder screens
-  shipped as done.
+| Task | File |
+|---|---|
+| Inventory the design system, set hierarchy, one primary action | **[LAYOUT.md](LAYOUT.md)** |
+| Ship all four render states with NN/g-grade error messages | **[RENDER-STATES.md](RENDER-STATES.md)** |
+| Meet WCAG 2.2 AA — semantics, focus, contrast, targets, color | **[ACCESSIBILITY.md](ACCESSIBILITY.md)** |
+| Reflow to 320px, then prove the surface renders | **[RESPONSIVE-VERIFY.md](RESPONSIVE-VERIFY.md)** |
 
-## Grounding
+## The rules in one breath
 
-- WCAG 2.2 (W3C Recommendation, 2023): SC 1.4.1, 1.4.3, 1.4.10, 1.4.11,
-  2.4.7, 2.4.11, 2.5.8.
-- W3C "Using ARIA" (First Rule of ARIA) and the ARIA Authoring Practices
-  Guide (APG) interaction patterns.
-- Nielsen Norman Group: "Error-Message Guidelines" and "10 Design Guidelines
-  for Reporting Errors in Forms".
-- NN/g 10 Usability Heuristics, #9: help users recognize, diagnose, and
-  recover from errors.
+1. Inventory first: extend the repo's components, tokens, and reference
+   page — never fork a second styling system.
+2. One primary action per view; size, weight, spacing come from the
+   existing scale, never hand-picked one-offs.
+3. Every data-driven surface ships all four render states — loading, empty,
+   error, success — each with a real assertion.
+4. Error messages say what happened, why, and the next action (NN/g);
+   never a bare code, never blame the user; form errors inline, input kept.
+5. WCAG 2.2 AA: semantic HTML first, ARIA only to fill gaps; labels;
+   visible unobscured focus; contrast 4.5:1 / 3:1; targets >=24x24px;
+   never color alone.
+6. Reflow to 320px with no horizontal scroll or lost function; relative
+   units; verify at phone width.
+7. Prove it rendered — a browser test ([[browser-e2e]]) or at minimum a
+   rendered assertion; markup alone is a claim, not proof.
+
+**Blocked on sight:** a second styling system beside the existing one ·
+"Something went wrong" with no cause and no next step · a `div`/`span` with
+a click handler impersonating `button`/`a` · a focus outline removed
+without an equal-or-better replacement · color as the only signal ·
+desktop-only layouts · placeholder screens shipped as done.
