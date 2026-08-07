@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Nine durable jobs carry an issue from filed to merged, with Claude Code doing the judgment work — building, reviewing, resolving — under committed skills, enforced hooks, and human-controlled settings. We killed the worker mid-task to prove it: same session, four cents.
+### Claude Code remembers the conversation; Temporal remembers the job. Compose the two and you get a durable delivery team: nine single-purpose jobs carrying an issue from filed to merged, with Claude Code doing the judgment work inside them — building, reviewing, resolving — under skill playbooks, enforced hooks, and human-controlled settings on every retry. We SIGKILLed a worker mid-task and the run finished as the same session for four cents; the team resolved a real merge conflict on the way, with no human decision in the loop.
 
 ---
 
