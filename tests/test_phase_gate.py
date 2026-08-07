@@ -86,6 +86,24 @@ class PhaseGateTests(unittest.TestCase):
                 self.assertEqual(decision["decision"], "block")
                 self.assertIn("Self-review", decision["reason"])
 
+    def test_phase_must_lead_the_task_name(self) -> None:
+        """The mandate says tasks are NAMED for the phases — a task that only
+        mentions a phase word mid-sentence ("run the tests…") must not satisfy
+        that phase. Substring matching allowed exactly that; prefix matching
+        is the contract."""
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            phases = gate_phases("backend")
+            todos = [{"content": f"{p} the task", "status": "completed"}
+                     for p in phases if p != "Test"]
+            todos.append({"content": "run the tests and show output",
+                          "status": "completed"})
+            log_todowrite(work_dir, todos)
+            decision = run_gate("backend", work_dir)
+            self.assertIsNotNone(decision, "mid-sentence 'tests' must not count")
+            self.assertEqual(decision["decision"], "block")
+            self.assertIn("Test", decision["reason"])
+
     def test_unfinished_phase_blocks_until_completed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             work_dir = Path(tmp)
