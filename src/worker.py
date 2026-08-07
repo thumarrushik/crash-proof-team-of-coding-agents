@@ -94,7 +94,10 @@ async def _run_team_worker(namespace: str, team: str) -> None:
         ],
         # Claude Code chunks are long-running subprocesses; keep concurrency
         # low so one worker doesn't fork-bomb the machine or the rate limits.
-        max_concurrent_activities=2,
+        # Tunable because a busy lane head-of-line blocks its own FAST
+        # activities (post/merge/push) behind hour-class agent chunks —
+        # observed live with 8 queued reviews on concurrency 2.
+        max_concurrent_activities=int(os.environ.get("MAX_CONCURRENT_ACTIVITIES", "2")),
         # Persist heartbeat details (incl. the in-flight Claude session id)
         # promptly, so a mid-chunk crash can resume the session instead of
         # restarting from zero. The effective interval is
