@@ -134,7 +134,7 @@ class RunClaudeTask:
         retry_policy=RetryPolicy(maximum_attempts=3),
     )
 
-    async def _merge_with_self_heal(self, input: TaskInput, summary: str) -> None:
+    async def _merge_with_self_heal(self, input: TaskInput) -> None:
         """Merge the PR; if it conflicts because the branch is stale, update the
         branch with base and retry once. A real content conflict is escalated to
         the owning team's agent (escalate_conflict), which resolves it and
@@ -156,11 +156,21 @@ class RunClaudeTask:
         )
         if upd.updated:
             await workflow.sleep(timedelta(seconds=10))  # let GitHub recompute mergeability
-            await workflow.execute_activity(
+            retry = await workflow.execute_activity(
                 merge_pull_request,
                 MergeInput(repo=input.repo, number=input.pr_number, commit_headline=headline),
                 **self._POST,
             )
+            if not retry.merged and retry.conflict:
+                # Base moved again during the update window — a real conflict
+                # now; hand it to the owning team instead of dropping it.
+                await workflow.execute_activity(
+                    escalate_conflict,
+                    ConflictEscalationInput(repo=input.repo, pr_number=input.pr_number,
+                                            branch=input.branch, base=input.base_branch,
+                                            model=input.model),
+                    **self._POST,
+                )
         elif upd.conflict:
             # Real content conflict — loop the owning team's agent back in to
             # resolve it (merge base, fix conflicts, test). Its post-completion
@@ -277,7 +287,7 @@ class RunClaudeTask:
             # Approved: gate the merge on a human. A denial that carries a note is
             # itself a change request — fix it (under the cap) instead of just stopping.
             if await self._human_gate("merge", f"PR #{input.pr_number} on {input.repo}", input):
-                await self._merge_with_self_heal(input, report.get("summary", ""))
+                await self._merge_with_self_heal(input)
             else:
                 decision = self.progress.approval
                 if (input.enable_fix_loop and input.fix_round < input.max_fix_rounds

@@ -190,7 +190,8 @@ class ChunkResult:
     # This chunk's workspace rule violations, tallied by rule name from the
     # flag hook's log. Typed data: the workflow's governor reads it.
     rule_flags: dict[str, int] = field(default_factory=dict)
-    # Which model actually ran this chunk — evidence for the escalation ladder.
+    # The model REQUESTED for this chunk (None = Claude Code's default);
+    # the actually-running model is in the session transcript.
     model: str | None = None
 
 
@@ -282,8 +283,6 @@ class PollSummary:
     started: int = 0
     held: int = 0
     started_ids: list[str] = field(default_factory=list)
-    # PR numbers that are approved + mergeable — the poll workflow merges these.
-    to_merge: list[int] = field(default_factory=list)
 
 
 @dataclass

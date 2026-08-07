@@ -28,7 +28,8 @@ class FakeClient:
     async def start_workflow(self, run, arg, *, id, task_queue, id_reuse_policy):  # noqa: A002
         if self.raise_duplicate:
             raise WorkflowAlreadyStartedError(id, "RunClaudeTask")
-        self.started.append({"id": id, "task_queue": task_queue, "input": arg})
+        self.started.append({"id": id, "task_queue": task_queue, "input": arg,
+                             "id_reuse_policy": id_reuse_policy})
         return f"handle:{id}"
 
 
@@ -129,7 +130,7 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
 
         ti = client.started[0]["input"]
         self.assertEqual(ti.team, "review")
-        self.assertEqual(ti.source, "pr-42")
+        self.assertEqual(ti.source, "pr-42")   # explicit fallback: event with no head_sha
 
     def test_review_source_is_keyed_by_head_sha(self) -> None:
         """Every new push is a NEW review job: without the sha key, a completed
@@ -144,7 +145,6 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
         ti = poller._task_input_for(activity, repo="o/r", model=None)
         self.assertEqual(ti.pr_number, 42)          # parsed despite the suffix
         self.assertEqual(ti.source, "pr-42-abcdef1")
-        self.assertEqual(ti.pr_number, 42)
         self.assertEqual(ti.branch, "claude/issue-9")   # checks out the PR's branch
 
     async def test_post_pr_review_approve_posts_comment(self) -> None:
@@ -188,11 +188,38 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
         started = client.started[0]
         self.assertEqual(started["id"], "claude-backend-resolve-pr-4")
         self.assertEqual(started["task_queue"], "claude-code-tasks-backend")
+        # The fleet run's deadlock lesson, pinned: failed jobs may retry.
+        from temporalio.common import WorkflowIDReusePolicy
+        self.assertEqual(started["id_reuse_policy"],
+                         WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY)
         ti = started["input"]
         self.assertEqual(ti.source, "resolve-pr-4")
         self.assertEqual(ti.pr_number, 4)
         self.assertEqual(ti.branch, "claude/issue-1")
         self.assertEqual(ti.team, "backend")
+
+    async def test_escalate_conflict_is_sha_keyed_when_head_readable(self) -> None:
+        """Cascade convergence, pinned: a PR that re-conflicts after a resolve
+        merges gets a FRESH resolve keyed by its current head sha."""
+        client = FakeClient()
+
+        async def fake_connect(addr, *, namespace):
+            return client
+
+        def gh_get(path, token):
+            if "/pulls/" in path:
+                return {"head": {"sha": "abcdef9876543210"}}
+            return {"number": 1, "labels": [{"name": "team/backend"}]}
+
+        with mock.patch.dict("os.environ", {"GITHUB_TOKEN": "tok"}), \
+             mock.patch.object(poller, "_gh_get", side_effect=gh_get), \
+             mock.patch.object(poller, "_gh_post", return_value=(201, {})), \
+             mock.patch.object(poller.Client, "connect", side_effect=fake_connect):
+            result = await poller.escalate_conflict(
+                ConflictEscalationInput(repo="o/r", pr_number=4, branch="claude/issue-1")
+            )
+        self.assertEqual(result.workflow_id, "claude-backend-resolve-pr-4-abcdef9")
+        self.assertEqual(client.started[0]["input"].source, "resolve-pr-4-abcdef9")
 
     async def test_escalate_conflict_duplicate_is_noop(self) -> None:
         client = FakeClient(raise_duplicate=True)

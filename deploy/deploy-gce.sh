@@ -10,6 +10,11 @@
 #   PROJECT=my-proj ZONE=us-central1-a ./deploy/deploy-gce.sh
 set -euo pipefail
 
+# Inherited from the lab repo (temporal-claude-demo): the image build needs
+# that repo's Dockerfile/docker-compose.yml, which are not shipped here.
+[ -f Dockerfile ] && [ -f docker-compose.yml ] || {
+  echo "deploy-gce.sh requires the lab repo's Docker files — see deploy/README.md"; exit 1; }
+
 PROJECT="${PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
 ZONE="${ZONE:-us-central1-a}"
 VM="${VM:-temporal-claude}"

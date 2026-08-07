@@ -117,6 +117,24 @@ class FlagRulesHookTest(unittest.TestCase):
         self.assertEqual([f["rule"] for f in flags],
                          ["redundant_orientation_ls", "redundant_orientation_ls"])
 
+    def test_testing_lane_sleep_rule_fires_in_compound_commands(self):
+        """Fleet finding follow-up: the start-anchored match missed
+        `npm test && sleep 2`; the pattern must catch embedded sleeps and
+        ignore mere mentions of the word."""
+        import json as _json
+        from pathlib import Path as _P
+        testing_rules = _json.loads(
+            (_P(__file__).resolve().parent.parent / "teams" / "testing" /
+             ".claude" / "rules.json").read_text())
+        flags = self._run_hook(testing_rules, [
+            {"tool_name": "Bash", "tool_input": {"command": "sleep 5"}},
+            {"tool_name": "Bash", "tool_input": {"command": "npm test && sleep 2"}},
+            {"tool_name": "Bash", "tool_input": {"command": "grep sleep test_app.py"}},
+        ])
+        self.assertEqual(
+            [f["rule"] for f in flags if f["rule"] == "sleep_as_synchronization"],
+            ["sleep_as_synchronization", "sleep_as_synchronization"])
+
     def test_review_lane_report_write_is_not_flagged(self):
         """Fleet learning: all 22 review-lane flags were the mandated
         REPORT.md write — pure noise drowning real violations. The rule's

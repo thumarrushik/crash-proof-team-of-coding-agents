@@ -4,7 +4,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import unittest
 
 from temporalio import activity
-from temporalio.client import WorkflowFailureError
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 

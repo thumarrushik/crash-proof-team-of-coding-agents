@@ -61,7 +61,7 @@ async def _run_poller_worker(namespace: str) -> None:
         client,
         task_queue=POLLER_TASK_QUEUE,
         workflows=[PollGitHubWorkflow, EconomicsCanary, AdaptiveCanary],
-        activities=[poll_github_activity, merge_pull_request, run_canary_probes],
+        activities=[poll_github_activity, run_canary_probes],
     )
     print(
         f'Poller worker listening on namespace "{namespace}", '

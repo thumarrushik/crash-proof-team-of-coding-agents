@@ -197,6 +197,22 @@ class PhaseGateTests(unittest.TestCase):
             self.assertIsNone(run_gate("backend", work_dir),
                               "returned report must satisfy the Report phase")
 
+    def test_report_satisfaction_excuses_only_the_report_phase(self) -> None:
+        """The returned report completes Report — and nothing else. A gutted
+        gate that treats StructuredOutput as blanket permission must fail."""
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            phases = gate_phases("backend")
+            log_taskboard(work_dir, phases,
+                          completed=set(phases) - {"Self-review", "Report"})
+            with open(work_dir / ".claude" / "hook-log.jsonl", "a") as f:
+                f.write(json.dumps({"tool_name": "StructuredOutput",
+                                    "tool_input": {}}) + "\n")
+            decision = run_gate("backend", work_dir)
+            self.assertIsNotNone(decision, "Self-review must still block")
+            self.assertEqual(decision["decision"], "block")
+            self.assertIn("Self-review", decision["reason"])
+
     def test_deadlock_guard_allows_after_three_blocks(self) -> None:
         """The gate never wedges a run: past MAX_BLOCKS it allows and leaves
         the miss in the audit trail (the Stop-gate article's ~8-block lesson)."""

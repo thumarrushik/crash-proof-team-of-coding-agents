@@ -79,7 +79,9 @@ Runner + evidence pairs the articles cite, all reproducible:
 - `fixloop-live.sh` / `fixloop-live-results.md` — the fix loop end to end
 - `issue-routing-check.py` / `-results.md` — live issues through the real
   router: 13/13 to the intended lane, five distinct phase lists
-- plus the cost, heartbeat-recovery, and learn-loop evidence behind the flagship
+- plus the cost, heartbeat-recovery, learn-loop, conflict-run, fleet-run,
+  governor-live, relay, and session-learnings evidence, and the human
+  gate's design doc (`hitl-design.md`)
 
 Agent-driven runners need the `claude` CLI logged in; the live-demo scripts
 start their own ephemeral `temporal server start-dev`.

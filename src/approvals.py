@@ -83,7 +83,7 @@ async def main() -> None:
     args = parser.parse_args()
 
     if args.list:
-        sys.exit(0 if await list_pending(args.namespace) >= 0 else 1)
+        sys.exit((await list_pending(args.namespace), 0)[1])
     target = args.approve or args.reject
     if not target:
         parser.error("pass --list, --approve <id>, or --reject <id>")

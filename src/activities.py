@@ -177,8 +177,7 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     so retries and resumed chunks always see the same policy."""
     team = normalize_team(team)
     claude_dir = work_dir / ".claude"
-    skills_dir = claude_dir / "skills"
-    skills_dir.mkdir(parents=True, exist_ok=True)
+    claude_dir.mkdir(parents=True, exist_ok=True)
     # BINDING, not copying: the task checks out into the team, the team is
     # never photocopied into the task.
     #   knowledge (mandate, skills)  -> bound LIVE to teams/<team>/ (an @import
@@ -196,7 +195,8 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     # -- policy: stamp, with deployment-specific source protection injected --
     settings = json.loads((team_claude / "settings.json").read_text())
     deny = settings.setdefault("permissions", {}).setdefault("deny", [])
-    for guard in (f"Write(//{team_dir.parent}/**)", f"Edit(//{team_dir.parent}/**)"):
+    _teams_abs = str(team_dir.parent).lstrip("/")
+    for guard in (f"Write(//{_teams_abs}/**)", f"Edit(//{_teams_abs}/**)"):
         if guard not in deny:
             deny.append(guard)
     (claude_dir / "settings.json").write_text(json.dumps(settings, indent=2))

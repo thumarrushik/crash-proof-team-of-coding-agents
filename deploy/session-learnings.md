@@ -2,7 +2,7 @@
 
 The corpus loop, run on the fleet: every workspace's audit logs, rule flags,
 task boards, and usage records read together, and each finding landed as a
-same-day commit. 37 workspaces, 60 chunks.
+same-day commit. 47 workspaces (60 costed chunks) by the time the corpus was packaged; 37 existed at mining time.
 
 ## The numbers
 
@@ -12,13 +12,13 @@ same-day commit. 37 workspaces, 60 chunks.
 - **Cache economics at scale: 38,582,090 cache-read tokens vs 9,819 fresh
   input tokens.** The resume architecture pays for itself: essentially the
   whole conversation context rides the cache on every chunk.
-- **Rule flags: 36 `redundant_orientation_ls`** across five lanes (frontend
+- **Rule flags: 36 `redundant_orientation_ls`** across six lanes (frontend
   worst at 12) despite every mandate's written efficiency rule — beg loses
   at fleet scale exactly as it lost in the measured experiment; the flags
   caught every instance.
 - **22 `review_lane_edits_code` flags — all false positives**: every one was
   the review lane writing its mandated REPORT.md.
-- **37/37 workspaces show exactly one phase-gate block**: agents return the
+- **every workspace live at mining time (37/37) showed exactly one phase-gate block** (the counter files live in the workspaces and are not packaged in the tarball): agents return the
   structured report and try to stop one beat before marking the final task
   completed.
 
@@ -40,7 +40,7 @@ The July learn-loop shipped session corpora to
 `gs://temporal-claude-corpus-213476/`. That bucket belongs to a different
 Google account than the one currently active locally (403 on list). This
 fleet's corpus is packaged at `deploy/fleet-corpus-2026-08-06.tar.gz`
-(gitignored; audit logs, rule flags, usage logs, reports, exported
+(untracked and gitignored; audit logs, rule flags, usage logs, reports, exported
 transcripts — no cloned repos). To ship it once on the owning account:
 
 ```bash

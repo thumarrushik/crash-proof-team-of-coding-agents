@@ -6,13 +6,20 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# --fresh may appear in any position: restart all workers so they pick up
+# code changes. Learned live: a policy fix in poller.py did nothing until
+# the running worker restarted.
+FRESH=0
+ARGS=()
+for a in "$@"; do
+  [ "$a" = "--fresh" ] && FRESH=1 || ARGS+=("$a")
+done
+set -- "${ARGS[@]:-}"
 REPO="${1:-thumarrushik/linkbox}"
 INTERVAL="${2:-60}"
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 
-# --fresh: restart all workers so they pick up code changes. Learned live:
-# a policy fix in poller.py did nothing until the running worker restarted.
-if [ "${3:-}" = "--fresh" ] || [ "${1:-}" = "--fresh" ]; then
+if [ "$FRESH" = 1 ]; then
   pkill -f "worker.py --team" 2>/dev/null || true
   pkill -f "worker.py --poller" 2>/dev/null || true
   sleep 2

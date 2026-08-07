@@ -174,6 +174,8 @@ def list_reviewable_prs(repo: str, token: str) -> list[PullRequestEvent]:
                 labels=_labels(pr),
                 head_ref=(pr.get("head") or {}).get("ref", ""),
                 head_sha=(pr.get("head") or {}).get("sha", ""),
+                linked_issues=tuple(int(n) for n in re.findall(
+                    r"(?i)\b(?:closes|fixes|resolves)\s+#(\d+)", pr.get("body") or "")),
             )
         )
     return events
@@ -386,7 +388,7 @@ async def escalate_conflict(input: ConflictEscalationInput) -> ConflictEscalatio
 
     The owning team is read from the issue the branch was cut for. A deterministic
     workflow ID + ALLOW_DUPLICATE_FAILED_ONLY make a re-escalation a no-op while the resolve
-    job is already running (or has run)."""
+    job is already ran or is running (or has run)."""
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if not token:
         raise RuntimeError("escalate_conflict requires GITHUB_TOKEN in the worker env")
@@ -438,9 +440,9 @@ async def escalate_conflict(input: ConflictEscalationInput) -> ConflictEscalatio
             id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
-        print(f"  ESCALATE PR #{input.pr_number}: resolve job {workflow_id} already running")
+        print(f"  ESCALATE PR #{input.pr_number}: resolve job {workflow_id} already ran or is running")
         return ConflictEscalationResult(started=False, workflow_id=workflow_id, team=team,
-                                        message="resolve job already running")
+                                        message="resolve job already ran or is running")
 
     # Best-effort visibility on the PR itself — never fail the escalation for it.
     try:
@@ -538,7 +540,16 @@ async def escalate_fix(input: FixEscalationInput) -> FixEscalationResult:
         except urllib.error.HTTPError as err:
             print(f"  FIX PR #{input.pr_number}: can't read issue #{issue_number} ({err.code}); default team")
 
-    source = f"fix-pr-{input.pr_number}-r{input.fix_round}"
+    head_sha = ""
+    try:
+        head = _gh_get(f"/repos/{input.repo}/pulls/{input.pr_number}", token)
+        if isinstance(head, dict):
+            head_sha = (head.get("head") or {}).get("sha", "")[:7]
+    except Exception:
+        pass
+    # Keyed by round AND head sha: a later review cycle at a new head gets a
+    # fresh fix job instead of colliding with a completed round-1 id.
+    source = f"fix-pr-{input.pr_number}-r{input.fix_round}" + (f"-{head_sha}" if head_sha else "")
     workflow_id = f"claude-{team}-{source}"
     task_input = TaskInput(
         task=_fix_prompt(input.repo, input.pr_number, input.branch, input.base, team,
@@ -572,9 +583,9 @@ async def escalate_fix(input: FixEscalationInput) -> FixEscalationResult:
             id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
-        print(f"  FIX PR #{input.pr_number}: fix job {workflow_id} already running")
+        print(f"  FIX PR #{input.pr_number}: fix job {workflow_id} already ran or is running")
         return FixEscalationResult(started=False, workflow_id=workflow_id, team=team,
-                                   fix_round=input.fix_round, message="fix job already running")
+                                   fix_round=input.fix_round, message="fix job already ran or is running")
 
     try:
         _gh_post(
@@ -617,7 +628,17 @@ async def escalate_review(input: ReviewEscalationInput) -> ReviewEscalationResul
     review lane that re-runs the suite and re-asks the human. The mirror image
     of ``escalate_fix``; deterministic ID + ALLOW_DUPLICATE_FAILED_ONLY keep it idempotent."""
     team = "review"
-    source = f"pr-{input.pr_number}-r{input.fix_round}"
+    head_sha = ""
+    try:
+        head = _gh_get(f"/repos/{input.repo}/pulls/{input.pr_number}", token)
+        if isinstance(head, dict):
+            head_sha = (head.get("head") or {}).get("sha", "")[:7]
+    except Exception:
+        pass
+    # Same id the next poll's planner would submit for this head — the two
+    # paths dedup into one review instead of racing on the same push.
+    source = (f"pr-{input.pr_number}-{head_sha}" if head_sha
+              else f"pr-{input.pr_number}-r{input.fix_round}")
     workflow_id = f"claude-{team}-{source}"
     task_input = TaskInput(
         task=_followup_review_prompt(input.repo, input.pr_number, input.branch, input.fix_round),
@@ -650,9 +671,9 @@ async def escalate_review(input: ReviewEscalationInput) -> ReviewEscalationResul
             id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
-        print(f"  RE-REVIEW PR #{input.pr_number}: review job {workflow_id} already running")
+        print(f"  RE-REVIEW PR #{input.pr_number}: review job {workflow_id} already ran or is running")
         return ReviewEscalationResult(started=False, workflow_id=workflow_id,
-                                      fix_round=input.fix_round, message="review job already running")
+                                      fix_round=input.fix_round, message="review job already ran or is running")
 
     print(f"  RE-REVIEW PR #{input.pr_number}: started review job {workflow_id} (round {input.fix_round})")
     return ReviewEscalationResult(started=True, workflow_id=workflow_id,
@@ -721,12 +742,22 @@ async def main() -> None:
                         help="Seconds between polls (schedule + --loop; default 300)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Route work but submit nothing (no Temporal needed)")
+    parser.add_argument("--enable-fix-loop", action="store_true",
+                        help="Not-approved PRs start bounded fix rounds (default off)")
+    parser.add_argument("--max-fix-rounds", type=int, default=3)
+    parser.add_argument("--require-approval", action="store_true",
+                        help="Human gate before any merge (default off)")
+    parser.add_argument("--approval-timeout-h", type=float, default=24.0)
     args = parser.parse_args()
 
     if not args.repo:
         parser.error("provide --repo owner/name or set GITHUB_REPOSITORY")
 
-    poll_input = PollInput(repo=args.repo, namespace=args.namespace, model=args.model, dry_run=args.dry_run)
+    poll_input = PollInput(repo=args.repo, namespace=args.namespace, model=args.model,
+                           dry_run=args.dry_run, enable_fix_loop=args.enable_fix_loop,
+                           max_fix_rounds=args.max_fix_rounds,
+                           require_approval=args.require_approval,
+                           approval_timeout_h=args.approval_timeout_h)
 
     # Schedule mode: register the poll on Temporal, then exit.
     if args.schedule:
