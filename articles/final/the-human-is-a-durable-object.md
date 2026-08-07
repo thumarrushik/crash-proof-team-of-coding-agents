@@ -73,7 +73,7 @@ Any of the three hands the PR to the team that owns the code, whose agent reads 
 
 One case is deliberately excluded, because the distinction is the whole point of the gate. A denial that came from the *deadline* never triggers a fix. A timeout is a safe stop, not a request for changes.
 
-The shape is the same one the main article uses for merge conflicts, and it reuses the same idea: two small handoff steps, each a durable job in its own lane, one carrying the not-approved PR from the review lane to the owning lane to be fixed, the other carrying the fixed PR back to be re-checked and re-asked. The round number lives in each job's own ID, so the cap cannot be lost and a repeat start is a no-op the server refuses.
+The shape is the same one the main article uses for merge conflicts, and it reuses the same idea: two small handoff steps, each a durable job in its own lane, one carrying the not-approved PR from the review lane to the owning lane to be fixed, the other carrying the fixed PR back to be re-checked and re-asked. The round number lives in each job's own ID, so the cap cannot be lost; a repeat start of a live or finished round is a no-op the server refuses, while a failed round may retry on a later sweep.
 
 We ran the whole loop on a real server, the same way we ran the gate. The agent, the tests, the push, and the GitHub calls are stubbed, and the two handoff steps are stubbed to start their real sibling workflow on the same server; the workflows themselves, the human gate, and the operator CLI are real.[^fixloop]
 

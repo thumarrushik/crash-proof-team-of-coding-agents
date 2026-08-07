@@ -54,15 +54,17 @@ The two experiments run the same instrument, a hard `deny`, to opposite results,
 
 That is why the enforcement layer the companion's tool-boundary hooks could not reach lives here, at `Stop`. A `PostToolUse` flag (a hook that logs but cannot veto) can record that a step was skipped; it cannot make the agent go back. A `PreToolUse` block guards actions the agent *takes*, not the step it *omits*: you cannot deny your way to a file that was never written. Only a gate on the finish can turn "looks done" into "is done," because it is the only hook that gets a vote on whether the agent is allowed to believe it.
 
-## The two ways this goes wrong
+## The three ways this goes wrong
 
-A `Stop` gate is a forcing function, and a forcing function pointed wrong is a trap. Two failure modes, both real, both worth designing around.
+A `Stop` gate is a forcing function, and a forcing function pointed wrong is a trap. Three failure modes, all real, all worth designing around — the third discovered later, in production.
 
 **The check must be satisfiable.** An earlier version of this task defined "done" as *the tests passing*, and gated on that. It deadlocked: when the agent's tests did not cleanly pass, it honestly would not claim they did, so it kept trying to stop, kept getting blocked, and burned turns to the cap without ever finishing. A gate on a condition the agent cannot reach is not a brake, it is a wall. Gate on an artifact the agent can always produce, a recorded result or a written proof, not on an outcome it may not be able to reach. That is why the arm above gates on "the proof file exists," not "the tests are green."
 
 **The gate checks the artifact, not the process.** The hook verifies that the proof exists; it does not verify that the agent truly ran the check before writing it. A determined agent can satisfy the letter and skip the spirit. The 5/5 above is itself letter-of-the-check: the gate confirms the marker is present, not that the verification behind it was real. So gate on something expensive to fake, a test log with real output or a build artifact, when the spirit matters.
 
-**And the veto is bounded, on purpose.** Claude Code overrides a `Stop` hook after several consecutive blocks, so the gate is a bounded forcing function, not an infinite jail. That is the correct design, because the alternative is a run that can never end. A gate makes finishing *conditional*, not *impossible*.
+**The check must understand every dialect the agent speaks.** This one surfaced after publication, when a descendant of this gate went to production: six team lanes now ship a `Stop`-hook phase gate enforcing each lane's own phase list, and a live fleet run caught the gate blocking runs whose task boards were *perfect* — the agents had created and completed every mandated phase, but with a different task tool than the one the gate grepped for. A check written against one way of satisfying it will punish every other way. The production gate now reads both dialects, and the fleet run's backend pilot passed it by creating exactly its six mandated phases, unprompted (`deploy/fleet-run-results.md`).
+
+**And the veto is bounded, on purpose.** Claude Code overrides a `Stop` hook after several consecutive blocks, so the gate is a bounded forcing function, not an infinite jail. That is the correct design, because the alternative is a run that can never end. A gate makes finishing *conditional*, not *impossible*. The production phase gates carry the same principle explicitly: a small block budget, reset each chunk, with every block left in the audit log.
 
 None of these is a reason to skip the gate. They are reasons to write it as a check that can be met and is worth meeting, and to ship it with the guardrail every hook deserves: a handful of offline tests that feed the real `Stop` hook a finish event and assert it still blocks when the proof is missing, still allows when it is present, and fails open on a malformed event. A gate that silently stops firing is the worst outcome of all, because a skipped step then ships in perfect silence.
 
