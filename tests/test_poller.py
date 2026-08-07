@@ -102,12 +102,16 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.number, 5)
 
     async def test_merge_conflict_sets_conflict_flag(self) -> None:
+        import contextlib
         import io
         import urllib.error
         err = urllib.error.HTTPError("http://x", 405, "Method Not Allowed", {},
                                      io.BytesIO(b'{"message":"Pull Request has merge conflicts"}'))
         with mock.patch.dict("os.environ", {"GITHUB_TOKEN": "tok"}), \
-             mock.patch.object(poller, "_gh_put", side_effect=err):
+             mock.patch.object(poller, "_gh_put", side_effect=err), \
+             contextlib.redirect_stdout(io.StringIO()):
+            # the activity's operator print ("MERGE PR #5: FAILED 405") is
+            # expected here; keep it out of a green suite's output
             result = await poller.merge_pull_request(MergeInput(repo="o/r", number=5))
         self.assertFalse(result.merged)
         self.assertTrue(result.conflict)  # 405 -> conflict, the self-heal trigger
