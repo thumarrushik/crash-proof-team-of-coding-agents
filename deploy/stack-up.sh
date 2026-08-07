@@ -21,7 +21,8 @@ fi
 
 # Server: reuse a running one, else start fresh (all namespaces declared).
 if ! temporal operator namespace describe default >/dev/null 2>&1; then
-  temporal server start-dev --headless --log-level warn \
+  # UI on http://localhost:8233 (was --headless; operators asked for the UI)
+  temporal server start-dev --log-level warn --ui-port 8233 \
     --db-filename deploy/temporal-dev.db \
     --namespace backend --namespace frontend --namespace testing \
     --namespace review --namespace issues --namespace service-design \
