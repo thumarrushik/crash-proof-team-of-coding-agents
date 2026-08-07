@@ -18,10 +18,12 @@ every number traces to an evidence file in `deploy/`.
 | Article | What it measures / builds |
 |---|---|
 | **A Crash-Proof Team of Coding Agents** (flagship) | kill -9 recovery as the same session for four cents; nine durable jobs carrying an issue from filed to merged; a real merge conflict resolved with no human decision in the loop |
-| **The Human Is a Durable Object** | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
+| **How It's Built** | the engineering companion: chunk anatomy, lanes and namespaces, the audit plane, the savepoint detour, the corpus loop |
+| **Mechanics Cost Cents, Behavior Costs Dollars** | every boundary priced: an eleven-cent task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the economics canary that re-probes it all on a schedule |
 | **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern — a mid-flight block prevented 5/5 but finished the task 1/5 |
 | **Done Is Not a Claim** | a `Stop`-hook gate on "done" — forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
 | **The Agent Grades Its Own Homework** | the merge switch's own `tests_passed` boolean vs ground truth — wrong 3 in 10, every miss a false alarm; the harness re-run corrects both directions |
+| **The Human Is a Durable Object** | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
 
 Regenerate outputs: `articles/final/render-pdf.sh` and
 `articles/final/export-medium.sh` (canonical `.md` files are the source).
