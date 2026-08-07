@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Review your own backend diff like the on-call engineer who will be paged for it — hunt broken callers, swallowed error paths, N+1 and unbounded-query edges, untrusted inputs, and missing migration pairing; use before declaring any backend task done.
+description: Review your own backend diff like the on-call engineer who will be paged for it — hunt broken callers, swallowed error paths, N+1 and unbounded-query edges, untrusted inputs, and missing migration pairing; Use when declaring any backend task done.
 ---
 
 # self-review

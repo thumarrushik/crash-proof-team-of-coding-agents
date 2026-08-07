@@ -46,3 +46,5 @@ hitl-approve-2388371a
 - PASS — C timer fired
 
 **ALL PASS** (10/10).
+
+Design doc for this gate: `deploy/hitl-design.md`.

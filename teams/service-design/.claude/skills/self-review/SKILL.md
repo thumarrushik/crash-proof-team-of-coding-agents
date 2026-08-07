@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Attack your own design artifact before downstream teams inherit its gaps — hunt unstated failure modes, capacity hand-waves, boundary leaks, and ambiguity, then dry-run the doc as each consuming team; use before declaring any blueprint, contract, or ADR done.
+description: Attack your own design artifact before downstream teams inherit its gaps — hunt unstated failure modes, capacity hand-waves, boundary leaks, and ambiguity, then dry-run the doc as each consuming team; Use when declaring any blueprint, contract, or ADR done.
 ---
 
 # self-review

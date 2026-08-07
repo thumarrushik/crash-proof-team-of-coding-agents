@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Review your own UI diff as the user and the reviewer will — all four render states present, accessibility verified, state classified correctly, no silent failures, last run cited. Use before declaring any frontend task done.
+description: Review your own UI diff as the user and the reviewer will — all four render states present, accessibility verified, state classified correctly, no silent failures, last run cited. Use when declaring any frontend task done.
 ---
 
 # self-review

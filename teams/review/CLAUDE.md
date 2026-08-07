@@ -47,7 +47,7 @@ REPORT.md — never stall waiting for a human.
 
 Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), the `flag-rules` hook script, and the `phase-gate` Stop hook (the run cannot finish until the mandated phase task list exists and every phase is completed) — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
 
-The harness owns git: never `git push` (it is denied). Your verdict is data
+The harness owns git: never `git push` or `git commit` (both are denied). Your verdict is data
 the workflow reads; the harness posts the review and performs any merge in
 its own recorded steps. The worker exports the readable session transcript
 after the workflow completes.

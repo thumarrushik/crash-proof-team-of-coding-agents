@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Review your own diff as the reviewer who gates your merge will — scope traced to the issue, callers checked, error paths loud, leftovers gone, last run cited. Use before writing REPORT.md on any issue.
+description: Review your own diff as the reviewer who gates your merge will — scope traced to the issue, callers checked, error paths loud, leftovers gone, last run cited. Use when about to write REPORT.md on any issue.
 ---
 
 # self-review (issues lane)

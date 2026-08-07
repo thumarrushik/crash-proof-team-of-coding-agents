@@ -1,6 +1,6 @@
 ---
 name: diff-forensics
-description: Read a PR diff for what it does not show — hidden callers, unclaimed behavior deltas, the hunk that should exist but doesn't, unsafe inputs. Use during the inspect phase of every review.
+description: Read a PR diff for what it does not show — hidden callers, unclaimed behavior deltas, the hunk that should exist but doesn't, unsafe inputs. Use when in the inspect phase of any review.
 ---
 
 # diff-forensics

@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Audit the suite you just wrote as the deliverable it is — every test seen red, assertions that would catch mutants, independence proven, names that read as spec. Use before declaring any testing task done.
+description: Audit the suite you just wrote as the deliverable it is — every test seen red, assertions that would catch mutants, independence proven, names that read as spec. Use when declaring any testing task done.
 ---
 
 # self-review (testing lane)

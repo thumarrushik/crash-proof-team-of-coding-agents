@@ -1,17 +1,33 @@
 ---
 name: final-report
-description: How to write the final report when a task is complete. Use when asked to produce the final report of the work done.
+description: The review lane's REPORT.md shape — verdict sentence first, blockers before everything, coverage disclosed, tests_passed cited. Use when ending any review run.
 ---
 
-When the task is complete, write a file named REPORT.md in the workspace root
-with exactly these sections:
+# final-report (review lane)
 
-# Task Report
-## What was built
-## How it was verified
-## Files
-(a bullet list of every file created or modified)
+Your report is not a builder's changelog; it is a verdict the workflow
+parses and an author will act on. Its shape is the review lane's own
+report contract (see [[self-review]] REPORT-CONTRACT.md) — not the
+builder lanes' what-was-built format.
 
-Keep each section to a few sentences. Factual, no filler. The `## How it was
-verified` section must name the exact command(s) you ran and their result — this
-is the evidence the review team checks.
+Write REPORT.md with exactly these sections:
+
+```
+# Review Report
+## Verdict            <- one unambiguous sentence: approve or block,
+                         with the deciding reason named
+## Blocking issues    <- first, or "None." Each: file:line, what is
+                         wrong, the consequence, what fixed looks like
+## Non-blocking notes <- suggestions and nitpicks, labeled, ignorable
+## Coverage           <- every diff file reviewed or disclosed as not
+## Evidence           <- the exact suite command + output tail backing
+                         tests_passed, run as your LAST workspace action
+```
+
+Then return the structured output the harness requires: `summary` opens
+with the verdict sentence; `tests_passed` is the literal result of the
+Evidence run ([[verdict-discipline]]), never an impression.
+
+**Blocked on sight:** a report opening with anything but the verdict ·
+blockers below suggestions · a diff file neither reviewed nor disclosed ·
+`tests_passed` without its Evidence line.

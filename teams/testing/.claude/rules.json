@@ -7,6 +7,6 @@
   {
     "name": "sleep_as_synchronization",
     "kind": "bash_regex",
-    "pattern": "\\bsleep\\s+[0-9]"
+    "pattern": ".*\\bsleep\\s+[0-9]"
   }
 ]

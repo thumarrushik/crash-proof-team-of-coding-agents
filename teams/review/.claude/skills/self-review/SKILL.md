@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Final audit of your own review before submitting — findings, labels, and claims held to the bar you held the diff to. Use immediately before writing REPORT.md in the review lane.
+description: Final audit of your own review before submitting — findings, labels, and claims held to the bar you held the diff to. Use when about to write REPORT.md in the review lane.
 ---
 
 # self-review
