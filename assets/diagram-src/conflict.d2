@@ -1,0 +1,46 @@
+# The conflict that resolved itself, read like a comic strip:
+# top row = the review lane detects it; bottom row = the owning team resolves it.
+grid-rows: 2
+vertical-gap: 90
+
+review: "The Review Lane" {
+  grid-columns: 4
+  horizontal-gap: 50
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+
+  approve: "1 · Review Lane Approves PR #4\nThe Change Was Fine, Only the Merge Wasn't" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  refused: "2 · Merge Refused · HTTP 405\nThe Branch Is Stale" {
+    style: {fill: "#fef9c3"; stroke: "#ca8a04"; font-color: "#713f12"}
+  }
+  retry: "3 · Merge Base In, Retry\nGitHub's Own 'Update Branch' Move" {
+    style: {fill: "#fef9c3"; stroke: "#ca8a04"; font-color: "#713f12"}
+  }
+  conflict: "4 · A Real Content Conflict\nTwo PRs Edited the Same Lines,\nNo Re-Merge Decides Which Side Wins" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+}
+
+backend: "The Backend Lane" {
+  grid-columns: 4
+  horizontal-gap: 50
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+
+  escalate: "5 · Handed to the Backend Lane\nThe Team That Owns the Code,\na Client Start From Inside an Activity" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  fix: "6 · Its Agent Keeps BOTH Changes\nSame Skill Bundle · Tests Pass, 10 of 10" {
+    style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"}
+  }
+  push: "7 · The Agent Can't Push; the Harness Does\nThen Re-Merges PR #4, Auto-Resolved" {
+    style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"}
+  }
+  ship: "8 · The Issue Closes Itself\nThe Blocked Frontend Feature Ships Next Poll" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+}
+
+review.approve -> review.refused -> review.retry -> review.conflict
+review.conflict -> backend.escalate: "Escalate" {style: {stroke-dash: 3; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
+backend.escalate -> backend.fix -> backend.push -> backend.ship

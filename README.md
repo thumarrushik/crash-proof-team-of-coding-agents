@@ -5,7 +5,7 @@ repo is the final publication kit and the running system behind it: a durable
 delivery team of single-purpose Temporal activities (nine in the measured
 runs; twelve today, the fix-loop members having arrived since) with Claude
 Code doing the judgment work inside them, under skill playbooks, enforced
-hooks, and human-controlled settings — plus every experiment the articles
+hooks, and human-controlled settings, plus every experiment the articles
 cite, with its evidence and tests.
 
 Curated from [temporal-claude-demo](https://github.com/thumarrushik/temporal-claude-demo)
@@ -21,43 +21,46 @@ every number traces to an evidence file in `deploy/`.
 | **A Crash-Proof Team of Coding Agents** (flagship) | kill -9 recovery as the same session for four cents; nine durable jobs carrying an issue from filed to merged; a real merge conflict resolved with no human decision in the loop |
 | **How It's Built** (engineering companion) | chunk anatomy, lanes and namespaces, the audit plane, the savepoint detour, the corpus loop |
 | **Mechanics Cost Cents, Behavior Costs Dollars** | every boundary priced: an eleven-cent task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the economics canary that re-probes it all on a schedule |
-| **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern — a mid-flight block prevented 5/5 but finished the task 1/5 |
-| **Done Is Not a Claim** | a `Stop`-hook gate on "done" — forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
-| **The Agent Grades Its Own Homework** | the self-reported `tests_passed` boolean vs ground truth — wrong 3 in 10 (all in the builder arm; the isolated reviewer arm was honest 5/5), every miss a false alarm; the harness re-run corrects both directions |
+| **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern: a mid-flight block prevented 5/5 but finished the task 1/5 |
+| **Done Is Not a Claim** | a `Stop`-hook gate on "done" that forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
+| **The Agent Grades Its Own Homework** | the self-reported `tests_passed` boolean vs ground truth: wrong 3 in 10 (all in the builder arm; the isolated reviewer arm was honest 5/5), every miss a false alarm; the harness re-run corrects both directions |
 | **The Human Is a Durable Object** | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
 
 Regenerate outputs: `articles/final/render-pdf.sh` and
 `articles/final/export-medium.sh` (canonical `.md` files are the source).
+Every figure regenerates from committed sources too: `assets/diagram-src/render.sh`
+(D2 + HTML diagrams), `assets/hero-src/render.sh` (Medium heroes), and
+`uv run --with matplotlib python assets/plot-src/plots.py` (the cost figure).
 
 ## The teams (`teams/`)
 
-Every lane is a physical folder — its identity in version control:
+Every lane is a physical folder, its identity in version control:
 
 ```
 teams/<team>/
   CLAUDE.md          the team's mandate: every task follows named phases,
-                     "do not skip" — and each lane's phases are its OWN
+                     "do not skip", and each lane's phases are its OWN
                      (backend runs Contract, issues runs Reproduce, frontend
                      runs Design/Verify, service-design runs Blueprint/Decide,
-                     testing runs Author/Run, review runs Inspect/Run) — plus
+                     testing runs Author/Run, review runs Inspect/Run), plus
                      the harness contract (the harness owns git)
-  .claude/skills/    the team's skills — OWNED by the team folder; skills live
+  .claude/skills/    the team's skills, OWNED by the team folder; skills live
                      here and NOWHERE else (no shared pool, no operator pool)
   .claude/           settings.json, rules.json, the flag-rules audit hook, and
-                     phase-gate.py — a Stop hook enforcing the work-issue
+                     phase-gate.py, a Stop hook enforcing the work-issue
                      discipline: every triggered run must create the SAME
                      phase task list (one task per mandated phase) and
                      complete it before the run is allowed to finish
 ```
 
 Six lanes: `backend`, `frontend`, `testing`, `review`, `issues`,
-`service-design` — discovered from the folders (adding a team = adding a
+`service-design`, discovered from the folders (adding a team = adding a
 folder). At run time a task **checks out into its team**, it never copies the
 team: the workspace `CLAUDE.md` `@import`s the live mandate and `.claude/skills`
 is a symlink into the team folder, so the owning team's edits reach the very
 next chunk. Only *policy* (`settings.json`, `rules.json`, the hook) is stamped
-per chunk — an immutable, tamper-healing snapshot, with absolute-path denies
-injected so no workspace can write through into `teams/` itself. Governance is edited directly in the owning team's folder — `python3 teams/validate.py` checks every folder (org floor, mandate sections, phase-gate parity) before it ships.
+per chunk: an immutable, tamper-healing snapshot, with absolute-path denies
+injected so no workspace can write through into `teams/` itself. Governance is edited directly in the owning team's folder; `python3 teams/validate.py` checks every folder (org floor, mandate sections, phase-gate parity) before it ships.
 
 ## The system (`src/`)
 
@@ -72,12 +75,12 @@ gate (off by default; operator CLI in `src/approvals.py`).
 
 Runner + evidence pairs the articles cite, all reproducible:
 
-- `flag-block-beg.py` / `-results.md` — the tool-call boundary
-- `step-gate.py` / `-results.md` — the finish boundary (`Stop` gate)
-- `self-grade.py` / `-results.md` — the self-reported boolean vs ground truth
-- `hitl-live.sh` / `hitl-live-results.md` — the human gate on a real server
-- `fixloop-live.sh` / `fixloop-live-results.md` — the fix loop end to end
-- `issue-routing-check.py` / `-results.md` — live issues through the real
+- `flag-block-beg.py` / `-results.md`: the tool-call boundary
+- `step-gate.py` / `-results.md`: the finish boundary (`Stop` gate)
+- `self-grade.py` / `-results.md`: the self-reported boolean vs ground truth
+- `hitl-live.sh` / `hitl-live-results.md`: the human gate on a real server
+- `fixloop-live.sh` / `fixloop-live-results.md`: the fix loop end to end
+- `issue-routing-check.py` / `-results.md`: live issues through the real
   router: 13/13 to the intended lane, five distinct phase lists
 - plus the cost, heartbeat-recovery, learn-loop, conflict-run, fleet-run,
   governor-live, relay, and session-learnings evidence, and the human

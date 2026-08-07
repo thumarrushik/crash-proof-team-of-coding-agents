@@ -45,10 +45,10 @@
   <div class="fork"></div>
   <div class="tick t1"></div><div class="tick t2"></div><div class="tick t3"></div>
   <div class="exit e1"><b>Retryable error → resume</b>
-    <span>API drop, execution error, report handshake miss —<br>the retry reopens the SAME session from its heartbeat</span></div>
+    <span>API drop, execution error, report handshake miss:<br>the retry reopens the SAME session from its heartbeat</span></div>
   <div class="exit e2"><b>Out of turns → next chunk</b>
     <span>error_max_turns is a checkpoint, not a failure:<br>the workflow schedules another chunk that resumes</span></div>
   <div class="exit e3"><b>Non-retryable → stop</b>
-    <span>budget exhausted or a genuinely terminal result —<br>the workflow fails loudly with the record kept</span></div>
+    <span>budget exhausted or a genuinely terminal result:<br>the workflow fails loudly with the record kept</span></div>
 </div>
 </body></html>

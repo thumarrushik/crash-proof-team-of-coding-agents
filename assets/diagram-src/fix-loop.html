@@ -39,7 +39,7 @@
   <div class="arr" style="left:360px;top:170px;width:70px;height:3px"></div>
   <div class="box flow" style="left:432px;top:120px;width:270px;height:104px"><b>Owning lane fixes</b><span>the review's own finding<br>is the fix job's brief</span></div>
   <div class="arr" style="left:702px;top:170px;width:60px;height:3px"></div>
-  <div class="box flow" style="left:764px;top:120px;width:240px;height:104px"><b>Harness pushes</b><span>new head sha —<br>never the agent</span></div>
+  <div class="box flow" style="left:764px;top:120px;width:240px;height:104px"><b>Harness pushes</b><span>new head sha,<br>never the agent</span></div>
   <div class="arr" style="left:1004px;top:170px;width:60px;height:3px"></div>
   <div class="box flow" style="left:1066px;top:120px;width:250px;height:104px"><b>Re-review</b><span>fresh sha-keyed job<br>on the review lane</span></div>
 
@@ -49,8 +49,10 @@
   <div class="arr" style="left:1188px;top:440px;width:3px;height:70px"></div>
   <div class="box end" style="left:1090px;top:510px;width:210px;height:84px"><b>Approve → merge</b><span>decider: a name</span></div>
 
-  <div class="box stop" style="left:770px;top:510px;width:240px;height:84px"><b>Silence → deny</b><span>decider: deadline —<br>a dead stop, attributed</span></div>
-  <div class="arr" style="left:1066px;top:552px;width:22px;height:3px"></div>
+  <div class="box stop" style="left:770px;top:510px;width:240px;height:84px"><b>Silence → deny</b><span>decider: deadline ·<br>a dead stop, attributed</span></div>
+  <!-- timeout fork: gate left edge -> across -> down into Silence → deny -->
+  <div class="arr" style="left:888px;top:380px;width:178px;height:3px"></div>
+  <div class="arr" style="left:888px;top:380px;width:3px;height:130px"></div>
 
   <!-- deny-with-note loopback: gate bottom -> across -> up into the cap check -->
   <div class="arr" style="left:1120px;top:440px;width:3px;height:30px;background:transparent;border-left:2px dashed rgba(129,140,248,.55)"></div>
@@ -58,6 +60,8 @@
   <div class="arr" style="left:310px;top:334px;width:3px;height:134px;background:transparent;border-left:2px dashed rgba(129,140,248,.55)"></div>
   <div class="lab" style="left:430px;top:478px">deny with a note → another round (while under the cap)</div>
 
-  <div class="box stop" style="left:60px;top:640px;width:420px;height:84px"><b>Cap exhausted → stop, comment, wait</b><span>the loop hands the PR to a human — bounded on purpose</span></div>
+  <!-- exhausted-cap exit: the cap check drops to the terminal stop -->
+  <div class="arr" style="left:150px;top:330px;width:3px;height:310px;background:transparent;border-left:2px dashed rgba(248,113,113,.55)"></div>
+  <div class="box stop" style="left:60px;top:640px;width:420px;height:84px"><b>Cap exhausted → stop, comment, wait</b><span>the loop hands the PR to a human, bounded on purpose</span></div>
 </div>
 </body></html>

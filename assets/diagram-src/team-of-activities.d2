@@ -1,0 +1,70 @@
+# The team of activities: 2 workflows conduct 9 one-job specialists,
+# grouped into the three labeled sub-teams the article's caption names.
+direction: down
+vertical-gap: 55
+
+conductors: "The Conductors · Two Workflows" {
+  grid-columns: 2
+  style: {fill: "#f8fafc"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  task: "The Durable Task\nRuns the Agent in Bounded Chunks,\nThen Ships the Result" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  poll: "The Scheduled Poll\nOne Durable GitHub Poll, Every Interval" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+}
+
+team: "The Team · Nine Activities, Each With One Job" {
+  grid-columns: 3
+  horizontal-gap: 40
+  style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+
+  work: "Work & Intake" {
+    grid-columns: 1
+    vertical-gap: 30
+    style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+    run: "Run the Agent\nOne Bounded, Heartbeated Chunk,\nthe Only Step With 'Fire'" {
+      style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+    }
+    scribe: "Export the Transcript\nA Readable Audit Log of the Whole Session" {
+      style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"}
+    }
+    scout: "Scout GitHub for Work\nRead Issues + PRs, Route Each to a Team" {
+      style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+    }
+  }
+
+  pr: "Pull-Request Lifecycle" {
+    grid-columns: 1
+    vertical-gap: 30
+    style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+    open: "Open the Pull Request\nCommit, Push, Open: the Harness, Not the Agent" {
+      style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"}
+    }
+    verdict: "Post the Review Verdict\nApprove Only If the Tests Pass" {
+      style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"}
+    }
+    merge: "Merge the Approved PR" {
+      style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"}
+    }
+  }
+
+  repair: "Conflict Repair" {
+    grid-columns: 1
+    vertical-gap: 30
+    style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+    update: "Update a Stale Branch\nMerge Base In, Retry the Merge" {
+      style: {fill: "#fef9c3"; stroke: "#ca8a04"; font-color: "#713f12"}
+    }
+    escalate: "Escalate a Real Conflict\nHand It to the Team That Owns the Code" {
+      style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+    }
+    push: "Push the Resolved Branch\nThen Re-Merge the PR" {
+      style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"}
+    }
+  }
+}
+
+conductors -> team: "Each Step Is a Durable Activity\nRetried · Heartbeated · Recorded" {
+  style: {stroke: "#334155"; font-color: "#334155"; bold: true}
+}

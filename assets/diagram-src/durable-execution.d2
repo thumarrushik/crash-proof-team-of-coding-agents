@@ -1,0 +1,20 @@
+# Durable execution: append to the ledger, replay after a crash
+direction: right
+
+w1: "A Mortal Worker\nRuns the Job" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+hist: "The Event History\nAn Append-Only Ledger on the Server\nEvery Step Recorded: A Step Scheduled,\na Result Returned, a Timer Fired" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+crash: "The Worker Dies\nMid-Job" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+w2: "Any New Worker\nReplays the Ledger and Continues\nFrom Exactly Where the Job Was" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+w1 -> hist: "Append Every Step"
+w1 -> crash
+crash -> w2
+hist -> w2: "Replay to Rebuild State"

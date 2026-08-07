@@ -1,0 +1,29 @@
+# From one agent to a team of lanes. Landscape: schedule + poll fan out to
+# three team lanes; one escalation crosses from review to backend.
+direction: right
+horizontal-gap: 105
+vertical-gap: 40
+
+sched: "A Temporal Schedule\nFires Every Interval" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+poll: "The Scheduled Poll\nStateless: Temporal Is\nthe Queue and De-Dup\nDuplicate Starts Refused" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+backend: "Backend Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+review: "Review Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+frontend: "Frontend Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+
+sched -> poll
+poll -> backend: "Start in the\nTeam's Namespace"
+poll -> review
+poll -> frontend
+review -> backend: "A Real Conflict →\nthe Owning Team" {
+  style: {stroke-dash: 3; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}

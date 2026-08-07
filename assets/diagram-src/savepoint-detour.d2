@@ -1,0 +1,21 @@
+# The detour we measured our way out of: chunked savepoints, then retired.
+grid-rows: 2
+horizontal-gap: 430
+vertical-gap: 120
+
+long: "1 · One Long Agent Run\n90 Minutes · Hours of\nAccumulated Context" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+chop: "2 · The First Design · Savepoints\nChop It Into Bounded Chunks;\nEach One Finishes or Resumes\nthe Same Session" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+hist: "3 · Every Completed Chunk → the History\nA Durable Checkpoint the Workflow Sees" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+retire: "4 · Then Two Things Retired It\nHeartbeat Recovery Survives a Crash With No Savepoint,\nand Fine Chunking Made Cost Unpredictable\n→ Coarse Chunks by Default" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+long -> chop: "Cap the Turns"
+chop -> hist: "On Success or Time-Out"
+hist -> retire: "It Worked, but Measurement Won"

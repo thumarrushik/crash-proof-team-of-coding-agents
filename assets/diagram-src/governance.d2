@@ -1,0 +1,20 @@
+# Governance: two planes of evidence, joined on the session id.
+# Two wide records on top, one join key below.
+direction: down
+vertical-gap: 85
+
+temporal: "Temporal: What the Job Did\nEvery Activity · Attempt · Failure · Heartbeat Timeout\nSignal · Cancel · Recorded Cost · Session ID" {
+  width: 660
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+workspace: "The Workspace: What the Agent Did\nA Log of Every Tool Call · The Exported, Readable\nTranscript · A Schema-Validated Pass/Fail Report" {
+  width: 660
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+key: "The Session ID\nOne Join Key Ties the Two Together" {
+  width: 520
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+temporal -> key: "Ask What the Job Did"
+workspace -> key: "Ask What the Agent Did"

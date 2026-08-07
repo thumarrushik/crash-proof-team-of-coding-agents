@@ -1,0 +1,29 @@
+# The corpus improves the system: a closed feedback loop.
+# Laid out clockwise (1,2,3 across the top; 5,4 across the bottom) so the
+# "codify" and "guardrail" edges never cross.
+grid-rows: 2
+horizontal-gap: 210
+vertical-gap: 150
+
+runs: "1 · Agent Runs" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+corpus: "2 · Every Run Ships Its Evidence\nTranscripts · Tool-Call Logs · Reports\n→ One Bucket, One Folder per Run" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+review: "3 · A Reviewer Reads the Corpus\nand Finds a Recurring Waste Pattern" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+measure: "5 · Re-Run and Score\nThe Rule Nudges · The Hook Is Law" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+guard: "4 · The Lesson Is Codified\nA Workspace Rule + a Hook\nThat Flags It Deterministically" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+runs -> corpus -> review
+review -> guard: "Codify the Lesson"
+guard -> measure
+measure -> runs: "The Guardrail Now Rides Every Future Run and Retry" {
+  style: {stroke-dash: 3; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}

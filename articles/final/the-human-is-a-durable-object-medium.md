@@ -1,17 +1,17 @@
-# A Crash-Proof Team of Coding Agents — The Human Is a Durable Object
+# A Crash-Proof Team of Coding Agents: The Human Is a Durable Object
 
-### Green tests should not authorize a production merge; a person should. So we gave the team exactly one human decision — not a chat message that scrolls away, but a durable place the job waits in, deny-safe when nobody answers: ten checks out of ten on a real Temporal server.
+### Green tests should not authorize a production merge; a person should. So we gave the team exactly one human decision, not a chat message that scrolls away, but a durable place the job waits in, deny-safe when nobody answers: ten checks out of ten on a real Temporal server.
 
 *A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ---
 
-![The human gate as a waiting room: the durable job holds at the gate while a deadline timer arms; either a named approval or the deadline itself writes exactly one attributed decision into the event history — even silence gets a byline](../../assets/medium-heroes/the-human-is-a-durable-object.png)
+![The human gate as a waiting room: the durable job holds at the gate while a deadline timer arms; either a named approval or the deadline itself writes exactly one attributed decision into the event history: even silence gets a byline](../../assets/medium-heroes/the-human-is-a-durable-object.png)
 
 ![The gate: the operator reads what is blocked through a query and decides through a validated update; a deadline timer denies attributably if nobody answers; either way, exactly one attributable decision lands in the event history](../../assets/diagrams/human-gate.png)
 *The Human Gate. The operator reads what is blocked through a query and answers through a validated update. If nobody answers, the deadline timer denies, attributably. Either path writes exactly one decision into the history.*
 
-There is a class of action no amount of green tests should authorize on its own: the merge to a protected branch, the deploy, the spend past a threshold. The irreversible acts. The [main article](a-crash-proof-team-of-coding-agents.md) builds a team of coding agents that carries a filed issue all the way to a merged pull request with no human decision in the loop, and it gates that merge on one thing: a schema-validated boolean, the review agent's tests-pass verdict. For a demo repository that is the whole point. For anything that ships to people it is a placeholder — and a sibling article measures exactly how far that boolean can be trusted: [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
+There is a class of action no amount of green tests should authorize on its own: the merge to a protected branch, the deploy, the spend past a threshold. The irreversible acts. The [main article](a-crash-proof-team-of-coding-agents.md) builds a team of coding agents that carries a filed issue all the way to a merged pull request with no human decision in the loop, and it gates that merge on one thing: a schema-validated boolean, the review agent's tests-pass verdict. For a demo repository that is the whole point. For anything that ships to people it is a placeholder, and a sibling article measures exactly how far that boolean can be trusted: [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 
 So this companion adds a person, at exactly one moment, deliberately. Not with a notification, but with a place: a gate the durable job waits in, where even silence gets a name in the permanent record the engine keeps of everything the job did.
 
@@ -23,7 +23,7 @@ The bug underneath all of that is a category error, and naming it is most of the
 
 ## Four Primitives Make a Human
 
-Every operator capability in this system — ask a running job a question, steer it, cancel it — is built from the same small set of moves the workflow engine gives you for talking to a running job ([How It's Built](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
+Every operator capability in this system (ask a running job a question, steer it, cancel it) is built from the same small set of moves the workflow engine gives you for talking to a running job ([How It's Built](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
 
 **The human reads: a query.** A running job can already answer questions from its live state without touching a database. We added one: *what are you blocked on, and how long until your deadline?* Point a small operator command-line tool at the fleet and you have an approvals inbox assembled from the workflows themselves, with no side store to keep in sync.¹
 
@@ -67,8 +67,8 @@ In the main system the gate sits at one place: the review lane, right after the 
 
 A gate answers approve or deny, and there is a temptation to treat deny as the end of the line. It should not be. A denial that carries a reason is not a full stop; it is a request. So we closed that loop too. Like the gate, it is off by default; one flag turns it on.
 
-![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated — approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
-*The denial that fixes itself — bounded, then human. Every exit is attributed; the cap is the design.*
+![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated: approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
+*The denial that fixes itself: bounded, then human. Every exit is attributed; the cap is the design.*
 
 
 When a pull request is not approved, it goes back to be fixed instead of just stopping. Three things count as not approved:
@@ -117,4 +117,4 @@ This is where the system's escalations run out. Retry harder, self-heal the bran
 3. The wait is `workflow.wait_condition(lambda: decision is not None, timeout=...)`; on `asyncio.TimeoutError` the workflow synthesizes a denial attributed to `deadline`. See `_human_gate` in `src/workflows.py`.
 4. `deploy/hitl-live.sh` starts an ephemeral `temporal server start-dev` (with the Update API enabled) and runs `deploy/hitl-live.py`: the real `RunClaudeTask` workflow, the real query, update, validator, and timer, and the real `src/approvals.py` CLI. Four activities are stubbed (the agent chunk, the transcript export, the review post, and the merge) so the run needs no tokens and no live repo. Ten checks, all passing; full output in `deploy/hitl-live-results.md`. A time-skipping unit test, `tests/test_human_gate.py`, separately fast-forwards the 24-hour deadline in milliseconds.
 5. The transient surfaces as an RPC error whose message names a workflow task in a failed state, raised when an update races an in-flight workflow task; `src/approvals.py` now retries exactly that error a few times with a short backoff, while a genuine validator rejection (a `WorkflowUpdateFailedError`) is surfaced immediately.
-6. The two handoffs are the `escalate_fix` (review lane to owning lane) and `escalate_review` (owning lane back to review lane) activities in `src/poller.py`, mirroring the conflict-resolution escalation; the round lives in the job source (`fix-pr-<n>-r<k>` / `pr-<n>-r<k>`) and is capped by `max_fix_rounds` (default 3); a repeat start of a live or finished round is a no-op the server refuses, while a failed round may retry on a later sweep. Off by default (`enable_fix_loop`). Covered by the time-skipping tests in `tests/test_fix_loop.py`; the live run is `deploy/fixloop-live.sh` (seven checks, all passing, `deploy/fixloop-live-results.md`), with six leaf steps stubbed — the agent chunk, the transcript export, the review post, the merge, the push, and the human-review read — and the two handoffs stubbed to start their real sibling workflow on the same server.
+6. The two handoffs are the `escalate_fix` (review lane to owning lane) and `escalate_review` (owning lane back to review lane) activities in `src/poller.py`, mirroring the conflict-resolution escalation; the round lives in the job source (`fix-pr-<n>-r<k>` / `pr-<n>-r<k>`) and is capped by `max_fix_rounds` (default 3); a repeat start of a live or finished round is a no-op the server refuses, while a failed round may retry on a later sweep. Off by default (`enable_fix_loop`). Covered by the time-skipping tests in `tests/test_fix_loop.py`; the live run is `deploy/fixloop-live.sh` (seven checks, all passing, `deploy/fixloop-live-results.md`), with six leaf steps stubbed (the agent chunk, the transcript export, the review post, the merge, the push, and the human-review read) and the two handoffs stubbed to start their real sibling workflow on the same server.

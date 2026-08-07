@@ -1,0 +1,22 @@
+# The seam: the agent quarantined in an activity. Two boxes, short lines.
+direction: right
+horizontal-gap: 340
+
+wf: "The Agent-Task Workflow\nDeterministic · Replayable" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  loop: "The Only Decision It Makes:\nRead a Typed Result →\nRun Another Chunk, or Stop" {
+    style: {fill: "#ffffff"; stroke: "#4f46e5"}
+  }
+}
+
+act: "An Activity\nThe Room Where Chaos Is Legal" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+  agent: "The Agent Runs Here\nTool Calls · Thinking\nToken Sampling\nNever Replayed" {
+    style: {fill: "#ffffff"; stroke: "#d97706"}
+  }
+}
+
+wf -> act: "Run a\nBounded Chunk"
+act -> wf: "Only Typed Data\nCrosses Back:\nSession ID · Outcome\nCost · Pass/Fail" {
+  style: {stroke-dash: 3; stroke: "#4f46e5"; bold: true}
+}

@@ -1,0 +1,24 @@
+# Crash recovery for the price of a heartbeat. Comic-strip: top row, bottom row.
+grid-rows: 2
+horizontal-gap: 320
+vertical-gap: 95
+
+a1: "1 · Worker · Attempt 1\nRuns the Agent Mid-Chunk, No Saved Result\nHeartbeats the Session ID Every 30s" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+kill: "2 · SIGKILL\nThe Whole Worker\nProcess Tree Dies" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+timeout: "3 · Heartbeats Stop\nAfter the Timeout,\nTemporal Retries" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+a2: "4 · Worker · Attempt 2\nReads the Session ID From the Last\nHeartbeat → Resumes the Conversation" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+done: "5 · Same Session, Finished\n1 Chunk · \$0.04\nA Resume, Not a Re-Run" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+a1 -> kill -> timeout
+timeout -> a2: "Retry"
+a2 -> done
