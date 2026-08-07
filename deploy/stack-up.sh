@@ -13,6 +13,7 @@ export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 # Server: reuse a running one, else start fresh (all namespaces declared).
 if ! temporal operator namespace describe default >/dev/null 2>&1; then
   temporal server start-dev --headless --log-level warn \
+    --db-filename deploy/temporal-dev.db \
     --namespace backend --namespace frontend --namespace testing \
     --namespace review --namespace issues --namespace service-design \
     > deploy/stack-server.log 2>&1 &

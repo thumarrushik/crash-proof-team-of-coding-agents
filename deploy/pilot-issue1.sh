@@ -7,11 +7,16 @@ cd "$(dirname "$0")/.."
 REPO="${1:-thumarrushik/linkbox}"
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 
-temporal server start-dev --headless --log-level warn \
-  --namespace backend --namespace review \
-  > deploy/pilot-server.log 2>&1 &
-SERVER=$!
-cleanup() { kill "${WB:-0}" "${WR:-0}" "$SERVER" 2>/dev/null || true; }
+SERVER=""
+if temporal operator namespace describe backend >/dev/null 2>&1; then
+  echo "reusing running server (not owned by this script; will not kill it)"
+else
+  temporal server start-dev --headless --log-level warn \
+    --namespace backend --namespace review \
+    > deploy/pilot-server.log 2>&1 &
+  SERVER=$!
+fi
+cleanup() { kill "${WB:-0}" "${WR:-0}" ${SERVER:+$SERVER} 2>/dev/null || true; }
 trap cleanup EXIT
 
 for _ in $(seq 1 30); do
