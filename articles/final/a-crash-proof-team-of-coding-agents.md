@@ -6,11 +6,11 @@
 
 ![A Crash-Proof Team of Coding Agents — an amber core (Claude Code, the judgment work) inside an indigo orbit of eight satellite jobs; a red Kill -9 bolt snaps the orbit and a green heartbeat weld re-closes it](../../assets/medium-heroes/a-crash-proof-team-of-coding-agents.png)
 
-A long headless run of an AI coding agent (headless: one command in a terminal, no chat window) gets interrupted routinely: a worker restarts, the API returns an overload error, a stream drops. There is a moment in every infrastructure demo where you stop trusting the slides and ask the presenter to pull the plug, so we opened this project by pulling it ourselves.
+There is a moment in every infrastructure demo where you stop trusting the slides and ask the presenter to pull the plug. We opened this project by pulling it ourselves. A long headless run of an AI coding agent — headless: one command in a terminal, no chat window — gets interrupted routinely anyway: a worker restarts, the API returns an overload error, a stream drops.
 
 We killed the worker's whole process tree minutes into a task, with no completed result saved anywhere. A different process on a restarted worker picked up the same half-finished conversation and ran it to completion as the same session.
 
-That is the durability half of this article, and it is the smaller half. The bigger half is what durability buys: a durable team of nine single-purpose jobs, one mandate apiece. One runs Claude Code itself and does all the judgment work: building the feature, reviewing the diff, resolving the conflict; the other eight carry the delivery pipeline around it. Each lane's agent runs under its team's skills (playbook files it discovers and invokes, not adjectives in a prompt) and under hooks and deny rules re-asserted before every chunk, a bounded slice of a run capped at a fixed number of turns. The team carried a filed GitHub issue to a merged pull request, resolving a real merge conflict, with no human decision in the loop.
+That is the durability half of this article, and it is the smaller half. The bigger half is what durability buys: a durable team of nine single-purpose jobs, one mandate apiece. One runs Claude Code itself and does all the judgment work: building the feature, reviewing the diff, resolving the conflict; the other eight carry the delivery pipeline around it. Each lane's agent runs under its team's skills (playbook files it discovers and invokes, not adjectives in a prompt) and under hooks and deny rules re-asserted before every chunk, a bounded slice of a run capped at a fixed number of turns. The team carried a filed GitHub issue to a merged pull request, resolving a real merge conflict, with no human decision in the loop (one mechanical asterisk, footnoted where that story is told).
 
 *The fine print, up front: one engineer ran everything here, and the "we" throughout is editorial. The agent model in every measured run is `haiku`, Claude's cheap fast tier, in July and August 2026; the tasks are benchmark-sized and the run counts are single-digit, so every number is a point estimate, not a distribution. Every number also traces to an evidence file in the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), with the runners under `deploy/`. The dollar figures are haiku-priced, too: on a stronger model tier, every absolute number here scales up roughly an order of magnitude.*
 
@@ -18,7 +18,7 @@ That is the durability half of this article, and it is the smaller half. The big
 
 Run Claude Code headless and it executes the whole agent, prints a result, and exits. The result carries a **session ID**: hand it back later with a resume flag and the agent reopens that exact conversation, because the transcript is an ordinary file on disk, filed under the directory the agent ran in. The *conversation* is already durable. Nor is this a toy mode: the official GitHub Action ships the same headless agent into continuous integration to review pull requests and fix failing checks.[^1][^2]
 
-It also ships a real guardrail harness: dangerous commands (deleting a tree, escalating privileges, pushing to a remote) are denied by the tool itself, a hook fires after every tool call and can veto and log it, the operating system sandboxes what the process can touch, and skills plus a required output schema shape what the agent does and returns.[^3] A line in a prompt is a suggestion; a deny rule is a fact, identical on the first attempt and the sixth.
+It also ships a real guardrail harness: dangerous commands (deleting a tree, escalating privileges, pushing to a remote) are denied by the tool itself, hooks fire around every tool call — one before it runs that can veto it, one after that records and reports it — the operating system sandboxes what the process can touch, and skills plus a required output schema shape what the agent does and returns.[^3] A line in a prompt is a suggestion; a deny rule is a fact, identical on the first attempt and the sixth.
 
 That is one half of a durable system, the hard, conversational half. The other half its own documentation concedes: a resumed session is local to the machine and directory it was born in, with no way to move it, no lease, nothing that notices the machine died and carries the work elsewhere.[^4] The agent remembers the conversation. **Nothing remembers the job.**
 
@@ -85,7 +85,7 @@ Three things have to be right. **The heartbeat has to be recorded before the cra
 
 The everyday value is less dramatic: what actually stops a headless run is the API, an overload, a rate limit, a dropped stream. Each becomes a typed, retryable failure whose backed-off retry (five seconds, doubling to a two-minute cap, six attempts) *resumes* the conversation, so an overload window becomes added latency, not a failed run.
 
-The same heartbeat, resume, and declared retries will carry a whole *team* of agents from a filed issue to a merged pull request; every agent on that team runs inside the sealed box you just watched recover.
+The same heartbeat, resume, and declared retries will carry a whole *team* of agents from a filed issue to a merged pull request; every agent on that team runs inside the sealed box you just watched recover. Before the team, the bill for the box.
 
 ## What Durability Costs, in Three Numbers
 
@@ -101,13 +101,13 @@ Each team is its own queue on the workflow engine. A backend worker is trusted t
 
 The full anatomy — lanes and namespaces, the chunk mechanics, the audit plane, how a filed issue becomes a merged PR — is one click away in the engineering companion, [How It's Built](how-its-built.md). What belongs here is the one story that proves the team is real.
 
-One more property makes the team compound rather than merely repeat: it learns from its own runs. Every run leaves a corpus — the audit log of every tool call, the rule flags, the task board, the report — and the corpus gets mined, with each lesson landing back in version control as a committed rule, skill, or gate. The pattern has held from the first experiment (a written plea to stop wasting turns was ignored in every run; a hook flagged twelve of twelve instances) to the latest fleet night, where the audit trail those flags write was the record that debugged five live failures into five same-evening commits (`deploy/fleet-run-results.md`, `deploy/session-learnings.md`). A line in a prompt is a suggestion; a hook is a law — and a mined corpus is how the laws get written. The system's job is not to avoid failure; it is to convert failure into a commit.
+One more property makes the team compound rather than merely repeat: it learns from its own runs. Every run leaves a corpus — the audit log of every tool call, the rule flags, the task board, the report — and the corpus gets mined — the repo calls this the learn-loop — with each lesson landing back in version control as a committed rule, skill, or gate. The pattern has held from the first experiment (a written plea to stop wasting turns was ignored in every run; a hook flagged twelve of twelve instances) to the latest fleet night, where the audit trail those flags write was the record that debugged five live failures into five same-evening commits (`deploy/fleet-run-results.md`, `deploy/session-learnings.md`). A line in a prompt is a suggestion; a hook is a law — and a mined corpus is how the laws get written. The system's job is not to avoid failure; it is to convert failure into a commit.
 
 ## The Conflict That Resolved Itself
 
 We built a real target for it: a full-stack "snippets" web app, backend and frontend and browser tests, wired to a live deployment with a namespace per team and the poller on a schedule.
 
-Two backend issues landed in the same poll window and collided by construction: both edited the same region of the same backend file, one adding search, the other an endpoint for deleting a snippet. Each got its own branch, job, and pull request. Search merged first, and the platform immediately marked the delete request as conflicting. This is where autonomy usually ends quietly: a "needs a manual rebase" comment, and a human inheriting the mess in the morning.
+Two backend issues landed in the same poll window and collided by construction: both edited the same regions of the same backend file and its API contract, one adding search, the other an endpoint for deleting a snippet. Each got its own branch, job, and pull request. Search merged first, and the platform immediately marked the delete request as conflicting. This is where autonomy usually ends quietly: a "needs a manual rebase" comment, and a human inheriting the mess in the morning.
 
 ![The Conflict That Resolved Itself: eight steps across two lanes. Review lane: approve PR #4, merge refused with HTTP 405, merge the base in and retry, hit a real content conflict. Backend lane: hand the fix to the owning team, keep both changes with tests ten of ten, the harness pushes and re-merges, the issue closes and the blocked frontend feature ships](../../assets/diagrams/conflict.png)
 *The Conflict That Resolved Itself. Detection lives in the review lane; the fix lives in the lane that owns the code.*
@@ -139,7 +139,7 @@ If you build any version of this, on any stack, these are the settled defaults t
 - **Deny `git push` to every agent.** The harness, with its own credentials, in its own recorded step, is the only hand that touches the outside world.
 - **Route by queue, not by prompt.** A lane's queue and skill bundle are an identity a worker cannot drift out of; a persona in a prompt is not.
 - **Deterministic job IDs, duplicates allowed only after failure.** Running and completed jobs are refused, so the poller needs no memory and the escalation loop cannot run away; failed jobs may retry on a later sweep, so one transient error cannot deadlock an issue forever. (A live fleet run found the stricter refuse-everything version of this rule doing exactly that; `deploy/fleet-run-results.md` has the evidence.)
-- **Write the rule as a hook, not a prompt.** The written rule nudged the waste pattern down ~20% and was ignored once; the hook flagged twelve of twelve. Measured at the tool boundary in [*Flag, Block, or Beg*](flag-block-or-beg.md) and at the finish line in [*Done Is Not a Claim*](done-is-not-a-claim.md).
+- **Write the rule as a hook, not a prompt.** A written rule bought at best a ~20% nudge in one experiment and was ignored outright in another; the hook flagged twelve of twelve in both. Measured at the tool boundary in [*Flag, Block, or Beg*](flag-block-or-beg.md) and at the finish line in [*Done Is Not a Claim*](done-is-not-a-claim.md).
 
 ## The Harness Was the Hard Part All Along
 
@@ -157,13 +157,13 @@ But the composition is the natural one, and the seam really is small. Claude Cod
 
 - **Vendor documentation** for every Claude Code behavior cited (headless mode, sessions, the CI action, permissions, hooks, sandboxing) and every Temporal behavior (durable execution, activities, heartbeats and their throttling, versioning): code.claude.com/docs, docs.temporal.io, python.temporal.io — specifics footnoted inline. *Vendor/canonical.* Checked 2026-07-15.
 - **Measured runs.** The heartbeat recovery, the conflict run, and the learn-loop are reproducible from the public repo, [github.com/thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents): `deploy/heartbeat-recovery-results.md`, `deploy/conflict-run-results.md`, `deploy/learn-loop-results.md`, runners and analyzers under `deploy/`. Agent model `haiku`, July–August 2026. The cost measurements live with the economics companion, [*Mechanics Cost Cents, Behavior Costs Dollars*](mechanics-cost-cents.md).
-- **Practitioner sources** — the 1.6%/98.4% teardown, the Temporal AI cookbook, and the two adjacent durable-agent write-ups — are footnoted inline with dates.
+- **Practitioner and adjacent sources** — the 1.6%/98.4% teardown, the Temporal AI cookbook, and the two adjacent durable-agent write-ups — are footnoted inline.
 
 [^1]: Claude Code headless mode: `--output-format json` returns `session_id`, cost, and (with a JSON schema) structured output; `--resume <id>` continues a stored session; transcripts are stored under `~/.claude/projects/<cwd-slug>/<session-id>.jsonl`, the working-directory path with non-alphanumerics replaced. Checked 2026-07-15. *Vendor/canonical.*
 
 [^2]: `anthropics/claude-code-action@v1` (GA) runs headless Claude Code on `pull_request`/cron and on `@claude` mentions, with automatic PR review; the docs note it is built on the Claude Agent SDK. Checked 2026-07-15. *Vendor/canonical.*
 
-[^3]: Claude Code permissions are evaluated deny → ask → allow (a deny is unoverridable) and "enforced by Claude Code, not by the model"; `PostToolUse` hooks receive the tool event as JSON and can block a call; Bash sandboxing uses Seatbelt (macOS) / bubblewrap (Linux). Checked 2026-07-15. *Vendor/canonical.*
+[^3]: Claude Code permissions are evaluated deny → ask → allow (a deny is unoverridable) and "enforced by Claude Code, not by the model"; `PreToolUse` hooks can deny a call before it runs, while `PostToolUse` hooks receive the completed event as JSON and report back; Bash sandboxing uses Seatbelt (macOS) / bubblewrap (Linux). Checked 2026-07-15. *Vendor/canonical.*
 
 [^4]: Claude Code sessions: resume lookup "is scoped to the current project directory and its git worktrees"; there is no documented cross-machine session transport or leasing: the gap an external orchestrator must fill. Checked 2026-07-15. *Vendor/canonical.*
 
@@ -177,7 +177,7 @@ But the composition is the natural one, and the seam really is small. Claude Cod
 
 [^9]: `deploy/full-experiment-results.md`, model `haiku`, 2026-07-15, run strictly sequentially, everything observed rather than modeled; the method and per-run detail are in the economics companion, [*Mechanics Cost Cents, Behavior Costs Dollars*](mechanics-cost-cents.md).
 
-[^10]: The asterisk: PR #4 predated the escalation feature, so its review was re-triggered against the new code, and the final polls were hand-triggered rather than waited out on the timer. The scheduled poll and the first-pass routing are proven across the other recorded runs; this run isolates the resolution chain. Evidence file: `deploy/conflict-run-results.md`.
+[^10]: The asterisk: PR #4 predated the escalation feature, so its review was re-triggered against the new code, and this run's polls were hand-triggered rather than waited out on the timer. The scheduled poll and the first-pass routing are proven across the other recorded runs; this run isolates the resolution chain. Evidence file: `deploy/conflict-run-results.md`.
 
 [^11]: anthropics/claude-code#36139: bypass-permissions mode misbehaves with `--resume` in print mode; reported and marked resolved (re-check against your installed version). This project uses an accept-edits mode plus an allow-list plus workspace deny rules instead. *Vendor issue tracker.*
 

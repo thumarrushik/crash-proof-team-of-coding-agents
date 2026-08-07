@@ -2,6 +2,8 @@
 
 ### The team's merge gate turns on a single self-reported boolean: tests_passed. We measured that boolean against the truth, and it failed three times in ten. Not in the direction anyone feared.
 
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
+
 ---
 
 ![Two cards grade the same work. The agent's own report card reads tests_passed: false; beside it the harness's re-run of the identical code shows every test passing under a VERIFIED GREEN stamp — a false alarm caught by one re-run, not a lie](../../assets/medium-heroes/the-agent-grades-its-own-homework.png)
