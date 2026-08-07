@@ -1,6 +1,6 @@
 # The Agent Grades Its Own Homework
 
-### The team's merge gate turns on a single self-reported boolean: tests_passed. We measured that boolean against the truth, and it failed three times in ten. Not in the direction anyone feared.
+### An agent team's merge gate turns on a single self-reported boolean: tests_passed. We measured that boolean against the truth, and it failed three times in ten. Not in the direction anyone feared.
 
 *A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 

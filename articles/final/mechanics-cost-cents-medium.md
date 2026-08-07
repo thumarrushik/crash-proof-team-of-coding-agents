@@ -1,13 +1,13 @@
 # Mechanics Cost Cents, Behavior Costs Dollars
 
-### We measured every boundary of a crash-proof coding agent: an eleven-cent task, a third-of-a-cent crash recovery, and the same code running $0.03 to $2.13. The durability engine was free. The agent's behavior was the bill.
+### We measured every boundary of a crash-proof coding agent: an eleven-cent task, a third-of-a-cent crash recovery, and the same code running $0.03 to $2.13. The durability engine was measurably free. The agent's behavior was the bill.
 
 *A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ---
 
 ![What Durability Costs: two measured panels relative to the roughly eleven-cent continuous base. Left: an interrupted run adds $0.0035 warm ($0.117 total) or $0.021 cold ($0.134 total) to resume. Right: fine-chunking the same task adds from near-zero to about two dollars ($0.034, $0.25, $2.13 at 1, 8, and 14 chunks)](../../assets/diagrams/cost-comparison.png)
-*What Durability Costs (measured, small model). Left: a resume only re-reads context at the cache rate. Right: fine chunking adds near-zero to two dollars, unpredictably.*
+*What Durability Costs (measured, small model). Left: a warm resume only re-reads context at the cache rate; a cold one pays a partial re-write. Right: fine chunking adds near-zero to two dollars, unpredictably.*
 
 Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents; this one is the ledger behind that number. We measured every boundary the harness has — the continuous run, the crash resume, warm and cold, the chunk seam, the no-engine baseline — and the pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
 

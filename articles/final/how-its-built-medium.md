@@ -1,8 +1,8 @@
 # How It's Built: Anatomy of a Crash-Proof Agent Harness
 
-### The engineering companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md): the chunk mechanics, the lanes, the audit plane, and the detours we measured our way out of.
+### The engineering companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md): the chunk mechanics, the lanes, the audit plane, and the detour we measured our way out of.
 
-*This is the mechanism half. The claims and the fine print — one engineer, a cheap fast model, single-digit runs, point estimates — live in the [flagship](a-crash-proof-team-of-coding-agents.md); the cost measurements live in the economics companion, [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md); both apply verbatim here.*
+*This is the mechanism half. The claims and the fine print — one engineer, a cheap fast model, single-digit runs, point estimates — live in the [flagship](a-crash-proof-team-of-coding-agents.md); the cost measurements live in the economics companion, [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md); all of it applies verbatim here.*
 
 ---
 
@@ -68,7 +68,7 @@ So the turn cap has one clear rule: it sets how often the job reports in and can
 
 ## A Team of Activities
 
-Everything so far makes *one* agent durable. The reason to bother is that the same machinery, pointed sideways, makes a *team* of them, because a durable job, unlike a bare process, can be given an owner, an address, and rules. And the durability does not thin out as the team grows: every lane's agent runs inside the same crash recovery, the same resume-from-heartbeat, the same declared retries, so a nine-member team is nine durable jobs, not one durable conductor waving at fragile helpers.
+Everything so far makes *one* agent durable. The reason to bother is that the same machinery, pointed sideways, makes a *team* of them, because a durable job, unlike a bare process, can be given an owner, an address, and rules. And the durability does not thin out as the team grows: every lane's agent runs inside the same crash recovery, the same resume-from-heartbeat, the same declared retries, so a nine-member team is nine durable specialists, not one durable conductor waving at fragile helpers.
 
 Here is what we actually built. **Two workflows conduct the delivery team.** One is the durable task you have already met: it runs the agent in bounded chunks and then ships the result. The other is a scheduled poll that looks at a repository for new work, on a timer, as a durable job in its own right. And beneath those two conductors sits a **team of nine activities, each with exactly one job** — nine in the measured runs; the repo now ships twelve, the fix-loop members having arrived after these runs. None of them is clever. Each is a sealed box that does one real-world thing and hands back typed data, and that narrowness is the point: it is what lets the retries, the heartbeats, and the audit trail apply to every one of them for free.
 
@@ -108,7 +108,7 @@ One structural catch shapes the whole picture. A workflow can only start child w
 Put the conductors and the team together and one issue travels a full loop, every box along the way a durable step in the history.
 
 ![From Filed Issue to Merged PR: a comic-strip of seven steps. 1, a GitHub issue is filed and its label routes it to a team. 2, durable intake — a scheduled poll starts one durable job per ready item. 3, the issue lane's agent works in resumable chunks and opens a pull request. 4, the review lane reads the diff and approves only if the tests pass. 5, merging the PR self-heals a stale branch or hands a real conflict to the owning team. 6, the PR is merged and the issue closes. 7, the next poll releases the dependents the closed issue was blocking, and the loop closes](../../assets/diagrams/pipeline.png)
-*From Filed Issue to Merged PR. Every box is a real activity from the team. The conflict detour and the unblock loop are not special cases; they are the same durable machinery running one more time.*
+*From Filed Issue to Merged PR. Every box past the filed issue is a real activity from the team. The conflict detour and the unblock loop are not special cases; they are the same durable machinery running one more time.*
 
 **Intake.** A schedule fires the poll on an interval. The poll reads the repository (open issues, open pull requests, and which issues have already closed), routes each item to a team by its `team/…` label (or the catch-all lane when it carries none), and starts one durable job per ready item with a deterministic ID. An issue marked *blocked by* another (a line in its body or a `blocked-by` label) is held until that other issue closes.
 

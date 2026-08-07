@@ -2,10 +2,11 @@
 
 **Claude Code remembers the conversation; Temporal remembers the job.** This
 repo is the final publication kit and the running system behind it: a durable
-delivery team of nine single-purpose Temporal jobs with Claude Code doing the
-judgment work inside them, under skill playbooks, enforced hooks, and
-human-controlled settings — plus every experiment the articles cite, with its
-evidence and tests.
+delivery team of single-purpose Temporal activities (nine in the measured
+runs; twelve today, the fix-loop members having arrived since) with Claude
+Code doing the judgment work inside them, under skill playbooks, enforced
+hooks, and human-controlled settings — plus every experiment the articles
+cite, with its evidence and tests.
 
 Curated from [temporal-claude-demo](https://github.com/thumarrushik/temporal-claude-demo)
 (the full lab notebook, including earlier drafts and the v1 chapter series).
@@ -22,7 +23,7 @@ every number traces to an evidence file in `deploy/`.
 | **Mechanics Cost Cents, Behavior Costs Dollars** | every boundary priced: an eleven-cent task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the economics canary that re-probes it all on a schedule |
 | **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern — a mid-flight block prevented 5/5 but finished the task 1/5 |
 | **Done Is Not a Claim** | a `Stop`-hook gate on "done" — forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
-| **The Agent Grades Its Own Homework** | the merge switch's own `tests_passed` boolean vs ground truth — wrong 3 in 10, every miss a false alarm; the harness re-run corrects both directions |
+| **The Agent Grades Its Own Homework** | the self-reported `tests_passed` boolean vs ground truth — wrong 3 in 10 (all in the builder arm; the isolated reviewer arm was honest 5/5), every miss a false alarm; the harness re-run corrects both directions |
 | **The Human Is a Durable Object** | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
 
 Regenerate outputs: `articles/final/render-pdf.sh` and
@@ -60,8 +61,9 @@ injected so no workspace can write through into `teams/` itself. Governance is e
 
 ## The system (`src/`)
 
-Two Temporal workflows conduct nine single-purpose activities; only one runs
-Claude Code, and it does all the judgment work (build, review, resolve, fix).
+Two Temporal workflows conduct the delivery team's twelve single-purpose
+activities; only one runs Claude Code, and it does all the judgment work
+(build, review, resolve, fix).
 Highlights: resume-from-heartbeat crash recovery, per-team namespaces and
 queues, the review-driven fix loop (off by default), and the human approval
 gate (off by default; operator CLI in `src/approvals.py`).

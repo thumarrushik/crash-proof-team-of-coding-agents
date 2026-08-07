@@ -1,6 +1,8 @@
 # The Human Is a Durable Object
 
-### Green tests should not authorize a production merge; a person should. So we gave an autonomous agent team exactly one human decision — the merge — not as a chat message that scrolls away, but as a durable place the job waits in, deny-safe when nobody answers. Run live on a real Temporal server: ten checks out of ten. A companion to *A Crash-Proof Team of Coding Agents*.
+### Green tests should not authorize a production merge; a person should. So we gave the team exactly one human decision — not a chat message that scrolls away, but a durable place the job waits in, deny-safe when nobody answers: ten checks out of ten on a real Temporal server.
+
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ---
 
