@@ -73,6 +73,8 @@ Runner + evidence pairs the articles cite, all reproducible:
 - `self-grade.py` / `-results.md` — the self-reported boolean vs ground truth
 - `hitl-live.sh` / `hitl-live-results.md` — the human gate on a real server
 - `fixloop-live.sh` / `fixloop-live-results.md` — the fix loop end to end
+- `issue-routing-check.py` / `-results.md` — live issues through the real
+  router: 13/13 to the intended lane, five distinct phase lists
 - plus the cost, heartbeat-recovery, and learn-loop evidence behind the flagship
 
 Agent-driven runners need the `claude` CLI logged in; the live-demo scripts
