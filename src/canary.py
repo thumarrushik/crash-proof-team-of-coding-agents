@@ -48,12 +48,15 @@ from temporalio.client import (
 )
 from temporalio.common import RetryPolicy
 
-from shared import (
-    DEFAULT_NAMESPACE,
-    POLLER_TASK_QUEUE,
-    TEMPORAL_ADDRESS,
-    CanaryReport,
-)
+# Passed through, exactly like workflows.py does: shared resolves paths at
+# import time, which the workflow sandbox forbids on re-import.
+with workflow.unsafe.imports_passed_through():
+    from shared import (
+        DEFAULT_NAMESPACE,
+        POLLER_TASK_QUEUE,
+        TEMPORAL_ADDRESS,
+        CanaryReport,
+    )
 
 CHEAP, SMART = "haiku", "sonnet"
 MARKER = "juniper"
