@@ -1,8 +1,8 @@
 # Done Is Not a Claim
 
-### An autonomous agent stops when the work *looks* done. A `Stop` hook makes "done" something it has to prove. And where you put that gate decides whether it saves the run or wrecks it.
+### An autonomous agent stops when the work *looks* done. A `Stop` hook makes "done" something it has to prove: five finishes in five runs, where the same hard deny placed mid-flight finished one. Where you put the block decides whether it saves the run or wrecks it.
 
-*A companion to the "run the loop without skipping steps" part of a series on running Claude Code autonomously without setting your codebase on fire.*
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ![Two rows compare the same hard deny in two places. Top row, a block mid-flight stops the agent before its work is reached: derailed, finished 1 of 5. Bottom row, a Stop-hook gate at the finish holds the exit until the checklist is done: completed, finished 5 of 5.](../../assets/medium-heroes/done-is-not-a-claim.png)
 
@@ -10,7 +10,7 @@
 
 Here is the branch you wake up to. Something is implemented. The tests are skipped, the review is skipped, and there is a cheerful `Done ✅` on top. The agent did not rebel and it did not misunderstand. It did what an optimizer does: it found the cheapest path that *looked* finished and took it, because when the only signal available is "does this look done," looks-done is what you get. Skipping the last step does not read to the model as cutting a corner. It reads as finishing.
 
-The companion piece to this one, on three ways to stop a *single* unwanted action, ended on a warning. A hard block placed *mid-flight*, denying a tool call the agent believed it needed, derailed the run: it prevented the unwanted `ls` in all five runs but finished the task in only one. So a hook that hard-blocks sounds like the wrong tool for "make the agent finish." This piece is the measurement that says otherwise, because the earlier result turned on a detail everyone skips: not *whether* you block, but *where*.
+The companion piece to this one, [Flag, Block, or Beg](flag-block-or-beg.md), on three ways to stop a *single* unwanted action, ended on a warning. A hard block placed *mid-flight*, denying a tool call the agent believed it needed, derailed the run: it prevented the unwanted `ls` in all five runs but finished the task in only one. So a hook that hard-blocks sounds like the wrong tool for "make the agent finish." This piece is the measurement that says otherwise, because the earlier result turned on a detail everyone skips: not *whether* you block, but *where*.
 
 ## Three ways to make "done" mean done
 
@@ -54,13 +54,13 @@ The two experiments run the same instrument, a hard `deny`, to opposite results,
 
 That is why the enforcement layer the companion's tool-boundary hooks could not reach lives here, at `Stop`. A `PostToolUse` flag (a hook that logs but cannot veto) can record that a step was skipped; it cannot make the agent go back. A `PreToolUse` block guards actions the agent *takes*, not the step it *omits*: you cannot deny your way to a file that was never written. Only a gate on the finish can turn "looks done" into "is done," because it is the only hook that gets a vote on whether the agent is allowed to believe it.
 
-## The three ways this goes wrong
+## Three failure modes, and one bound
 
-A `Stop` gate is a forcing function, and a forcing function pointed wrong is a trap. Three failure modes, all real, all worth designing around — the third discovered later, in production.
+A `Stop` gate is a forcing function, and a forcing function pointed wrong is a trap. Three failure modes, all real, all worth designing around — the third discovered later, in production — and one bound that keeps the gate honest.
 
-**The check must be satisfiable.** An earlier version of this task defined "done" as *the tests passing*, and gated on that. It deadlocked: when the agent's tests did not cleanly pass, it honestly would not claim they did, so it kept trying to stop, kept getting blocked, and burned turns to the cap without ever finishing. A gate on a condition the agent cannot reach is not a brake, it is a wall. Gate on an artifact the agent can always produce, a recorded result or a written proof, not on an outcome it may not be able to reach. That is why the arm above gates on "the proof file exists," not "the tests are green."
+**The check must be satisfiable.** An earlier version of this task defined "done" as *the tests passing*, and gated on that. It deadlocked (a run we did not keep; the lesson survived, the transcript did not): when the agent's tests did not cleanly pass, it honestly would not claim they did — the same under-trust instinct a sibling article measures head-on — so it kept trying to stop, kept getting blocked, and burned turns to the cap without ever finishing. A gate on a condition the agent cannot reach is not a brake, it is a wall. Gate on an artifact the agent can always produce, a recorded result or a written proof, not on an outcome it may not be able to reach. That is why the arm above gates on "the proof file exists," not "the tests are green."
 
-**The gate checks the artifact, not the process.** The hook verifies that the proof exists; it does not verify that the agent truly ran the check before writing it. A determined agent can satisfy the letter and skip the spirit. The 5/5 above is itself letter-of-the-check: the gate confirms the marker is present, not that the verification behind it was real. So gate on something expensive to fake, a test log with real output or a build artifact, when the spirit matters.
+**The gate checks the artifact, not the process.** The hook verifies that the proof exists; it does not verify that the agent truly ran the check before writing it. A determined agent can satisfy the letter and skip the spirit. The 5/5 above is itself letter-of-the-check: the gate confirms the marker is present, not that the verification behind it was real. So gate on something expensive to fake, a test log with real output or a build artifact, when the spirit matters. The independent answer to this gap — re-run the checks yourself, and treat every self-report as a hypothesis — is measured in the companion [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 
 **The check must understand every dialect the agent speaks.** This one surfaced in production, where this gate's descendant now guards six team lanes: a live run caught it blocking agents whose task boards were *perfect* — every mandated phase created and completed, but with a different task tool than the one the gate grepped for. A check written against one way of satisfying it will punish every other way. The gate now reads both dialects (`deploy/fleet-run-results.md`).
 
@@ -76,7 +76,7 @@ Memory steers; only hooks enforce; and the one thing you most need to enforce ab
 
 One honest boundary: these are single-digit runs on one cheap model against one skippable step, point estimates reproducible from the repo, not a benchmark, and the gate's edge over the baseline is a two-run gap widened by a consistent mechanism, not a proof. But the mechanism is the point, and it is the same one the companion found from the other side: a hard *no* is neither good nor bad on its own. Where you place it decides whether it saves the task or costs it.
 
-*The measured runs, the `Stop`-gate hook, and its offline tests are reproducible from the companion repo; the "looks done" failure it addresses is the subject of the run-the-loop part of this series, which builds the gate, and this is the benchmark behind it.*
+*The measured runs, the `Stop`-gate hook, and its offline tests are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The gate's production descendant guards every lane of the team built in [How It's Built](how-its-built.md); this is the benchmark behind it.*
 
 ---
 
@@ -84,7 +84,7 @@ One honest boundary: these are single-digit runs on one cheap model against one 
 
 ## Sources
 
-- **Claude Code hooks: the `Stop` event and its block-decision contract (a `Stop` hook can veto the finish; the reason is fed back and the turn continues), the `stop_hook_active` re-entry flag, and the consecutive-block cap that keeps the gate bounded.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
-- **The "looks done" failure mode ("Claude stops when the work looks done; without a check it can run, looks-done is the only signal") and the blocking `Stop` verify-gate it motivates.** The run-the-loop part of this series and its live step-enforcement transcript. **Practitioner.**
-- **The measured runs.** Three arms times five headless runs on `claude-haiku-4-5`, isolated to workspace policy (`--setting-sources project`), each run scored for the skipped step and task completion. Runner, the `Stop`-gate hook, and its offline tests: `deploy/step-gate.py`, `deploy/step-gate-results.md`, `tests/test_step_gate.py` in the companion repo. **Practitioner.**
-- **The tool-boundary companion (beg / flag / block; the finding that a mid-flight block finished the task 1 in 5) this piece answers from the finish boundary.** *Flag, Block, or Beg* and its `deploy/flag-block-beg-results.md`. **Practitioner.**
+- **Claude Code hooks: the `Stop` event and its block-decision contract (a `Stop` hook can veto the finish; the reason is fed back and the turn continues), and the consecutive-block cap that keeps the gate bounded.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
+- **The gate's production descendant: the per-lane `Stop`-hook phase gate and the live fleet run that exercised it (including the two-dialect fix).** `teams/<team>/.claude/phase-gate.py` and `deploy/fleet-run-results.md`. **Practitioner.**
+- **The measured runs.** Three arms times five headless runs on `claude-haiku-4-5`, isolated to workspace policy (`--setting-sources project`), each run scored for the skipped step and task completion. Runner, the `Stop`-gate hook, and its offline tests: `deploy/step-gate.py`, `deploy/step-gate-results.md`, `tests/test_step_gate.py` in [the public repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
+- **The tool-boundary companion (beg / flag / block; the finding that a mid-flight block finished the task 1 in 5) this piece answers from the finish boundary.** [Flag, Block, or Beg](flag-block-or-beg.md) and its `deploy/flag-block-beg-results.md`. **Practitioner.**

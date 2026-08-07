@@ -1,8 +1,8 @@
 # Flag, Block, or Beg
 
-### A prompt asks the agent to behave. A flag records when it doesn't. A block stops it cold. They are not three flavors of one thing; they are three layers, and the measurements say which job each layer is for.
+### A prompt asks the agent to behave. A flag records when it doesn't. A block stops it cold: five for five on the waste — and one for five on the task. They are not three flavors of one thing; they are three layers, and the measurements say which job each layer is for.
 
-*A companion to the guardrails part of a series on running Claude Code autonomously without setting your codebase on fire.*
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ![Three lanes for stopping one redundant `ls`: a dashed rule it walks straight through, a camera that photographs it and lets it pass, and a solid barrier that stops it before it runs, with a bill meter where only the barrier lane is shorter](../../assets/medium-heroes/flag-block-or-beg.png)
 
@@ -10,7 +10,7 @@
 
 Here is a demo that lies. You notice the agent wasting turns, running `ls` to confirm a file it created one step ago, re-reading state the tool already handed back. So you add a line to `CLAUDE.md`: *trust your tool results; don't list a directory to confirm your own write.* You run it again, it behaves, and you close the ticket.
 
-Then it runs a hundred more times while you sleep, and the line you wrote turns out to be a suggestion the agent is free to decline. The guardrails part of this series argues for hooks by design and never puts a number on the question that matters when you are choosing between them: which kind of intervention is worth reaching for, and what does each one actually buy? So here is the number. One concrete waste pattern, stopped three ways on the same task and the same model, measured. The result was not the obvious one, and it is more useful for that.
+Then it runs a hundred more times while you sleep, and the line you wrote turns out to be a suggestion the agent is free to decline. The parent article argues for hooks by design — a line in a prompt is a suggestion; a deny rule is a fact — and never puts a number on the question that matters when you are choosing between them: which kind of intervention is worth reaching for, and what does each one actually buy? So here is the number. One concrete waste pattern, stopped three ways on the same task and the same model, measured. The result was not the obvious one, and it is more useful for that.
 
 ## Three ways to say no
 
@@ -30,7 +30,7 @@ The three interventions are not three settings on one dial. They live on three d
    only block sits between intent and action.
 ```
 
-That is the claim the design part asserts and this part measures: a rule asks, a flag records, only a block prevents. All three turned out to be true. What the design part cannot tell you is the price on the third one.
+That is the claim the parent article asserts and this one measures: a rule asks, a flag records, only a block prevents. All three turned out to be true. What design alone cannot tell you is the price on the third one.
 
 ## The experiment
 
@@ -60,13 +60,13 @@ Read it one row at a time.
 
 ## Determinism is the point, not volume
 
-Be careful what the flag arm proves, because it is easy to oversell. The honest version was written down once already, in the durable-agents experiment this method borrows from: there, a `PostToolUse` flag caught a *spontaneous* re-orientation habit 12 out of 12 times while a prompt rule cut it about 20% and was ignored on one run, and the total tool count did not fall either way. The win from a flag is not that the agent improved. It is that the mistake is caught, every time, in a record you can trust. Determinism, not volume. That record has since earned its keep: each team now commits its own watched patterns beside the org-wide floor, and when a later fleet run pushed thirteen issues through the live system, the agent-behavior failures it surfaced were diagnosed from the audit trail those flags write (`deploy/fleet-run-results.md`). The log the flag keeps is the log that debugged the fleet's agents.
+Be careful what the flag arm proves, because it is easy to oversell. The honest version was written down once already, in the learn-loop experiment this method borrows from (the walkthrough is in [How It's Built](how-its-built.md)): there, a `PostToolUse` flag caught a *spontaneous* re-orientation habit 12 out of 12 times while a prompt rule cut it about 20% and was ignored on one run, and the total tool count did not fall either way. The win from a flag is not that the agent improved. It is that the mistake is caught, every time, in a record you can trust. Determinism, not volume. That record has since earned its keep. Each team now commits its own watched patterns beside the org-wide floor, and when a later fleet run pushed thirteen issues through the live system, its failures were diagnosed from the audit trail the hooks write (`deploy/fleet-run-results.md`). The log the hooks keep is the log that debugged the fleet.
 
-Which reframes beg rather than condemning it. In that earlier run the rule fought a habit and bought ~20%; here it fought an explicit instruction and bought nothing. That is not a contradiction. It is the rule's actual law: a prompt's power falls as the agent's reason to ignore it rises. Weak pull, some effect; a direct instruction to the contrary, none. A block does not have that property, because it is code in the harness, not a request to the model. That is the asymmetry the docs state plainly and most write-ups skip: a hook can *tighten* what the agent may do, but a prompt cannot *enforce* anything at all.
+Which reframes beg rather than condemning it. In that earlier run the rule fought a habit and bought ~20%; here it fought an explicit instruction and bought nothing. That is not a contradiction. It is the rule's actual law: **a prompt's power falls as the agent's reason to ignore it rises.** Weak pull, some effect; a direct instruction to the contrary, none. A block does not have that property, because it is code in the harness, not a request to the model. That is the asymmetry the docs state plainly and most write-ups skip: a hook can *tighten* what the agent may do, but a prompt cannot *enforce* anything at all.
 
 ## Prevention is not free, and neither is a hook you forgot
 
-The block result is the one to sit with, because the naive reading, *block everything you don't want*, is the expensive one. A block is a hard stop, and a hard stop lands on the agent mid-plan. When the thing you blocked was pure danger the agent never needed, that is exactly right. When it was something the agent was in the middle of using, you do not pay in latency, you pay in derailed runs, the way a stubborn agent fighting a bad test burns a whole session. This is why the durable-agents system *flagged* the orientation waste and reserved outright `deny` for `rm -rf`, `sudo`, and `git push`, the acts with no legitimate use. Flag waste; block danger.
+The block result is the one to sit with, because the naive reading, *block everything you don't want*, is the expensive one. A block is a hard stop, and a hard stop lands on the agent mid-plan. When the thing you blocked was pure danger the agent never needed, that is exactly right. When it was something the agent was in the middle of using, you do not pay in latency, you pay in derailed runs, the way a stubborn agent fighting a bad test burns a whole session. This is why the crash-proof team behind this series *flagged* the orientation waste and reserved outright `deny` for `rm -rf`, `sudo`, and `git push`, the acts with no legitimate use. Flag waste; block danger.
 
 And there is a failure mode with no line in any table: the hook that quietly stops firing. A settings edit, a moved script, a matcher typo, and the guardrail is gone, announcing nothing, because a hook that no longer runs produces no error, only the silent absence of one. A deleted cron line makes no sound. So the hooks here ship with the guardrail every hook deserves and almost none have: eight offline tests that feed the real hook script a tool event and assert it still denies what it should, still ignores real work, and still fails open on malformed input. When a hook regresses, a test goes red instead of a mistake going quiet.
 
@@ -76,17 +76,17 @@ Three layers, three jobs, and only one of them is enforcement. But enforcement i
 
 **Practical rule:** put preferences in prose, audits in a `PostToolUse` flag, and only the genuinely forbidden in a `PreToolUse` block with a one-line reason attached, then write the test that goes red when the block stops firing. Beg for what's nice; flag what you want to see; block what must never happen. Never confuse the log for the lock, or the lock for a nudge.
 
-One honest boundary: these are single-digit runs on one cheap model against one waste pattern, point estimates reproducible from the repo, not a benchmark. And the hook surface is far larger than the three events used here; the current docs list dozens of events and five hook types, which is its own deep-dive. But the layer law does not depend on the count. Persuasion is not enforcement, detection is not prevention, and prevention is not free. And there is a fourth move these three do not reach, at a different boundary: a `Stop` gate on *done* itself, which turns this article's block-derails-the-run result on its head. That is the companion *Done Is Not a Claim*.
+One honest boundary: these are single-digit runs on one cheap model against one waste pattern, point estimates reproducible from the repo, not a benchmark. And the hook surface is far larger than the two tool-call events used here; the current docs list dozens of events and five hook types, which is its own deep-dive. But the layer law does not depend on the count. Persuasion is not enforcement, detection is not prevention, and prevention is not free. Further down the same road, an autonomous loop must also decide what *green* is allowed to mean — whether an agent's own "tests passed" can be believed at all; that is measured in the companion [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 
-The next thing an autonomous loop needs is to decide what *green* is allowed to mean — whether an agent's own "tests passed" can be believed at all. That is measured in the companion [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
+And there is a fourth move these three do not reach, at a different boundary entirely: a `Stop` gate on *done* itself, which turns this article's block-derails-the-run result on its head. Same hard no, moved from the path to the exit, opposite outcome. That is the companion [Done Is Not a Claim](done-is-not-a-claim.md).
 
 ---
 
-*Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runner, hook scripts, and evidence are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Sources
 
 - **Claude Code hooks: the event lifecycle, the `PreToolUse` decision contract (`hookSpecificOutput.permissionDecision`, values allow / deny / ask / defer), the stdin JSON and exit-code semantics, and `PostToolUse` firing only after a tool succeeds.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
 - **Permissions: "instructions ... shape what Claude tries to do, but they don't change what Claude Code allows," and that a hook can tighten but not loosen what the permission layer allows.** `code.claude.com/docs/en/permissions`. Checked 2026-08-06. **Vendor/canonical.**
-- **The measured runs.** Four arms times five headless runs on `claude-haiku-4-5`, isolated to workspace policy (`--setting-sources project`), everything observed from the CLI JSON plus the audit log, each run scored for task completion. Runner, hook scripts, and the eight offline hook tests: `deploy/flag-block-beg.py`, `deploy/flag-block-beg-results.md`, `tests/test_flag_block_beg.py` in the companion repo. **Practitioner.**
-- **The determinism baseline (12/12 flag versus ~20% rule; "the win is determinism, not volume") and the flag-waste / block-danger split this experiment validates.** The durable-agents write-up and its `deploy/learn-loop-results.md`. **Practitioner.**
+- **The measured runs.** Four arms times five headless runs on `claude-haiku-4-5`, isolated to workspace policy (`--setting-sources project`), everything observed from the CLI JSON plus the audit log, each run scored for task completion. Runner, hook scripts, and the eight offline hook tests: `deploy/flag-block-beg.py`, `deploy/flag-block-beg-results.md`, `tests/test_flag_block_beg.py` in [the public repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
+- **The determinism baseline (12/12 flag versus ~20% rule; "the win is determinism, not volume") and the flag-waste / block-danger split this experiment validates.** [How It's Built](how-its-built.md) and its `deploy/learn-loop-results.md`. **Practitioner.**
