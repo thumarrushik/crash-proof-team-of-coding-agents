@@ -38,6 +38,12 @@ example; the bar for fixing one is not lower.
 - A "fix" for a bug never observed failing in this workspace.
 - A repro test that passes before the fix, or fails for a setup reason.
 - "Could not reproduce" with no command trail behind it.
+- **Building the missing feature to have something to fix.** If the code the
+  bug describes does not exist in this repo, the issue is blocked on the
+  feature that ships it — report that (name the missing module and, if known,
+  the issue that builds it) and stop. A live run showed an agent implementing
+  a whole export feature to "fix" a bug filed against it, racing the real
+  implementation into a merge conflict.
 
 ## Grounding
 

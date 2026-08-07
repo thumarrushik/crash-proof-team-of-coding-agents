@@ -10,6 +10,15 @@ REPO="${1:-thumarrushik/linkbox}"
 INTERVAL="${2:-60}"
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 
+# --fresh: restart all workers so they pick up code changes. Learned live:
+# a policy fix in poller.py did nothing until the running worker restarted.
+if [ "${3:-}" = "--fresh" ] || [ "${1:-}" = "--fresh" ]; then
+  pkill -f "worker.py --team" 2>/dev/null || true
+  pkill -f "worker.py --poller" 2>/dev/null || true
+  sleep 2
+  echo "workers stopped (--fresh): restarting with current code"
+fi
+
 # Server: reuse a running one, else start fresh (all namespaces declared).
 if ! temporal operator namespace describe default >/dev/null 2>&1; then
   temporal server start-dev --headless --log-level warn \
