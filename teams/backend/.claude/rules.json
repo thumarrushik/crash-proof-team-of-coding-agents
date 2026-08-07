@@ -1,0 +1,7 @@
+[
+  {
+    "name": "redundant_orientation_ls",
+    "kind": "bash_regex",
+    "pattern": "^\\s*ls(\\s|$)"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "redundant_orientation_ls",
+    "kind": "bash_regex",
+    "pattern": "^\\s*ls(\\s|$)"
+  },
+  {
+    "name": "sleep_as_synchronization",
+    "kind": "bash_regex",
+    "pattern": "\\bsleep\\s+[0-9]"
+  }
+]

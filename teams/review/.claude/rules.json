@@ -1,0 +1,12 @@
+[
+  {
+    "name": "redundant_orientation_ls",
+    "kind": "bash_regex",
+    "pattern": "^\\s*ls(\\s|$)"
+  },
+  {
+    "name": "review_lane_edits_code",
+    "kind": "tool_use",
+    "tools": "Write,Edit"
+  }
+]

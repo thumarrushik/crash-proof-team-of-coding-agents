@@ -100,6 +100,26 @@ class TeamSelfSufficiencyTests(unittest.TestCase):
             self.assertIn("sleep_as_synchronization", [r["name"] for r in rules],
                           "testing lane's sleep rule should reach its workspace")
 
+    def test_governance_is_tracked_by_git(self) -> None:
+        """The team folders are only real if version control carries them: an
+        unanchored `.claude/` gitignore once silently excluded every team's
+        policy, gates, and skills from the pushed repo while local validation
+        stayed green. Guard: git must track each team's governance unit."""
+        import subprocess
+        tracked = subprocess.run(
+            ["git", "ls-files", "teams"], capture_output=True, text=True,
+            cwd=REPO, check=True).stdout.splitlines()
+        for team in known_teams():
+            with self.subTest(team=team):
+                prefix = f"teams/{team}/.claude/"
+                unit = [p[len(prefix):] for p in tracked if p.startswith(prefix)]
+                for required in ("settings.json", "rules.json",
+                                 "flag-rules.py", "phase-gate.py"):
+                    self.assertIn(required, unit,
+                                  f"{team}: {required} is not tracked by git")
+                self.assertTrue(any(p.endswith("SKILL.md") for p in unit),
+                                f"{team}: no skill is tracked by git")
+
     def test_every_mandate_ref_resolves_to_an_owned_skill(self) -> None:
         """No dangling [[skill]] references: every skill a mandate tells the
         agent to apply must exist in that team's own folder — the working set
