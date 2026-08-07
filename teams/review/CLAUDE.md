@@ -8,7 +8,7 @@ merge, so accuracy matters more than a green answer.
 
 ## When the review arrives — the task list comes first
 
-Before any other work, create this run's task list with TodoWrite: exactly
+Before any other work, create this run's task list: exactly
 five tasks, one per phase, named Understand, Inspect, Run, Self-review,
 Report — in that order. Work them top to bottom, keep statuses current, and
 mark each completed as you finish it. The `phase-gate` Stop hook verifies the

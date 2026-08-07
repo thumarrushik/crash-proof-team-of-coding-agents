@@ -5,7 +5,7 @@ Each poll lists a repo's open issues and open pull requests, routes them with
 ``RunClaudeTask`` workflow per item.
 
 The trick that keeps this tiny: workflow IDs are **deterministic**
-(``claude-<team>-<source>``) and started with ``REJECT_DUPLICATE``. Re-polling
+(``claude-<team>-<source>``) and started with ``ALLOW_DUPLICATE_FAILED_ONLY``. Re-polling
 the same issue is a no-op — Temporal rejects the duplicate — so the poller keeps
 **no state of its own**. Temporal is the queue and the dedup. A blocked issue is
 skipped each poll until its blocker issue is *closed* on GitHub.
@@ -245,7 +245,10 @@ async def submit(client, activity_plan, *, repo: str | None = None, model: str |
             _task_input_for(activity_plan, repo, model, review_cfg),
             id=workflow_id,
             task_queue=activity_plan.task_queue,
-            id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
+            # Idempotent against running/completed work, but a FAILED
+            # attempt may retry on a later sweep — REJECT_DUPLICATE
+            # deadlocked an issue forever after one transient failure.
+            id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
         print(f"  START {workflow_id} -> {namespace_for_team(activity_plan.team)}/{activity_plan.task_queue}")
         return True
@@ -381,7 +384,7 @@ async def escalate_conflict(input: ConflictEscalationInput) -> ConflictEscalatio
     branch and re-merges the PR — fully autonomous.
 
     The owning team is read from the issue the branch was cut for. A deterministic
-    workflow ID + REJECT_DUPLICATE make a re-escalation a no-op while the resolve
+    workflow ID + ALLOW_DUPLICATE_FAILED_ONLY make a re-escalation a no-op while the resolve
     job is already running (or has run)."""
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if not token:
@@ -419,7 +422,10 @@ async def escalate_conflict(input: ConflictEscalationInput) -> ConflictEscalatio
             task_input,
             id=workflow_id,
             task_queue=task_queue_for_team(team),
-            id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
+            # Idempotent against running/completed work, but a FAILED
+            # attempt may retry on a later sweep — REJECT_DUPLICATE
+            # deadlocked an issue forever after one transient failure.
+            id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
         print(f"  ESCALATE PR #{input.pr_number}: resolve job {workflow_id} already running")
@@ -507,7 +513,7 @@ async def escalate_fix(input: FixEscalationInput) -> FixEscalationResult:
     human gate denial with a note). Loop the owning team's agent back in: start a
     ``fix-pr-<n>-r<k>`` RunClaudeTask on that team's namespace/queue that fixes
     the feedback, re-runs the tests, and pushes. Its post-completion re-reviews
-    the PR and re-asks the human. Deterministic ID + REJECT_DUPLICATE make a
+    the PR and re-asks the human. Deterministic ID + ALLOW_DUPLICATE_FAILED_ONLY make a
     re-escalation of the same round a no-op."""
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if not token:
@@ -550,7 +556,10 @@ async def escalate_fix(input: FixEscalationInput) -> FixEscalationResult:
             task_input,
             id=workflow_id,
             task_queue=task_queue_for_team(team),
-            id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
+            # Idempotent against running/completed work, but a FAILED
+            # attempt may retry on a later sweep — REJECT_DUPLICATE
+            # deadlocked an issue forever after one transient failure.
+            id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
         print(f"  FIX PR #{input.pr_number}: fix job {workflow_id} already running")
@@ -596,7 +605,7 @@ concrete file/line reference). Return the required structured output.
 async def escalate_review(input: ReviewEscalationInput) -> ReviewEscalationResult:
     """A fix job finished and pushed. Start the follow-up review job on the
     review lane that re-runs the suite and re-asks the human. The mirror image
-    of ``escalate_fix``; deterministic ID + REJECT_DUPLICATE keep it idempotent."""
+    of ``escalate_fix``; deterministic ID + ALLOW_DUPLICATE_FAILED_ONLY keep it idempotent."""
     team = "review"
     source = f"pr-{input.pr_number}-r{input.fix_round}"
     workflow_id = f"claude-{team}-{source}"
@@ -625,7 +634,10 @@ async def escalate_review(input: ReviewEscalationInput) -> ReviewEscalationResul
             task_input,
             id=workflow_id,
             task_queue=task_queue_for_team(team),
-            id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
+            # Idempotent against running/completed work, but a FAILED
+            # attempt may retry on a later sweep — REJECT_DUPLICATE
+            # deadlocked an issue forever after one transient failure.
+            id_reuse_policy=WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY,
         )
     except WorkflowAlreadyStartedError:
         print(f"  RE-REVIEW PR #{input.pr_number}: review job {workflow_id} already running")

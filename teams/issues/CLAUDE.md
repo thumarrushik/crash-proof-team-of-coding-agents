@@ -8,7 +8,7 @@ match the task.
 
 ## When the task arrives — the task list comes first
 
-Before any other work, create this run's task list with TodoWrite: exactly
+Before any other work, create this run's task list: exactly
 seven tasks, one per phase, named Understand, Reproduce, Plan, Implement,
 Test, Self-review, Report — in that order. Work them top to bottom, keep statuses
 current, and mark each completed as you finish it. The `phase-gate` Stop hook

@@ -40,6 +40,24 @@ def log_todowrite(work_dir: Path, todos: list[dict]) -> None:
                             "tool_input": {"todos": todos}}) + "\n")
 
 
+def log_taskboard(work_dir: Path, names: list[str], completed: set[str]) -> None:
+    """The other dialect, exactly as live runs log it: TaskCreate with the id
+    in tool_response, then TaskUpdate status changes addressed by taskId."""
+    (work_dir / ".claude").mkdir(exist_ok=True)
+    with open(work_dir / ".claude" / "hook-log.jsonl", "a") as f:
+        for i, name in enumerate(names, start=1):
+            f.write(json.dumps({
+                "tool_name": "TaskCreate",
+                "tool_input": {"subject": name, "description": name},
+                "tool_response": {"task": {"id": str(i), "subject": name}},
+            }) + "\n")
+            if name in completed:
+                f.write(json.dumps({
+                    "tool_name": "TaskUpdate",
+                    "tool_input": {"taskId": str(i), "status": "completed"},
+                }) + "\n")
+
+
 class PhaseGateTests(unittest.TestCase):
     """The work-issue discipline, enforced mechanically: every triggered run
     must create the SAME phase task list and complete it before it can stop."""
@@ -132,6 +150,37 @@ class PhaseGateTests(unittest.TestCase):
             log_todowrite(work_dir, [{"content": f"{p} the task",
                                       "status": "completed"} for p in phases])
             self.assertIsNone(run_gate("backend", work_dir))
+
+    def test_taskcreate_dialect_complete_board_allows(self) -> None:
+        """Live runs showed agents building the phase list with TaskCreate/
+        TaskUpdate instead of TodoWrite — the pilot's backend agent created
+        exactly its six phases and completed all of them, and the gate still
+        blocked because it only spoke TodoWrite. Both dialects must pass."""
+        for team in known_teams():
+            with self.subTest(team=team), tempfile.TemporaryDirectory() as tmp:
+                work_dir = Path(tmp)
+                phases = gate_phases(team)
+                log_taskboard(work_dir, phases, completed=set(phases))
+                self.assertIsNone(run_gate(team, work_dir),
+                                  f"{team}: completed task board must allow")
+
+    def test_taskcreate_dialect_unfinished_phase_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            phases = gate_phases("backend")
+            log_taskboard(work_dir, phases, completed=set(phases) - {"Report"})
+            decision = run_gate("backend", work_dir)
+            self.assertEqual(decision["decision"], "block")
+            self.assertIn("Report", decision["reason"])
+
+    def test_taskcreate_dialect_missing_phase_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            phases = [p for p in gate_phases("backend") if p != "Self-review"]
+            log_taskboard(work_dir, phases, completed=set(phases))
+            decision = run_gate("backend", work_dir)
+            self.assertEqual(decision["decision"], "block")
+            self.assertIn("Self-review", decision["reason"])
 
     def test_deadlock_guard_allows_after_three_blocks(self) -> None:
         """The gate never wedges a run: past MAX_BLOCKS it allows and leaves
