@@ -1,0 +1,87 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/how-its-built.md.
+  Render: assets/hero-src/render.sh -> assets/medium-heroes/how-its-built.png
+  Editorial style: an exploded cutaway — four anatomy plates lifted apart on a
+  blueprint axis: the agent core, the activity shell, the team lanes, the audit
+  plane. The engineering companion's promise: see every layer.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --amber2:#f59e0b;
+    --indigo:#818cf8; --indigo2:#6366f1;
+    --pulse:#34d399; --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{
+    font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 80% 42%, rgba(129,140,248,.16), transparent 60%),
+      radial-gradient(900px 480px at 12% 80%, rgba(245,158,11,.10), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;
+  }
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.70) 30%, rgba(2,6,23,0) 52%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:620px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .kicker{font-family:"SF Mono",Menlo,monospace;font-size:19px;letter-spacing:.28em;
+    color:var(--indigo);text-transform:uppercase;margin-bottom:22px}
+  h1{font-size:70px;line-height:1.05;font-weight:800;color:var(--t1);letter-spacing:-.015em}
+  .sub{margin-top:24px;font-size:24px;line-height:1.5;color:var(--t2);max-width:540px}
+  .anatomy{position:absolute;right:120px;top:46%;transform:translateY(-50%) ;z-index:2;
+    width:560px;height:520px}
+  .plate{position:absolute;left:0;width:460px;height:96px;border-radius:16px;
+    transform:skewX(-16deg);
+    border:1.5px solid rgba(129,140,248,.5);
+    background:linear-gradient(180deg,rgba(99,102,241,.18),rgba(99,102,241,.05));
+    box-shadow:0 20px 44px rgba(2,6,23,.5);
+    display:flex;align-items:center;gap:16px;padding:0 30px}
+  .plate .lab{font-family:"SF Mono",Menlo,monospace;font-size:19px;letter-spacing:.1em;
+    color:var(--t2);transform:skewX(16deg)}
+  .plate .chip{width:14px;height:14px;border-radius:50%;transform:skewX(16deg)}
+  .axis{position:absolute;left:225px;top:-8px;width:2px;height:536px;
+    background:linear-gradient(180deg,transparent,rgba(129,140,248,.55) 15%,rgba(129,140,248,.55) 85%,transparent);
+    z-index:-1}
+  .p1{top:8px;left:96px}
+  .p1 .chip{background:var(--amber);box-shadow:0 0 18px rgba(251,191,36,.9)}
+  .p1{border-color:rgba(251,191,36,.6);
+    background:linear-gradient(180deg,rgba(245,158,11,.20),rgba(245,158,11,.05))}
+  .p2{top:146px;left:64px}
+  .p3{top:284px;left:32px}
+  .p4{top:422px;left:0}
+  .p4 .chip{background:var(--pulse);box-shadow:0 0 16px rgba(52,211,153,.8)}
+  .p2 .chip,.p3 .chip{background:var(--indigo);box-shadow:0 0 14px rgba(129,140,248,.8)}
+  .note{position:absolute;right:100px;bottom:12px;width:640px;text-align:center;
+    font-family:"SF Mono",Menlo,monospace;font-size:16px;letter-spacing:.08em;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="anatomy">
+    <div class="axis"></div>
+    <div class="plate p1"><div class="chip"></div><div class="lab">The Agent Core · One Bounded Chunk</div></div>
+    <div class="plate p2"><div class="chip"></div><div class="lab">The Activity Shell · Heartbeats + Retries</div></div>
+    <div class="plate p3"><div class="chip"></div><div class="lab">The Team Lanes · Queues + Governance</div></div>
+    <div class="plate p4"><div class="chip"></div><div class="lab">The Audit Plane · Every Call on Record</div></div>
+  </div>
+  <div class="note">The Exploded View · Every Layer Committed to Version Control</div>
+  <div class="scrim"></div>
+  <div class="text">
+    <div class="kicker">The Engineering Companion</div>
+    <h1>How It&rsquo;s Built</h1>
+    <div class="sub">Anatomy of a crash-proof agent harness: the chunk, the shell, the lanes, and the audit plane that holds them honest.</div>
+  </div>
+</div>
+</body>
+</html>

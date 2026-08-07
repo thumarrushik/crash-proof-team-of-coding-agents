@@ -4,6 +4,8 @@
 
 *This is the mechanism half. The claims and the fine print — one engineer, a cheap fast model, single-digit runs, point estimates — live in the [flagship](a-crash-proof-team-of-coding-agents.md); the cost measurements live in the economics companion, [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md); all of it applies verbatim here.*
 
+![An exploded cutaway of the harness: four plates lifted apart on a blueprint axis — the agent core (one bounded chunk), the activity shell (heartbeats and retries), the team lanes (queues and governance), and the audit plane (every call on record)](../../assets/medium-heroes/how-its-built.png)
+
 ---
 
 Vocabulary, in one breath, for anyone arriving cold: this system runs headless Claude Code sessions under Temporal, a durable-execution engine. A **workflow** is the deterministic, replayable layer that decides what happens next; an **activity** is a sealed step that may do real-world work; a **chunk** is one bounded activity-run of the agent, capped at a fixed number of turns; a **heartbeat** is the liveness pulse a running activity sends. The flagship earns each of those words. This article spends them.
