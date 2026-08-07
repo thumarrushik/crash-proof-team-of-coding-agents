@@ -4,7 +4,7 @@
 
 *A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
-![Four price tags on a rail: three amber cents-priced mechanics — $0.113 continuous, $0.0035 warm resume, $0.021 cold resume — dwarfed by one red dollars-priced behavior, $2.13 for fine-chunking into 14 chunks](../../assets/medium-heroes/mechanics-cost-cents.png)
+![Four price tags on a rail: the eleven-cent continuous base ($0.113) and two amber cents-priced mechanics — $0.0035 warm resume, $0.021 cold resume — dwarfed by one red dollars-priced behavior, $2.13 for fine-chunking into 14 chunks](../../assets/medium-heroes/mechanics-cost-cents.png)
 
 ---
 
