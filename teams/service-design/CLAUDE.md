@@ -9,7 +9,7 @@ match the task.
 ## When the task arrives — the task list comes first
 
 Before any other work, create this run's task list with TodoWrite: exactly
-six tasks, one per phase, named Understand, Plan, Implement, Test,
+six tasks, one per phase, named Understand, Blueprint, Decide, Verify,
 Self-review, Report — in that order. Work them top to bottom, keep statuses
 current, and mark each completed as you finish it. The `phase-gate` Stop hook
 verifies the same list on every run: a run that skipped or renamed a phase
@@ -21,13 +21,15 @@ and note it in REPORT.md — never stall waiting for a human.
 1. **Understand.** Read the task and this file. Locate the relevant code with
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
-2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   A new service, split, or major capability is designed as a
-   [[service-blueprint]]; choices that are costly to reverse are recorded per
-   [[adr]] — numbered, immutable, superseded rather than edited.
-3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
-   stubs, no commented-out "later".
-4. **Test.** Design artifacts still get verified: apply the [[lean-service]]
+2. **Blueprint.** This lane's own step: a new service, split, or major
+   capability is designed as a [[service-blueprint]] — bounded-context
+   boundary, one writer per fact, per-dependency failure modes (down, slow,
+   wrong), capacity with arithmetic, alternatives considered.
+3. **Decide.** Record every choice that is costly to reverse per [[adr]] —
+   numbered, immutable, superseded rather than edited — and cite the ADR
+   number where the blueprint decides. No placeholders: no TBD sections, no
+   "will be defined during implementation".
+4. **Verify.** Design artifacts still get verified: apply the [[lean-service]]
    standard, run any checks or examples the design ships with, and show the
    output. If the task produced code, write the failing test first and run
    the suite until green.

@@ -9,7 +9,7 @@ match the task.
 ## When the task arrives — the task list comes first
 
 Before any other work, create this run's task list with TodoWrite: exactly
-six tasks, one per phase, named Understand, Plan, Implement, Test,
+six tasks, one per phase, named Understand, Design, Implement, Verify,
 Self-review, Report — in that order. Work them top to bottom, keep statuses
 current, and mark each completed as you finish it. The `phase-gate` Stop hook
 verifies the same list on every run: a run that skipped or renamed a phase
@@ -21,16 +21,19 @@ and note it in REPORT.md — never stall waiting for a human.
 1. **Understand.** Read the task and this file. Locate the relevant code with
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
-2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones.
+2. **Design.** Plan the surface before building it — this is the frontend's
+   own step: hierarchy, tokens, the four render states, and accessibility per
+   [[design-ui]]; classify every piece of state (server vs client) per
+   [[state-and-errors]]. Then decide the smallest correct change, reusing
+   existing components over inventing new ones.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
-4. **Test.** Follow the [[tdd]] loop: add or update tests (including a browser
-   test for user-visible behavior, per [[browser-e2e]]), then run the suite and
-   show the output. Surfaces follow [[design-ui]]; data handling follows
-   [[state-and-errors]] — all four render states get an assertion. A frontend change must also run the backend and
-   end-to-end suites when they exist — a change in one layer has to prove it
-   did not break the others. If a check fails, fix it and re-run until green.
+4. **Verify.** Follow the [[tdd]] loop, and prove user-visible behavior in the
+   browser per [[browser-e2e]] — all four render states get an assertion.
+   Run the suite and show the output. A frontend change must also run the
+   backend and end-to-end suites when they exist — a change in one layer has
+   to prove it did not break the others. If a check fails, fix it and re-run
+   until green.
 5. **Self-review.** Run the [[self-review]] checklist on your own diff:
    correctness, edge cases, security, leftovers, conventions. Fix anything
    you'd flag.

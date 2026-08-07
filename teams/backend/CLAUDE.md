@@ -9,7 +9,7 @@ match the task.
 ## When the task arrives — the task list comes first
 
 Before any other work, create this run's task list with TodoWrite: exactly
-six tasks, one per phase, named Understand, Plan, Implement, Test,
+six tasks, one per phase, named Understand, Contract, Implement, Test,
 Self-review, Report — in that order. Work them top to bottom, keep statuses
 current, and mark each completed as you finish it. The `phase-gate` Stop hook
 verifies the same list on every run: a run that skipped or renamed a phase
@@ -21,11 +21,13 @@ and note it in REPORT.md — never stall waiting for a human.
 1. **Understand.** Read the task and this file. Locate the relevant code with
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
-2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones. A change that
-   touches a served endpoint goes through [[api-contracts]]; a change that
-   touches schema, backfills, or seeds goes through [[data-migrations]]. The
-   [[lean-service]] standard governs how services are built here.
+2. **Contract.** Classify the change before writing code — this is the
+   backend's own step: a change touching a served endpoint goes through
+   [[api-contracts]] (additive ships in place; breaking means a new version
+   beside the old); a change touching schema, backfills, or seeds goes
+   through [[data-migrations]] (expand-contract, never one shot). Then decide
+   the smallest correct change, reusing existing functions over adding new
+   ones. The [[lean-service]] standard governs how services are built here.
 3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
    stubs, no commented-out "later".
 4. **Test.** Follow the [[tdd]] loop: add or update tests for the behavior you

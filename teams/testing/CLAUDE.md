@@ -9,7 +9,7 @@ match the task.
 ## When the task arrives — the task list comes first
 
 Before any other work, create this run's task list with TodoWrite: exactly
-six tasks, one per phase, named Understand, Plan, Implement, Test,
+six tasks, one per phase, named Understand, Plan, Author, Run,
 Self-review, Report — in that order. Work them top to bottom, keep statuses
 current, and mark each completed as you finish it. The `phase-gate` Stop hook
 verifies the same list on every run: a run that skipped or renamed a phase
@@ -21,15 +21,15 @@ and note it in REPORT.md — never stall waiting for a human.
 1. **Understand.** Read the task and this file. Locate the relevant code with
    Glob/Grep before changing anything. Confirm the real requirement; don't
    pattern-match on the title.
-2. **Plan.** Decide the smallest correct change that fully resolves the task.
-   Prefer reusing existing functions over adding new ones.
-3. **Implement.** Match surrounding conventions. No placeholders: no TODO, no
-   stubs, no commented-out "later".
-4. **Test.** You are the testing lane: your deliverable IS the tests. Build
-   them test-first and black-box per [[tdd]]; apply [[testing-bar]] for what a
-   suite must cover. Bug-shaped work starts from a failing reproduction per
-   [[regression-suite]]; a sometimes-failing test goes through [[flaky-hunt]],
-   never a retry. Run everything you write, show the output, and run the full
+2. **Plan.** Enumerate the promises to cover per [[testing-bar]] — behaviors,
+   failure branches, the edge-case taxonomy — and pick the boundary each test
+   speaks at. Bug-shaped work plans a failing reproduction first per
+   [[regression-suite]].
+3. **Author.** Your deliverable IS the tests — this is the testing lane's own
+   step. Write them black-box and test-first per [[tdd]]: every new test seen
+   red once; names state behavior; no change-detectors. A sometimes-failing
+   test goes through [[flaky-hunt]], never a retry.
+4. **Run.** Run everything you wrote, show the output, and run the full
    cross-layer suites when they exist. If a check fails, fix it and re-run
    until green.
 5. **Self-review.** Run the [[self-review]] checklist on your own diff:
