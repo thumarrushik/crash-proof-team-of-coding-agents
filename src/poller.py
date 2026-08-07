@@ -90,7 +90,7 @@ def _gh_get(path: str, token: str) -> list:
             "User-Agent": "temporal-claude-poller",
         },
     )
-    with urllib.request.urlopen(request) as response:
+    with urllib.request.urlopen(request, timeout=30) as response:
         return json.loads(response.read().decode())
 
 
@@ -107,7 +107,7 @@ def _gh_put(path: str, token: str, body: dict) -> tuple[int, dict]:
             "User-Agent": "temporal-claude-poller",
         },
     )
-    with urllib.request.urlopen(request) as response:
+    with urllib.request.urlopen(request, timeout=30) as response:
         raw = response.read().decode()
         return response.status, (json.loads(raw) if raw else {})
 
@@ -125,7 +125,7 @@ def _gh_post(path: str, token: str, body: dict) -> tuple[int, dict]:
             "User-Agent": "temporal-claude-poller",
         },
     )
-    with urllib.request.urlopen(request) as response:
+    with urllib.request.urlopen(request, timeout=30) as response:
         raw = response.read().decode()
         return response.status, (json.loads(raw) if raw else {})
 

@@ -275,7 +275,7 @@ def _gh_post(path: str, token: str, body: dict) -> tuple[int, dict]:
             "User-Agent": "temporal-claude-worker",
         },
     )
-    with urllib.request.urlopen(request) as response:
+    with urllib.request.urlopen(request, timeout=30) as response:
         raw = response.read().decode()
         return response.status, (json.loads(raw) if raw else {})
 
