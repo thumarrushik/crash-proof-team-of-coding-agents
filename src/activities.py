@@ -202,6 +202,9 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
     (claude_dir / "settings.json").write_text(json.dumps(settings, indent=2))
     for name in ("flag-rules.py", "rules.json", "phase-gate.py"):
         (claude_dir / name).write_text((team_claude / name).read_text())
+    # Fresh chunk, fresh deadlock budget: without this, a run that burned its
+    # 3 phase-gate blocks leaves every later chunk with a disarmed gate.
+    (claude_dir / "phase-gate-blocks").unlink(missing_ok=True)
 
     # -- knowledge: bind live --
     ws_skills = claude_dir / "skills"

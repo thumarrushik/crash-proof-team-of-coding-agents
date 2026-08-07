@@ -131,6 +131,19 @@ class PhaseGateTests(unittest.TestCase):
             self.assertIsNone(run_gate("backend", work_dir),
                               "fourth stop must be allowed through")
 
+    def test_bootstrap_resets_the_deadlock_budget_each_chunk(self) -> None:
+        """A chunk that burned its 3 blocks must not disarm the gate for the
+        next chunk — the per-chunk policy stamp clears the counter."""
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            _bootstrap_workspace(work_dir, "backend")
+            (work_dir / ".claude" / "phase-gate-blocks").write_text("3")
+            self.assertIsNone(run_gate("backend", work_dir))   # gate disarmed
+            _bootstrap_workspace(work_dir, "backend")          # next chunk
+            decision = run_gate("backend", work_dir)
+            self.assertIsNotNone(decision, "fresh chunk must re-arm the gate")
+            self.assertEqual(decision["decision"], "block")
+
     def test_bootstrap_stamps_the_gate_and_wires_the_stop_hook(self) -> None:
         for team in known_teams():
             with self.subTest(team=team), tempfile.TemporaryDirectory() as tmp:
