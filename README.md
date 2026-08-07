@@ -52,7 +52,7 @@ team: the workspace `CLAUDE.md` `@import`s the live mandate and `.claude/skills`
 is a symlink into the team folder, so the owning team's edits reach the very
 next chunk. Only *policy* (`settings.json`, `rules.json`, the hook) is stamped
 per chunk — an immutable, tamper-healing snapshot, with absolute-path denies
-injected so no workspace can write through into `teams/` itself. After editing the policy sources in `src/shared.py`: `python3 teams/sync.py`. Skills are edited directly in the owning team's folder.
+injected so no workspace can write through into `teams/` itself. Governance is edited directly in the owning team's folder — `python3 teams/validate.py` checks every folder (org floor, mandate sections, phase-gate parity) before it ships.
 
 ## The system (`src/`)
 

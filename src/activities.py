@@ -171,11 +171,10 @@ def _find_external_skill(name: str, team: str | None = None) -> Path | None:
 
 
 def _install_skill(skills_dir: Path, name: str, team: str | None = None) -> str:
-    """Install a skill folder into the workspace. Skills are real files (the
-    team's own folder under teams/<team>/.claude/skills, materialized by
-    teams/sync.py from the canonical skills/ pool); the operator's
-    ~/.claude/skills wins over the repo's. A skill named nowhere gets a small
-    placeholder so the profile stays runnable."""
+    """Install a skill folder into the workspace. Skills are real files owned
+    by the team's folder (teams/<team>/.claude/skills) — the only source there
+    is. A skill named nowhere gets a small placeholder so the profile stays
+    runnable."""
     skill_dir = skills_dir / name
     external = _find_external_skill(name, team)
     if external:
