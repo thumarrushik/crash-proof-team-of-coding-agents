@@ -101,6 +101,8 @@ Each team is its own queue on the workflow engine. A backend worker is trusted t
 
 The full anatomy — lanes and namespaces, the chunk mechanics, the audit plane, how a filed issue becomes a merged PR — is one click away in the engineering companion, [How It's Built](how-its-built.md). What belongs here is the one story that proves the team is real.
 
+One more property makes the team compound rather than merely repeat: it learns from its own runs. Every run leaves a corpus — the audit log of every tool call, the rule flags, the task board, the report — and the corpus gets mined, with each lesson landing back in version control as a committed rule, skill, or gate. The pattern has held from the first experiment (a written plea to stop wasting turns was ignored in every run; a hook flagged twelve of twelve instances) to the latest fleet night, where the audit trail those flags write was the record that debugged five live failures into five same-evening commits (`deploy/fleet-run-results.md`, `deploy/session-learnings.md`). A line in a prompt is a suggestion; a hook is a law — and a mined corpus is how the laws get written. The system's job is not to avoid failure; it is to convert failure into a commit.
+
 ## The Conflict That Resolved Itself
 
 We built a real target for it: a full-stack "snippets" web app, backend and frontend and browser tests, wired to a live deployment with a namespace per team and the poller on a schedule.
