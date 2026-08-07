@@ -44,7 +44,7 @@ Round two, the same question asked of a more open-ended task: the neutrality sha
 
 So what exploded? Behavior. A tight two-turn cap can send the agent to fourteen chunks and twenty-eight turns to finish what a continuous session did in nine: more turns, more output, and a growing prefix re-read at every seam. Coarse chunks never hand the agent that much room to wander. The chunking premium is real, *task-dependent*, and behavioral — which is why the earlier task, too small to wander in, measured it at zero. The rule this family ships as a default — **big chunks, always** — is not a guess about cache pricing. It is a guardrail against a slot machine.
 
-Chunks still earn their keep at any size — they are where the workflow gets visibility, steering, and a place to stand between attempts; [Anatomy of a Crash-Proof Agent Harness](how-its-built.md) walks that anatomy. You chunk for control. You just never chunk for cost.
+Chunks still earn their keep at any size — they are where the workflow gets visibility, steering, and a place to stand between attempts; [How It's Built](how-its-built.md) walks that anatomy. You chunk for control. You just never chunk for cost.
 
 ## The Baseline With No Engine at All
 

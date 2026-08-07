@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents — How It's Built
 
-### The engineering companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md): the chunk mechanics, the lanes, the audit plane, and the detour we measured our way out of.
+### The engineering companion: the chunk mechanics, the lanes, the audit plane, and the detour we measured our way out of.
 
 *This is the mechanism half. The claims and the fine print — one engineer, a cheap fast model, single-digit runs, point estimates — live in the [flagship](a-crash-proof-team-of-coding-agents.md); the cost measurements live in the economics companion, [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md); all of it applies verbatim here.*
 
@@ -13,6 +13,10 @@ Vocabulary, in one breath, for anyone arriving cold: this system runs headless C
 ## How a Chunk Actually Runs
 
 Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record: a session ID, an outcome, a cost, a turn count, the validated report, and nothing else. That typing is the wall. The workflow can only read fields on that record, so nothing the agent did unpredictably has a path into the replayable layer.
+
+![How a chunk ends, three typed exits: a bounded headless chunk emits a typed result record — a retryable error resumes the same session from its heartbeat, out-of-turns is a checkpoint that schedules the next resuming chunk, and only a genuinely terminal result stops the workflow, loudly, with the record kept](../../assets/diagrams/chunk-exits.png)
+*How a chunk ends. Three typed exits: resume, continue, or stop loudly — nothing ends silently.*
+
 
 Launching the agent inside that function is a short list of settings, and one of them does the quiet heavy lifting: the agent is told to load its configuration from the project directory *only*, never from the machine's own user config. That single choice is why the policy below is true rather than hopeful: the rules ride inside the workspace, so the same agent runs on every worker on every machine. The rest read as you would guess: resume the prior session, cap the run at a fixed number of turns so a chunk stops cleanly with its transcript intact, auto-accept file edits but gate every other tool behind an explicit allow-list, and force the closing report to match a schema so the workflow reads a real pass/fail value instead of parsing prose.
 

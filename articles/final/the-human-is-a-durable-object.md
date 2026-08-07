@@ -23,7 +23,7 @@ The bug underneath all of that is a category error, and naming it is most of the
 
 ## Four Primitives Make a Human
 
-Every operator capability in this system — ask a running job a question, steer it, cancel it — is built from the same small set of moves the workflow engine gives you for talking to a running job ([Anatomy of a Crash-Proof Agent Harness](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
+Every operator capability in this system — ask a running job a question, steer it, cancel it — is built from the same small set of moves the workflow engine gives you for talking to a running job ([How It's Built](how-its-built.md) tours them). Model the person on those same moves and the whole gate is a few lines.
 
 **The human reads: a query.** A running job can already answer questions from its live state without touching a database. We added one: *what are you blocked on, and how long until your deadline?* Point a small operator command-line tool at the fleet and you have an approvals inbox assembled from the workflows themselves, with no side store to keep in sync.[^inbox]
 
@@ -31,7 +31,7 @@ Every operator capability in this system — ask a running job a question, steer
 
 **The human decides: an update, with a validator.** This is the load-bearing choice. An update is synchronous and validated. The workflow inspects the decision before it enters the permanent record and can reject it outright, while the caller gets a definitive answer back instead of firing into the void. Ours rejects two things: a decision when no gate is open (you cannot approve something that is not asking), and a decision with no named decider. When either check fails, the code refuses to record it, so an unattributed approval never becomes history at all. (The name itself is self-asserted; authenticating *who* typed it is an identity-layer job this demo does not do.)[^decide]
 
-**The human is waited for, with a deadline: a durable timer.** The heart of the gate is one call: wait until a decision exists, or until the clock runs out. Because the wait is a workflow primitive, it survives worker crashes and deploys, exactly as the parent article's kill-9 runs demonstrated for this same workflow, while holding nothing open. A human's absence costs the system nothing. And when the deadline fires, the gate closes on the **deny** side and records a decision attributed to `deadline`, with a note saying how long it waited.[^gate] Six months later the history does not merely show that the merge did not happen. It shows that nobody answered, how long the system waited, and which policy closed the gate. Even silence gets a byline.
+**The human is waited for, with a deadline: a durable timer.** The heart of the gate is one call: wait until a decision exists, or until the clock runs out. Because the wait is a workflow primitive, it survives worker crashes and deploys, exactly as the main article's kill-9 runs demonstrated for this same workflow, while holding nothing open. A human's absence costs the system nothing. And when the deadline fires, the gate closes on the **deny** side and records a decision attributed to `deadline`, with a note saying how long it waited.[^gate] Six months later the history does not merely show that the merge did not happen. It shows that nobody answered, how long the system waited, and which policy closed the gate. Even silence gets a byline.
 
 The gate defaults off. Autonomy stays the resting state of the whole system; accountability is one boolean on the job.
 
@@ -66,6 +66,10 @@ In the main system the gate sits at one place: the review lane, right after the 
 ## The Denial That Fixes Itself
 
 A gate answers approve or deny, and there is a temptation to treat deny as the end of the line. It should not be. A denial that carries a reason is not a full stop; it is a request. So we closed that loop too. Like the gate, it is off by default; one flag turns it on.
+
+![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated — approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
+*The denial that fixes itself — bounded, then human. Every exit is attributed; the cap is the design.*
+
 
 When a pull request is not approved, it goes back to be fixed instead of just stopping. Three things count as not approved:
 
