@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/the-human-is-a-durable-object.md.
+  Editorial style: the gate as a waiting room — the durable job holds at a
+  gate; one named decision (or the deadline) writes exactly one line into
+  the event history. Even silence gets a byline.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --indigo:#818cf8;
+    --pulse:#34d399; --red:#f87171;
+    --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 80% 40%, rgba(129,140,248,.16), transparent 60%),
+      radial-gradient(900px 480px at 16% 82%, rgba(52,211,153,.10), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;}
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.70) 30%, rgba(2,6,23,0) 52%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:620px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .kicker{font-family:"SF Mono",Menlo,monospace;font-size:19px;letter-spacing:.28em;
+    color:var(--amber);text-transform:uppercase;margin-bottom:22px}
+  h1{font-size:66px;line-height:1.06;font-weight:800;color:var(--t1);letter-spacing:-.015em}
+  .sub{margin-top:24px;font-size:24px;line-height:1.5;color:var(--t2);max-width:560px}
+  .scene{position:absolute;right:90px;top:50%;transform:translateY(-50%);z-index:2;width:600px}
+  .gate{position:relative;height:190px;border-radius:20px;
+    border:1.5px solid rgba(129,140,248,.55);
+    background:linear-gradient(180deg,rgba(99,102,241,.16),rgba(99,102,241,.04));
+    display:flex;align-items:center;justify-content:space-between;padding:0 34px;
+    box-shadow:0 20px 44px rgba(2,6,23,.5)}
+  .job{display:flex;align-items:center;gap:16px}
+  .core{width:44px;height:44px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 24px rgba(251,191,36,.85)}
+  .jl{font-family:"SF Mono",Menlo,monospace;font-size:18px;color:var(--t2);line-height:1.5}
+  .timer{text-align:center;font-family:"SF Mono",Menlo,monospace;color:var(--t3)}
+  .dial{width:84px;height:84px;border-radius:50%;border:3px solid rgba(203,213,225,.5);
+    border-top-color:var(--indigo);margin:0 auto 8px}
+  .doors{display:flex;flex-direction:column;gap:14px}
+  .door{font-family:"SF Mono",Menlo,monospace;font-size:17px;letter-spacing:.05em;
+    padding:10px 18px;border-radius:10px;border:1.5px solid}
+  .ok{color:var(--pulse);border-color:rgba(52,211,153,.6)}
+  .no{color:var(--red);border-color:rgba(248,113,113,.55)}
+  .ledger{margin-top:34px;border-radius:14px;border:1.5px solid rgba(148,163,184,.35);
+    background:rgba(2,6,23,.55);padding:18px 24px;
+    font-family:"SF Mono",Menlo,monospace;font-size:17px;line-height:1.9;color:var(--t2)}
+  .ledger .dim{color:var(--t3)}
+  .ledger .name{color:var(--pulse)}
+  .ledger .dl{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="scene">
+    <div class="gate">
+      <div class="job"><div class="core"></div>
+        <div class="jl">The Durable Job<br><span style="color:var(--t3)">waiting · holding nothing</span></div></div>
+      <div class="timer"><div class="dial"></div>deadline<br>armed</div>
+      <div class="doors">
+        <div class="door ok">approve --by rushik</div>
+        <div class="door no">deny · by deadline</div>
+      </div>
+    </div>
+    <div class="ledger">
+      <span class="dim">event history</span><br>
+      update accepted · decider: <span class="name">rushik</span><br>
+      <span class="dim">— or —</span> timer fired · decider: <span class="dl">deadline</span> · waited 24h
+    </div>
+  </div>
+  <div class="scrim"></div>
+  <div class="text">
+    <div class="kicker">The Human Gate</div>
+    <h1>The Human Is a<br>Durable Object</h1>
+    <div class="sub">Consent is a state, not a message: the job waits, a named decision lands in the history — and even silence gets a byline.</div>
+  </div>
+</div>
+</body>
+</html>

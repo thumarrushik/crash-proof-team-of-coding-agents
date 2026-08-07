@@ -1,4 +1,4 @@
-# Done Is Not a Claim
+# A Crash-Proof Team of Coding Agents — Done Is Not a Claim
 
 ### An autonomous agent stops when the work *looks* done. A `Stop` hook makes "done" something it has to prove — and the same hard deny that wrecks a run mid-flight completes it at the exit. It is not whether you block, it is where.
 

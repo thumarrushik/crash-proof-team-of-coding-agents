@@ -19,7 +19,7 @@ every number traces to an evidence file in `deploy/`.
 | Article | What it measures / builds |
 |---|---|
 | **A Crash-Proof Team of Coding Agents** (flagship) | kill -9 recovery as the same session for four cents; nine durable jobs carrying an issue from filed to merged; a real merge conflict resolved with no human decision in the loop |
-| **Anatomy of a Crash-Proof Agent Harness** | the engineering companion: chunk anatomy, lanes and namespaces, the audit plane, the savepoint detour, the corpus loop |
+| **How It's Built** (engineering companion) | the engineering companion: chunk anatomy, lanes and namespaces, the audit plane, the savepoint detour, the corpus loop |
 | **Mechanics Cost Cents, Behavior Costs Dollars** | every boundary priced: an eleven-cent task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the economics canary that re-probes it all on a schedule |
 | **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern — a mid-flight block prevented 5/5 but finished the task 1/5 |
 | **Done Is Not a Claim** | a `Stop`-hook gate on "done" — forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |

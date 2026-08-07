@@ -1,4 +1,4 @@
-# Mechanics Cost Cents, Behavior Costs Dollars
+# A Crash-Proof Team of Coding Agents — Mechanics Cost Cents, Behavior Costs Dollars
 
 ### We measured every boundary of a crash-proof coding agent: an eleven-cent task, a third-of-a-cent crash recovery, and the same code running $0.03 to $2.13. The durability engine was measurably free. The agent's behavior was the bill.
 

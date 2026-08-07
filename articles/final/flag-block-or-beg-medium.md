@@ -1,4 +1,4 @@
-# Flag, Block, or Beg
+# A Crash-Proof Team of Coding Agents — Flag, Block, or Beg
 
 ### A prompt asks the agent to behave. A flag records when it doesn't. A block stops it cold: five for five on the waste — and one for five on the task. They are not three flavors of one thing; they are three layers, and the measurements say which job each layer is for.
 

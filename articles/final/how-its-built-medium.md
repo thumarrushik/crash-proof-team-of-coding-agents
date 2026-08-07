@@ -1,4 +1,4 @@
-# Anatomy of a Crash-Proof Agent Harness
+# A Crash-Proof Team of Coding Agents — How It's Built
 
 ### The engineering companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md): the chunk mechanics, the lanes, the audit plane, and the detour we measured our way out of.
 

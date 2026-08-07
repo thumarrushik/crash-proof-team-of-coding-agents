@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/done-is-not-a-claim.md.
+  Editorial style: the same hard deny in two places — a mid-flight barrier
+  derails the run (1/5), an exit gate completes it (5/5). Placement is the
+  whole finding.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --indigo:#818cf8;
+    --pulse:#34d399; --red:#f87171;
+    --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 82% 30%, rgba(248,113,113,.12), transparent 60%),
+      radial-gradient(900px 480px at 80% 78%, rgba(52,211,153,.13), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;}
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.70) 30%, rgba(2,6,23,0) 52%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:620px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .kicker{font-family:"SF Mono",Menlo,monospace;font-size:19px;letter-spacing:.28em;
+    color:var(--pulse);text-transform:uppercase;margin-bottom:22px}
+  h1{font-size:70px;line-height:1.05;font-weight:800;color:var(--t1);letter-spacing:-.015em}
+  .sub{margin-top:24px;font-size:24px;line-height:1.5;color:var(--t2);max-width:540px}
+  .rows{position:absolute;right:80px;top:50%;transform:translateY(-50%);z-index:2;
+    display:flex;flex-direction:column;gap:56px}
+  .lane{position:relative;width:640px;height:150px;border-radius:18px;
+    border:1.5px solid rgba(148,163,184,.3);
+    background:linear-gradient(180deg,rgba(148,163,184,.10),rgba(148,163,184,.03));
+    display:flex;align-items:center;padding:0 28px;gap:22px}
+  .track{position:absolute;left:120px;right:150px;top:50%;height:2px;
+    background:rgba(203,213,225,.35)}
+  .runner{width:40px;height:40px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 22px rgba(251,191,36,.8);z-index:1}
+  .wall{position:absolute;width:10px;height:84px;border-radius:5px;background:var(--red);
+    box-shadow:0 0 18px rgba(248,113,113,.8);top:33px}
+  .mid .wall{left:300px}
+  .exit .wall{right:118px;background:var(--pulse);box-shadow:0 0 18px rgba(52,211,153,.8)}
+  .flag{position:absolute;right:34px;font-family:"SF Mono",Menlo,monospace;
+    font-weight:700;font-size:26px}
+  .mid .flag{color:var(--red)}
+  .exit .flag{color:var(--pulse)}
+  .lab{position:absolute;left:28px;bottom:10px;font-family:"SF Mono",Menlo,monospace;
+    font-size:15px;letter-spacing:.12em;color:var(--t3)}
+  .crash{position:absolute;left:320px;top:44px;color:var(--red);font-size:30px;
+    font-weight:800;transform:rotate(-8deg)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="rows">
+    <div class="lane mid">
+      <div class="runner"></div><div class="track"></div><div class="wall"></div>
+      <div class="crash">✕</div>
+      <div class="flag">1/5</div>
+      <div class="lab">Block Mid-Flight · The Run Derails</div>
+    </div>
+    <div class="lane exit">
+      <div class="runner"></div><div class="track"></div><div class="wall"></div>
+      <div class="flag">5/5</div>
+      <div class="lab">Gate The Exit · The Step Gets Done</div>
+    </div>
+  </div>
+  <div class="scrim"></div>
+  <div class="text">
+    <div class="kicker">The Finish Boundary</div>
+    <h1>Done Is Not a Claim</h1>
+    <div class="sub">The same hard deny wrecks the run mid-flight and completes it at the exit. It is not whether you block — it is where.</div>
+  </div>
+</div>
+</body>
+</html>

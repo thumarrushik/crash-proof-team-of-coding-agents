@@ -1,10 +1,12 @@
-# The Human Is a Durable Object
+# A Crash-Proof Team of Coding Agents — The Human Is a Durable Object
 
 ### Green tests should not authorize a production merge; a person should. So we gave the team exactly one human decision — not a chat message that scrolls away, but a durable place the job waits in, deny-safe when nobody answers: ten checks out of ten on a real Temporal server.
 
 *A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
 
 ---
+
+![The human gate as a waiting room: the durable job holds at the gate while a deadline timer arms; either a named approval or the deadline itself writes exactly one attributed decision into the event history — even silence gets a byline](../../assets/medium-heroes/the-human-is-a-durable-object.png)
 
 ![The gate: the operator reads what is blocked through a query and decides through a validated update; a deadline timer denies attributably if nobody answers; either way, exactly one attributable decision lands in the event history](../../assets/diagrams/human-gate.png)
 *The Human Gate. The operator reads what is blocked through a query and answers through a validated update. If nobody answers, the deadline timer denies, attributably. Either path writes exactly one decision into the history.*

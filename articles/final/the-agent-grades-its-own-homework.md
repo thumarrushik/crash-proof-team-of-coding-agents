@@ -1,4 +1,4 @@
-# The Agent Grades Its Own Homework
+# A Crash-Proof Team of Coding Agents — The Agent Grades Its Own Homework
 
 ### An agent team's merge gate turns on a single self-reported boolean: tests_passed. We measured that boolean against the truth, and it failed three times in ten. Not in the direction anyone feared.
 

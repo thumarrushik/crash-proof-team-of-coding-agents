@@ -1,0 +1,87 @@
+<!doctype html>
+<!--
+  Hero source for articles/final/flag-block-or-beg.md.
+  Editorial style: three lanes for stopping one redundant `ls` — a dashed
+  rule it walks through, a camera that records it, a barrier that stops it.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --slate:#0f172a; --ink:#020617;
+    --amber:#fbbf24; --indigo:#818cf8;
+    --pulse:#34d399; --red:#f87171;
+    --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1600px;height:640px}
+  body{font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 84% 36%, rgba(129,140,248,.15), transparent 60%),
+      radial-gradient(900px 480px at 70% 84%, rgba(251,191,36,.10), transparent 62%),
+      linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
+    overflow:hidden;}
+  .stage{position:relative;width:1600px;height:640px}
+  .grid{position:absolute;inset:0;
+    background-image:radial-gradient(rgba(148,163,184,.08) 1px, transparent 1.4px);
+    background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.70) 30%, rgba(2,6,23,0) 52%);}
+  .text{position:absolute;left:84px;top:0;height:100%;width:600px;
+    display:flex;flex-direction:column;justify-content:center;z-index:3}
+  .kicker{font-family:"SF Mono",Menlo,monospace;font-size:19px;letter-spacing:.28em;
+    color:var(--indigo);text-transform:uppercase;margin-bottom:22px}
+  h1{font-size:74px;line-height:1.05;font-weight:800;color:var(--t1);letter-spacing:-.015em}
+  .sub{margin-top:24px;font-size:24px;line-height:1.5;color:var(--t2);max-width:520px}
+  .lanes{position:absolute;right:80px;top:50%;transform:translateY(-50%);z-index:2;
+    display:flex;flex-direction:column;gap:40px}
+  .lane{position:relative;width:660px;height:118px;border-radius:16px;
+    border:1.5px solid rgba(148,163,184,.3);
+    background:linear-gradient(180deg,rgba(148,163,184,.10),rgba(148,163,184,.03));
+    display:flex;align-items:center;padding:0 26px}
+  .cmd{font-family:"SF Mono",Menlo,monospace;font-size:24px;font-weight:700;color:var(--amber)}
+  .track{position:absolute;left:130px;right:200px;top:50%;height:2px;background:rgba(203,213,225,.35)}
+  .mark{position:absolute;top:50%;transform:translate(-50%,-50%);}
+  .dashed{left:56%;width:8px;height:70px;border-left:3px dashed rgba(203,213,225,.6)}
+  .cam{left:56%;font-size:34px}
+  .bar{left:56%;width:10px;height:70px;border-radius:5px;background:var(--red);
+    box-shadow:0 0 16px rgba(248,113,113,.8)}
+  .verdict{position:absolute;right:26px;font-family:"SF Mono",Menlo,monospace;
+    font-size:18px;letter-spacing:.06em;color:var(--t2);text-align:right;line-height:1.5}
+  .lab{position:absolute;left:26px;bottom:8px;font-family:"SF Mono",Menlo,monospace;
+    font-size:14px;letter-spacing:.12em;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="lanes">
+    <div class="lane">
+      <div class="cmd">$ ls</div><div class="track"></div>
+      <div class="mark dashed"></div>
+      <div class="verdict">walks through<br><span style="color:var(--t3)">obeyed 0/5</span></div>
+      <div class="lab">Beg · A Rule In The Prompt</div>
+    </div>
+    <div class="lane">
+      <div class="cmd">$ ls</div><div class="track"></div>
+      <div class="mark cam">📷</div>
+      <div class="verdict">recorded, passes<br><span style="color:var(--amber)">caught 12/12</span></div>
+      <div class="lab">Flag · PostToolUse Hook</div>
+    </div>
+    <div class="lane">
+      <div class="cmd">$ ls</div><div class="track"></div>
+      <div class="mark bar"></div>
+      <div class="verdict">never runs<br><span style="color:var(--red)">task finished 1/5</span></div>
+      <div class="lab">Block · PreToolUse Deny</div>
+    </div>
+  </div>
+  <div class="scrim"></div>
+  <div class="text">
+    <div class="kicker">The Tool Boundary</div>
+    <h1>Flag, Block,<br>or Beg</h1>
+    <div class="sub">A prompt asks. A flag records. A block prevents — and can cost the task. Three layers, measured on one waste pattern.</div>
+  </div>
+</div>
+</body>
+</html>
