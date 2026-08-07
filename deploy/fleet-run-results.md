@@ -60,3 +60,14 @@ the always-on monitor, diagnosed from the audit trail the hooks write, fixed
 in the governance-or-code layer it belonged to, verified by the suite, and
 pushed — while the fleet kept running. The system's job is not to avoid
 failure; it is to convert failure into a commit.
+
+## Postscript: the thirteenth merge (2026-08-07 morning)
+
+PR #21 — the one the review lane had blocked for cause (a breaking date
+change with no migration for pre-existing rows) — was finished by the fix
+loop on operator request: `escalate_fix` handed the review's own blocking
+finding to the backend lane, the fix job shipped migration 2 (deriving
+`created_at` from legacy `added_at`) with an upgrade-path test, and the
+sha-keyed re-review merged it. Final board: **13 of 13 issues delivered** —
+twelve autonomously, one refused until its incompleteness was actually
+fixed, then delivered through the same machinery that refused it.
