@@ -173,6 +173,7 @@ def list_reviewable_prs(repo: str, token: str) -> list[PullRequestEvent]:
                 draft=bool(pr.get("draft")),
                 labels=_labels(pr),
                 head_ref=(pr.get("head") or {}).get("ref", ""),
+                head_sha=(pr.get("head") or {}).get("sha", ""),
             )
         )
     return events
@@ -211,7 +212,7 @@ def _task_input_for(activity_plan, repo: str | None, model: str | None,
     """
     source = activity_plan.source or ""
     if source.startswith("pr-"):
-        pr_number = int(source.split("-")[-1])
+        pr_number = int(source.split("-")[1])   # "pr-42" and "pr-42-<sha7>"
         branch = getattr(activity_plan, "head_ref", "") or None
         cfg = review_cfg or {}
         return TaskInput(task=activity_plan.prompt, team=activity_plan.team, model=model,
@@ -399,7 +400,16 @@ async def escalate_conflict(input: ConflictEscalationInput) -> ConflictEscalatio
         except urllib.error.HTTPError as err:
             print(f"  ESCALATE PR #{input.pr_number}: can't read issue #{issue_number} ({err.code}); default team")
 
+    # Same convergence rule as reviews: key the resolve by the head SHA so a
+    # PR that re-conflicts after this resolve merges can be resolved again.
     source = f"resolve-pr-{input.pr_number}"
+    try:
+        head = _gh_get(f"/repos/{input.repo}/pulls/{input.pr_number}", token)
+        sha = (head.get("head") or {}).get("sha", "") if isinstance(head, dict) else ""
+        if sha:
+            source += f"-{sha[:7]}"
+    except Exception:
+        pass  # un-suffixed id keeps the old (single-shot) behavior
     workflow_id = f"claude-{team}-{source}"
     task_input = TaskInput(
         task=_resolve_prompt(input.repo, input.pr_number, input.branch, input.base, team),

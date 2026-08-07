@@ -130,6 +130,20 @@ class PollerTests(unittest.IsolatedAsyncioTestCase):
         ti = client.started[0]["input"]
         self.assertEqual(ti.team, "review")
         self.assertEqual(ti.source, "pr-42")
+
+    def test_review_source_is_keyed_by_head_sha(self) -> None:
+        """Every new push is a NEW review job: without the sha key, a completed
+        review blocked re-review after a conflict-resolve push and cascade
+        conflicts never converged (observed live on PRs #21-#23)."""
+        event = PullRequestEvent(number=42, title="t", action="ready_for_review",
+                                 draft=False, head_ref="claude/issue-9",
+                                 head_sha="abcdef1234567890")
+        activity = plan_pr_review_activity(event)
+        self.assertEqual(activity.source, "pr-42-abcdef1")
+        self.assertEqual(poller.workflow_id_for(activity), "claude-review-pr-42-abcdef1")
+        ti = poller._task_input_for(activity, repo="o/r", model=None)
+        self.assertEqual(ti.pr_number, 42)          # parsed despite the suffix
+        self.assertEqual(ti.source, "pr-42-abcdef1")
         self.assertEqual(ti.pr_number, 42)
         self.assertEqual(ti.branch, "claude/issue-9")   # checks out the PR's branch
 

@@ -32,6 +32,7 @@ class PullRequestEvent:
     labels: tuple[str, ...] = ()
     linked_issues: tuple[int, ...] = ()
     head_ref: str = ""
+    head_sha: str = ""
 
 
 @dataclass(frozen=True)
@@ -135,7 +136,10 @@ def plan_pr_review_activity(event: PullRequestEvent) -> TeamActivity | None:
         return None
 
     team = "review"
-    source = f"pr-{event.number}"
+    # Keyed by head SHA: every new push is a NEW review job. Without this a
+    # completed review blocked re-review after a conflict-resolve push, and
+    # cascade conflicts could never converge (observed live).
+    source = f"pr-{event.number}" + (f"-{event.head_sha[:7]}" if event.head_sha else "")
     linked = ", ".join(f"#{number}" for number in event.linked_issues) or "none"
     prompt = f"""Review pull request #{event.number}: {event.title}
 
