@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Kill the worker mid-task and the agent finishes the job anyway — same session, four cents. This is what durability buys when one coding agent becomes a team governed by committed skills and hooks.
+### Nine durable jobs carry an issue from filed to merged, with Claude Code doing the judgment work — building, reviewing, resolving — under committed skills, enforced hooks, and human-controlled settings. We killed the worker mid-task to prove it: same session, four cents.
 
 ---
 
