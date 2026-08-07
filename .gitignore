@@ -13,3 +13,6 @@ deploy/*.log
 # Anchored on purpose: teams/*/.claude is the committed governance unit —
 # an unanchored .claude/ silently excluded every team's policy and skills.
 /.claude/
+
+# live dev-server state (file-backed history; never committed)
+deploy/temporal-dev.db
