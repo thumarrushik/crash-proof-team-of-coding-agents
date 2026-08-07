@@ -93,6 +93,12 @@ class TeamSelfSufficiencyTests(unittest.TestCase):
             _bootstrap_workspace(work_dir, "backend")
             self.assertTrue((work_dir / ".claude" / "skills" / "lean-service" / "HARD-RULES.md").exists(),
                             "lean-service topic files should reach the backend workspace")
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            _bootstrap_workspace(work_dir, "testing")
+            rules = json.loads((work_dir / ".claude" / "rules.json").read_text())
+            self.assertIn("sleep_as_synchronization", [r["name"] for r in rules],
+                          "testing lane's sleep rule should reach its workspace")
 
     def test_every_mandate_ref_resolves_to_an_owned_skill(self) -> None:
         """No dangling [[skill]] references: every skill a mandate tells the
