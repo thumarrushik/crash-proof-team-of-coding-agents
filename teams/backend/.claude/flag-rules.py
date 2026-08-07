@@ -12,7 +12,9 @@ for r in rules:
     if r.get("kind") == "bash_regex" and tool == "Bash" and re.match(r["pattern"], cmd):
         hit = {"rule": r["name"], "cmd": cmd[:120]}
     elif r.get("kind") == "tool_use" and tool in r.get("tools", "").split(","):
-        hit = {"rule": r["name"], "tool": tool}
+        path = str((d.get("tool_input") or {}).get("file_path", ""))
+        if not any(x in path for x in r.get("exclude_paths", [])):
+            hit = {"rule": r["name"], "tool": tool}
     if hit:
         with open(".claude/rule-flags.jsonl", "a") as f:
             f.write(json.dumps(hit) + "\n")

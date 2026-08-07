@@ -182,6 +182,21 @@ class PhaseGateTests(unittest.TestCase):
             self.assertEqual(decision["decision"], "block")
             self.assertIn("Self-review", decision["reason"])
 
+    def test_returned_report_satisfies_the_report_phase(self) -> None:
+        """Fleet learning: every run was blocked exactly once because agents
+        stop at the moment they return structured output — one beat before
+        marking the final task. The report IS the Report phase's completion."""
+        with tempfile.TemporaryDirectory() as tmp:
+            work_dir = Path(tmp)
+            phases = gate_phases("backend")
+            # all phases completed except Report, but StructuredOutput returned
+            log_taskboard(work_dir, phases, completed=set(phases) - {"Report"})
+            with open(work_dir / ".claude" / "hook-log.jsonl", "a") as f:
+                f.write(json.dumps({"tool_name": "StructuredOutput",
+                                    "tool_input": {}}) + "\n")
+            self.assertIsNone(run_gate("backend", work_dir),
+                              "returned report must satisfy the Report phase")
+
     def test_deadlock_guard_allows_after_three_blocks(self) -> None:
         """The gate never wedges a run: past MAX_BLOCKS it allows and leaves
         the miss in the audit trail (the Stop-gate article's ~8-block lesson)."""

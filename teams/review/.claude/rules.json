@@ -7,6 +7,9 @@
   {
     "name": "review_lane_edits_code",
     "kind": "tool_use",
-    "tools": "Write,Edit"
+    "tools": "Write,Edit",
+    "exclude_paths": [
+      "REPORT.md"
+    ]
   }
 ]

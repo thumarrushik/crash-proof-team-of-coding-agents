@@ -117,6 +117,17 @@ class FlagRulesHookTest(unittest.TestCase):
         self.assertEqual([f["rule"] for f in flags],
                          ["redundant_orientation_ls", "redundant_orientation_ls"])
 
+    def test_review_lane_report_write_is_not_flagged(self):
+        """Fleet learning: all 22 review-lane flags were the mandated
+        REPORT.md write — pure noise drowning real violations. The rule's
+        exclude_paths carves out exactly that file."""
+        rules = DEFAULT_RULES + TEAM_RULES["review"]
+        flags = self._run_hook(rules, [
+            {"tool_name": "Write", "tool_input": {"file_path": "REPORT.md"}},
+            {"tool_name": "Write", "tool_input": {"file_path": "src/app.py"}},
+        ])
+        self.assertEqual([f["rule"] for f in flags], ["review_lane_edits_code"])
+
     def test_review_lane_tool_rule_flags_edits(self):
         rules = DEFAULT_RULES + TEAM_RULES["review"]
         flags = self._run_hook(rules, [

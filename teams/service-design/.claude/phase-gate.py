@@ -39,9 +39,9 @@ def block(reason: str) -> None:
 def _collect():
     """Return (todo_lists, tasks) from the audit log: every TodoWrite call's
     todos, and an id->(name, completed) map built from TaskCreate/TaskUpdate."""
-    todo_calls, tasks = [], {}
+    todo_calls, tasks, saw_report = [], {}, False
     if not os.path.exists(LOG):
-        return todo_calls, tasks
+        return todo_calls, tasks, saw_report
     with open(LOG) as f:
         for line in f:
             try:
@@ -57,11 +57,13 @@ def _collect():
                 task = resp.get("task") if isinstance(resp, dict) else None
                 tid = str((task or {}).get("id", "")) or str(len(tasks) + 1)
                 tasks[tid] = {"name": args.get("subject", ""), "done": False}
+            elif tool == "StructuredOutput":
+                saw_report = True
             elif tool == "TaskUpdate":
                 tid = str(args.get("taskId", ""))
                 if tid in tasks and args.get("status"):
                     tasks[tid]["done"] = args["status"] == "completed"
-    return todo_calls, tasks
+    return todo_calls, tasks, saw_report
 
 
 def main() -> None:
@@ -69,7 +71,7 @@ def main() -> None:
         json.load(sys.stdin)  # hook input; presence is all we need
     except Exception:
         pass
-    todo_calls, tasks = _collect()
+    todo_calls, tasks, saw_report = _collect()
     order = ", ".join(PHASES)
     if todo_calls:  # TodoWrite dialect: judge the latest full list
         last = todo_calls[-1]
@@ -97,6 +99,9 @@ def main() -> None:
         )
     phase_not_done = [n for n in not_done
                       if any(n.strip().lower().startswith(p.lower()) for p in PHASES)]
+    if saw_report:  # the returned structured report IS the Report phase's completion
+        phase_not_done = [n for n in phase_not_done
+                         if not n.strip().lower().startswith("report")]
     if phase_not_done:
         block(
             "Finish every phase before stopping. Not completed: "
