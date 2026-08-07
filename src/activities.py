@@ -152,46 +152,6 @@ def _session_id_from_heartbeat(details: Sequence[Any]) -> str | None:
     return None
 
 
-def _skill_search_roots(team: str | None = None) -> list[Path]:
-    repo_root = Path(__file__).resolve().parents[1]
-    # Skills live in the teams folder and NOWHERE else — no operator pool,
-    # no shared pool, no fallback outside teams/.
-    roots = []
-    if team:
-        roots.append(repo_root / "teams" / team / ".claude" / "skills")
-    return roots
-
-
-def _find_external_skill(name: str, team: str | None = None) -> Path | None:
-    for root in _skill_search_roots(team):
-        candidate = root / name
-        if (candidate / "SKILL.md").exists():
-            return candidate
-    return None
-
-
-def _install_skill(skills_dir: Path, name: str, team: str | None = None) -> str:
-    """Install a skill folder into the workspace. Skills are real files owned
-    by the team's folder (teams/<team>/.claude/skills) — the only source there
-    is. A skill named nowhere gets a small placeholder so the profile stays
-    runnable."""
-    skill_dir = skills_dir / name
-    external = _find_external_skill(name, team)
-    if external:
-        shutil.copytree(external, skill_dir, dirs_exist_ok=True)
-        return f"external:{external}"
-    placeholder = f"""---
-name: {name}
-description: Team-local placeholder skill for the {name} discipline. Use when this team profile names the skill and no copy exists on this worker.
----
-
-No `{name}` skill was found on this worker. Follow the repository's own
-instructions, keep changes small, verify with real checks, and record any
-assumption in REPORT.md.
-"""
-    skill_dir.mkdir(exist_ok=True)
-    (skill_dir / "SKILL.md").write_text(placeholder)
-    return "placeholder"
 
 
 def _write_team_memory(work_dir: Path, claude_dir: Path, team: str, installed: dict[str, str]) -> None:
