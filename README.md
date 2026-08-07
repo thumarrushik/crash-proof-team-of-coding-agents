@@ -32,10 +32,12 @@ Every lane is a physical folder — its identity in version control:
 
 ```
 teams/<team>/
-  CLAUDE.md          the team's mandate: every task follows named phases
-                     (Understand -> Plan -> Implement -> Test -> Self-review
-                     -> Report), "do not skip", per-lane duties, the harness
-                     contract (the harness owns git)
+  CLAUDE.md          the team's mandate: every task follows named phases,
+                     "do not skip" — and each lane's phases are its OWN
+                     (backend runs Contract, issues runs Reproduce, frontend
+                     runs Design/Verify, service-design runs Blueprint/Decide,
+                     testing runs Author/Run, review runs Inspect/Run) — plus
+                     the harness contract (the harness owns git)
   .claude/skills/    the team's skills — OWNED by the team folder; skills live
                      here and NOWHERE else (no shared pool, no operator pool)
   .claude/           settings.json, rules.json, the flag-rules audit hook, and
