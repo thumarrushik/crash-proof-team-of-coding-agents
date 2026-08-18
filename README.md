@@ -1,5 +1,9 @@
 # A Crash-Proof Team of Coding Agents
 
+### Kill it. It finishes anyway.
+
+*A crash-proof, self-governing team of coding agents — every claim measured, every number a receipt.*
+
 **Claude Code remembers the conversation; Temporal remembers the job.** This
 repo is the final publication kit and the running system behind it: a durable
 delivery team of single-purpose Temporal activities (nine in the measured
@@ -39,20 +43,27 @@ Bring up the full always-on fleet (a worker per lane, the poller, the schedule
 watching a repo) with `./deploy/stack-up.sh`, and tear it down with
 `./deploy/stack-down.sh`.
 
-## The articles (`articles/final/`)
+## The family (`articles/final/`)
 
-Each ships as canonical markdown + print PDF + a Medium-paste variant, and
-every number traces to an evidence file in `deploy/`.
+One flagship and six companions, meant to be read as a set and in this order:
+the claim, then the mechanism, then the bill, then the three trust boundaries,
+then the person. No two share a job. Each ships as canonical markdown + print
+PDF + a Medium-paste variant, and every number traces to an evidence file in
+`deploy/`.
 
-| Article | What it measures / builds |
-|---|---|
-| **A Crash-Proof Team of Coding Agents** (flagship) | kill -9 recovery as the same session for four cents; nine durable jobs carrying an issue from filed to merged; a real merge conflict resolved with no human decision in the loop |
-| **How It's Built** (engineering companion) | chunk anatomy, lanes and namespaces, the audit plane, the savepoint detour, the corpus loop |
-| **Mechanics Cost Cents, Behavior Costs Dollars** | every boundary priced: an eleven-cent task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the economics canary that re-probes it all on a schedule |
-| **Flag, Block, or Beg** | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern: a mid-flight block prevented 5/5 but finished the task 1/5 |
-| **Done Is Not a Claim** | a `Stop`-hook gate on "done" that forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
-| **The Agent Grades Its Own Homework** | the self-reported `tests_passed` boolean vs ground truth: wrong 3 in 10 (all in the builder arm; the isolated reviewer arm was honest 5/5), every miss a false alarm; the harness re-run corrects both directions |
-| **The Human Is a Durable Object** | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
+| # | Article | Its job | The receipt |
+|---|---|---|---|
+| 1 | **A Crash-Proof Team of Coding Agents** (flagship) | the claim | kill -9 mid-task and the run finishes as the **same session** for four cents — resumed from its last heartbeat, not a saved checkpoint; a real merge conflict resolved with no human decision in the loop |
+| 2 | **How It's Built** | the mechanism | chunk anatomy, lanes and namespaces, sticky-queue worker affinity, the audit plane, the corpus loop |
+| 3 | **Mechanics Cost Cents, Behavior Costs Dollars** | the bill | every boundary priced: an ~11¢ task, a $0.0035 crash resume, the $0.03–$2.13 fine-chunking spread, the bare-loop baseline, and the canary that re-probes it all on a schedule |
+| 4 | **Flag, Block, or Beg** | the tool-call boundary | beg (prompt) vs flag (`PostToolUse`) vs block (`PreToolUse`) on one waste pattern: a mid-flight block prevented 5/5 but finished the task 1/5 |
+| 5 | **Done Is Not a Claim** | the finish boundary | a `Stop`-hook gate on "done" forced the skipped step 5/5 where the mid-flight block derailed: it is not whether you block, it is where |
+| 6 | **The Agent Grades Its Own Homework** | the verdict boundary | the self-reported `tests_passed` boolean vs ground truth: wrong 3 in 10 (all in the builder arm; the isolated reviewer arm was honest 5/5), every miss a false alarm; the harness re-run corrects both directions |
+| 7 | **The Human Is a Durable Object** | the person | the human merge gate on four Temporal primitives (query, validated update, durable timer, deny-safe deadline), run live 10/10; plus the bounded review-driven fix loop |
+
+The one thread through all seven: every durable-execution engine can resume a
+*completed step*; this family resumes a coding agent's *live session* — and
+proves, prices, and governs every part of it.
 
 Regenerate outputs: `articles/final/render-pdf.sh` and
 `articles/final/export-medium.sh` (canonical `.md` files are the source).
