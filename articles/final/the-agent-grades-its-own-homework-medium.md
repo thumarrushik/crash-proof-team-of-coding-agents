@@ -58,7 +58,7 @@ Third, the co-evolution result is bounded by the design. This task *hands* the a
 
 ---
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), closing the unverified half of its sixth limitation. The measured runs, the seeded project, the frozen-reference scorer, and its offline tests are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), closing the unverified half of its sixth limitation. The measured runs, the seeded project, the frozen-reference scorer, and its offline tests are reproducible from the evidence repository (to be published soon). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Notes
 

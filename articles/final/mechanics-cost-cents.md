@@ -13,7 +13,7 @@
 
 Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents. This one is the ledger behind that number. We measured every boundary the harness has (the continuous run, the crash resume, warm and cold, the chunk seam, the no-engine baseline). The pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
 
-*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), runners under `deploy/`. Dollar figures are haiku-priced; a stronger tier scales them up.*
+*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion evidence repository (to be published soon), runners under `deploy/`. Dollar figures are haiku-priced; a stronger tier scales them up.*
 
 ## How to Measure a Boundary Honestly
 
@@ -79,7 +79,7 @@ Its first flights independently reproduced the published numbers (warm resume $0
 
 ---
 
-*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the public repository, [thumarrushik/crash-proof-team-of-coding-agents](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the evidence repository (to be published soon). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Sources
 
