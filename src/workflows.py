@@ -45,6 +45,7 @@ with workflow.unsafe.imports_passed_through():
         corrective_instruction,
         model_for_chunk,
         normalize_team,
+        pin_queue,
     )
 
 CONTINUE_PROMPT = (
@@ -314,6 +315,15 @@ class RunClaudeTask:
         self.progress.team = team
         self.progress.fix_round = input.fix_round
 
+        # Worker affinity: the first chunk runs on the lane queue (any worker);
+        # once a chunk reports its stable per-worker queue, pin every later
+        # chunk and the transcript export there, so a resume lands on the worker
+        # that holds the session's local transcript and workspace. Off by
+        # default (pinned == "" → pin_queue returns the lane queue), so a
+        # single-worker lane is unchanged.
+        lane_queue = workflow.info().task_queue
+        pinned_queue = ""
+
         for chunk in range(input.max_chunks):
             base = input.task if chunk == 0 else CONTINUE_PROMPT
             prompt = self._next_prompt(base)
@@ -329,6 +339,7 @@ class RunClaudeTask:
                     repo=input.repo,
                     branch=input.branch,
                 ),
+                task_queue=pin_queue(lane_queue, pinned_queue),
                 start_to_close_timeout=timedelta(minutes=15),
                 heartbeat_timeout=timedelta(minutes=2),
                 # Tuned for the common failure — API errors (429/529). Three
@@ -345,6 +356,9 @@ class RunClaudeTask:
             # Resuming can mint a new session ID — always chain the latest one.
             session_id = result.session_id
             work_dir = result.work_dir
+            # Pin to the worker that just held the session (first non-empty
+            # wins and sticks); "" when affinity is off, leaving the lane queue.
+            pinned_queue = pinned_queue or result.worker_queue
             self.progress.chunks_completed += 1
             self.progress.total_cost_usd += result.cost_usd
             self.progress.session_id = session_id
@@ -381,6 +395,9 @@ class RunClaudeTask:
                         session_id=session_id,
                         work_dir=work_dir,
                     ),
+                    # The transcript is a local file on the worker that ran the
+                    # session — read it on that same worker.
+                    task_queue=pin_queue(lane_queue, pinned_queue),
                     start_to_close_timeout=timedelta(minutes=2),
                 )
                 # Close the loop: issue lanes open a PR; the review lane posts

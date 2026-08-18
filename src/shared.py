@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 import os
 import re
+import socket
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,46 @@ def normalize_team(team: str | None) -> str:
 
 def task_queue_for_team(team: str | None) -> str:
     return f"{BASE_TASK_QUEUE}-{normalize_team(team)}"
+
+
+# --- Worker affinity (sticky-session task queues) -------------------------
+#
+# The transcript and the workspace are LOCAL files on the worker that ran a
+# chunk: the transcript under the Claude projects dir keyed by cwd, the
+# workspace under the temp dir keyed by the workflow id. A retried or later
+# chunk therefore has to land on the worker that holds them. On the shared lane
+# queue any worker can pick it up, so on a multi-worker lane a resume can land
+# where the session does not live. The fix: the first chunk runs on the lane
+# queue (any worker), reports its own STABLE per-worker queue, and the workflow
+# pins every later chunk (and the transcript export) to that queue. Opt-in, so
+# a single-worker lane behaves exactly as before.
+WORKER_AFFINITY = os.environ.get("WORKER_AFFINITY", "").strip().lower() in (
+    "1", "true", "yes", "on",
+)
+
+
+def stable_worker_id() -> str:
+    """A worker's identity, STABLE across process restarts on the same host, so
+    its per-worker queue survives a crash-and-restart — the case the heartbeat
+    recovery already handles, where the local transcript and workspace are still
+    on disk. Hostname by default; override with WORKER_ID to pin by pod/replica
+    name in an orchestrator (or in a test)."""
+    raw = os.environ.get("WORKER_ID") or socket.gethostname()
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", raw).strip("-") or "worker"
+
+
+def worker_queue_name(team: str | None, worker_id: str) -> str:
+    """The per-worker task queue for a lane: the shared lane queue plus the
+    worker's stable id. Sticky affinity routes every chunk after the first back
+    to the worker that holds the session's files."""
+    return f"{task_queue_for_team(team)}-w-{worker_id}"
+
+
+def pin_queue(lane_queue: str, pinned: str) -> str:
+    """Where the next chunk runs: the pinned per-worker queue once the first
+    chunk has reported one (affinity on), else the shared lane queue. Pure, so
+    the workflow calls it during deterministic replay."""
+    return pinned or lane_queue
 
 
 def model_for_chunk(input: "TaskInput", chunk: int, escalated: bool = False) -> str | None:
@@ -193,6 +234,10 @@ class ChunkResult:
     # The model REQUESTED for this chunk (None = Claude Code's default);
     # the actually-running model is in the session transcript.
     model: str | None = None
+    # The stable per-worker task queue of the worker that ran this chunk, when
+    # worker affinity is on ("" otherwise). The workflow pins every later chunk
+    # here so a resume lands where the session's local files live.
+    worker_queue: str = ""
 
 
 @dataclass

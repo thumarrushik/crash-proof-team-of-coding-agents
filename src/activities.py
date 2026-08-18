@@ -42,6 +42,9 @@ from shared import (
     UpdateBranchInput,
     UpdateBranchResult,
     normalize_team,
+    WORKER_AFFINITY,
+    stable_worker_id,
+    worker_queue_name,
 )
 
 # Workspace scratch that must never land in a pushed branch/PR.
@@ -691,6 +694,13 @@ async def run_claude_chunk(input: ChunkInput) -> ChunkResult:
                     structured=structured if message.subtype == "success" else None,
                     rule_flags=_read_rule_flags(work_dir, rule_flags_before),
                     model=input.model,
+                    # Report this worker's stable queue so the workflow can pin
+                    # every later chunk here — the session's transcript and
+                    # workspace are local files on this worker.
+                    worker_queue=(
+                        worker_queue_name(input.team, stable_worker_id())
+                        if WORKER_AFFINITY else ""
+                    ),
                 )
         raise RuntimeError("Claude Code stream ended without a result message")
     except asyncio.CancelledError:

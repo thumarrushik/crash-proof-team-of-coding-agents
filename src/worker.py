@@ -48,9 +48,12 @@ from shared import (
     POLLER_TASK_QUEUE,
     known_teams,
     TEMPORAL_ADDRESS,
+    WORKER_AFFINITY,
     namespace_for_team,
     normalize_team,
+    stable_worker_id,
     task_queue_for_team,
+    worker_queue_name,
 )
 from workflows import PollGitHubWorkflow, RunClaudeTask
 
@@ -75,42 +78,54 @@ async def _run_poller_worker(namespace: str) -> None:
 async def _run_team_worker(namespace: str, team: str) -> None:
     task_queue = task_queue_for_team(team)
     client = await Client.connect(TEMPORAL_ADDRESS, namespace=namespace)
-    worker = Worker(
-        client,
-        task_queue=task_queue,
-        workflows=[RunClaudeTask],
-        activities=[
-            run_claude_chunk,
-            export_claude_session_transcript,
-            open_pull_request,   # issue lanes: open a PR after the work
-            post_pr_review,      # review lane: post the review verdict
-            merge_pull_request,  # review lane: merge on approve
-            update_pr_branch,    # review lane: self-heal a stale branch, then re-merge
-            escalate_conflict,   # review lane: hand a real conflict to the owning team
-            push_branch,         # resolve lane: push the agent's conflict fix, then re-merge
-            read_pr_review_state,  # review lane: read a human "Request Changes" review
-            escalate_fix,        # review lane: hand a not-approved PR to the owning team to fix
-            escalate_review,     # fix lane: re-review + re-ask the human after a fix
-        ],
-        # Claude Code chunks are long-running subprocesses; keep concurrency
-        # low so one worker doesn't fork-bomb the machine or the rate limits.
-        # Tunable because a busy lane head-of-line blocks its own FAST
-        # activities (post/merge/push) behind hour-class agent chunks —
-        # observed live with 8 queued reviews on concurrency 2.
-        max_concurrent_activities=int(os.environ.get("MAX_CONCURRENT_ACTIVITIES", "2")),
-        # Persist heartbeat details (incl. the in-flight Claude session id)
-        # promptly, so a mid-chunk crash can resume the session instead of
-        # restarting from zero. The effective interval is
-        # min(heartbeat_timeout * 0.8, max_heartbeat_throttle_interval).
-        max_heartbeat_throttle_interval=_HB_THROTTLE,
-        default_heartbeat_throttle_interval=_HB_THROTTLE,
-    )
+
+    def build(queue: str) -> Worker:
+        return Worker(
+            client,
+            task_queue=queue,
+            workflows=[RunClaudeTask],
+            activities=[
+                run_claude_chunk,
+                export_claude_session_transcript,
+                open_pull_request,   # issue lanes: open a PR after the work
+                post_pr_review,      # review lane: post the review verdict
+                merge_pull_request,  # review lane: merge on approve
+                update_pr_branch,    # review lane: self-heal a stale branch, then re-merge
+                escalate_conflict,   # review lane: hand a real conflict to the owning team
+                push_branch,         # resolve lane: push the agent's conflict fix, then re-merge
+                read_pr_review_state,  # review lane: read a human "Request Changes" review
+                escalate_fix,        # review lane: hand a not-approved PR to the owning team to fix
+                escalate_review,     # fix lane: re-review + re-ask the human after a fix
+            ],
+            # Claude Code chunks are long-running subprocesses; keep concurrency
+            # low so one worker doesn't fork-bomb the machine or the rate limits.
+            # Tunable because a busy lane head-of-line blocks its own FAST
+            # activities (post/merge/push) behind hour-class agent chunks —
+            # observed live with 8 queued reviews on concurrency 2.
+            max_concurrent_activities=int(os.environ.get("MAX_CONCURRENT_ACTIVITIES", "2")),
+            # Persist heartbeat details (incl. the in-flight Claude session id)
+            # promptly, so a mid-chunk crash can resume the session instead of
+            # restarting from zero. The effective interval is
+            # min(heartbeat_timeout * 0.8, max_heartbeat_throttle_interval).
+            max_heartbeat_throttle_interval=_HB_THROTTLE,
+            default_heartbeat_throttle_interval=_HB_THROTTLE,
+        )
+
+    # One worker on the shared lane queue always; with affinity on, ALSO a
+    # worker on this host's stable per-worker queue, so the workflow can pin a
+    # resume back to the box that holds the session's transcript and workspace.
+    queues = [task_queue]
+    if WORKER_AFFINITY:
+        queues.append(worker_queue_name(team, stable_worker_id()))
+    workers = [build(q) for q in queues]
     print(
         f'Worker listening on namespace "{namespace}", '
         f'team "{team}", task queue "{task_queue}"'
+        + (f' + per-worker queue "{queues[1]}" (affinity on)'
+           if WORKER_AFFINITY else "")
     )
     print(f"Team folder: teams/{team} (self-sufficient: mandate + skills + policy)")
-    await worker.run()
+    await asyncio.gather(*(w.run() for w in workers))
 
 
 async def main() -> None:
