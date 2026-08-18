@@ -11,6 +11,34 @@ cite, with its evidence and tests.
 Curated from [temporal-claude-demo](https://github.com/thumarrushik/temporal-claude-demo)
 (the full lab notebook, including earlier drafts and the v1 chapter series).
 
+## Start here
+
+See the lead claim happen for real, in one command. It kills a worker's whole
+process tree mid-task and shows the **same** Claude Code session finish the job
+on a restarted worker, resumed from its last heartbeat with no completed
+checkpoint:
+
+```bash
+./deploy/quickstart.sh
+```
+
+It starts an ephemeral Temporal dev server, runs the SIGKILL-and-resume demo,
+prints `recovery-log.jsonl` (the one line that proves the resume), and tears
+everything down. Needs `uv`, the `temporal` CLI, and a logged-in `claude` CLI;
+the run bills real tokens (~4 cents on `haiku`).
+
+No credentials handy? Verify the whole system offline and for free — hooks, the
+finish gate, scoring, the team folders, and the workflows on Temporal's
+time-skipping test server:
+
+```bash
+uv run --with temporalio python -m unittest discover -s tests
+```
+
+Bring up the full always-on fleet (a worker per lane, the poller, the schedule
+watching a repo) with `./deploy/stack-up.sh`, and tear it down with
+`./deploy/stack-down.sh`.
+
 ## The articles (`articles/final/`)
 
 Each ships as canonical markdown + print PDF + a Medium-paste variant, and

@@ -10,7 +10,11 @@
 # Timing is driven by a real signal, not a guess: wait until the agent starts
 # writing files (session live + heartbeated), add a short flush margin, then
 # crash. Runs on a dedicated lane so it never disturbs other workers.
-# Prereq: docker compose up -d (Temporal infra + namespaces).
+#
+# Prereq: a Temporal server on :7233 with the TEAM namespace (default
+# 'testing'), plus a logged-in `claude` CLI. The easiest way to get both and
+# have them cleaned up for you is `./deploy/quickstart.sh`, which wraps this
+# script; or bring the whole fleet up with `./deploy/stack-up.sh`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TEAM="${TEAM:-testing}"
