@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Claude Code remembers the conversation; Temporal remembers the job. Compose the two and you get a durable delivery team: nine single-purpose jobs carrying an issue from filed to merged, with Claude Code doing the judgment work inside them (building, reviewing, resolving) under skill playbooks, enforced hooks, and human-controlled settings on every retry. We SIGKILLed a worker mid-task and the run finished as the same session for four cents; the team resolved a real merge conflict on the way, with no human decision in the loop.
+### Claude Code remembers the conversation; Temporal remembers the job. Compose the two and you get a durable delivery team: nine single-purpose jobs carrying an issue from filed to merged, with Claude Code doing the judgment work inside them (building, reviewing, resolving) under skill playbooks, enforced hooks, and human-controlled settings on every retry. We SIGKILLed a worker mid-task and the run finished as the same session for four cents, resumed from its last heartbeat rather than any saved checkpoint; the team resolved a real merge conflict on the way, with no human decision in the loop.
 
 ---
 
@@ -68,6 +68,8 @@ Two details make resume survive that boundary. First, each run gets one stable w
 This is where the sealed box earns its place. While the agent works, a timer inside the activity fires a heartbeat every thirty seconds, no matter what the agent is doing. So a long, silent tool call cannot look like a dead worker. A wedged-but-pulsing agent is bounded by a separate ceiling on the whole chunk. Every pulse carries the latest known session ID, announced at the start of the run.
 
 Kill the worker and the pulses stop. After the two-minute heartbeat timeout, the retry reads the session ID straight out of the dead attempt's last heartbeat and relaunches the agent with a resume. No completed checkpoint is required; the last heartbeat is the checkpoint.
+
+That is the distinction worth naming, because it is the whole point. Every durable-execution engine can resume a *completed* step by replaying its recorded result. This resumes a *live* agent from an attempt that recorded nothing at all. The unit of recovery is not a finished step; it is a coding agent's conversation, caught mid-thought.
 
 ![Recovering a Crashed Run: attempt 1 heartbeats the live session ID; a SIGKILL kills the whole worker; attempt 2 reads the session ID from the last heartbeat and resumes the same conversation](../../assets/diagrams/heartbeat.png)
 *Recovering a Crashed Run. Attempt 2 recovers the session ID from the dead attempt's final pulse. A re-read, not a re-run.*
