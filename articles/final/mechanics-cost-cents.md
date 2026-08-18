@@ -13,7 +13,7 @@
 
 Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents. This one is the ledger behind that number. We measured every boundary the harness has (the continuous run, the crash resume, warm and cold, the chunk seam, the no-engine baseline). The pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
 
-*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion evidence repository (to be published soon), runners under `deploy/`. Dollar figures are haiku-priced; a stronger tier scales them up.*
+*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion evidence repository, runners under `deploy/`. Dollar figures are haiku-priced; a stronger tier scales them up.*
 
 ## How to Measure a Boundary Honestly
 
@@ -79,25 +79,25 @@ Its first flights independently reproduced the published numbers (warm resume $0
 
 ---
 
-*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the evidence repository (to be published soon). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the evidence repository. Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Sources
 
-- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034–$2.13 at 1/8/14 chunks): `deploy/full-experiment.py` / `deploy/full-experiment-results.md`, 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
-- **The boundary estimator and prefix scaling** (no-op resume $0.00311; still-warm at 6.5 minutes; linear projection to a 470k prefix): `deploy/resume-cost.py` / `deploy/resume-cost-results.md`. **Practitioner.**
-- **The superseded first experiment and the bare-loop baseline** (fine ≈ coarse on the small task; the n=3 +68% artifact; bare loop $0.175 mean ×9): `deploy/chunk-cost-results.md`, `deploy/bare-loop-cost.py`. Kept published with its correction header. **Practitioner.**
-- **The live cross-checks**: the $0.0404 worker-kill recovery (`deploy/heartbeat-recovery-results.md`) and the $0.11 issue-to-PR pipeline job (`deploy/chunk-cost-results.md`). **Practitioner.**
-- **The economics canary** (five probes, ~$0.09/pass, bands ~3× around published values, first three passes green): `src/canary.py`, `deploy/canary-results.md`, 2026-07-29. **Practitioner.**
+- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034–$2.13 at 1/8/14 chunks): runner and results in the evidence repository, 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
+- **The boundary estimator and prefix scaling** (no-op resume $0.00311; still-warm at 6.5 minutes; linear projection to a 470k prefix): runner and results in the evidence repository. **Practitioner.**
+- **The superseded first experiment and the bare-loop baseline** (fine ≈ coarse on the small task; the n=3 +68% artifact; bare loop $0.175 mean ×9): both in the evidence repository, the superseded results file kept published with its correction header. **Practitioner.**
+- **The live cross-checks**: the $0.0404 worker-kill recovery and the $0.11 issue-to-PR pipeline job. **Practitioner.**
+- **The economics canary** (five probes, ~$0.09/pass, bands ~3× around published values, first three passes green): the canary code and its results in the evidence repository, 2026-07-29. **Practitioner.**
 - **Prompt caching and extended cache lifetimes**: code.claude.com/docs and Anthropic API documentation. *Vendor/canonical.* Checked 2026-07-15.
 
-[^method]: `deploy/resume-cost.py`: one session built to a fixed ~28k-token prefix, then resumed with `--max-turns 1` and a no-tools instruction; the resume's `total_cost_usd` is the boundary tax with work variance held at zero. Same prefix every trial, so the numbers are tight ($0.00311 warm ×3, $0.00312 at 390 seconds ×3; the 6.5-minute "cold" probe came back still warm, ratio 1.0×).
+[^method]: The boundary estimator: one session built to a fixed ~28k-token prefix, then resumed with `--max-turns 1` and a no-tools instruction; the resume's `total_cost_usd` is the boundary tax with work variance held at zero. Same prefix every trial, so the numbers are tight ($0.00311 warm ×3, $0.00312 at 390 seconds ×3; the 6.5-minute "cold" probe came back still warm, ratio 1.0×).
 
-[^four]: `deploy/full-experiment.py`, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3–9 turns, prefixes 84k–332k); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). Full write-up: `deploy/full-experiment-results.md`.
+[^four]: The four-cost experiment, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3–9 turns, prefixes 84k–332k); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). The full write-up is in the evidence repository.
 
-[^linear]: Warm boundary ≈ 0.1 × prefix × input rate; cold ≈ 1.25 ×. At 28k: $0.003 warm. At the 470k prefix observed on live issue #41: ~$0.05 per warm resume, ~$0.47 for ten back-to-back warm seams, ~$5.88 for ten cold-spaced ones. `deploy/resume-cost-results.md` has the table.
+[^linear]: Warm boundary ≈ 0.1 × prefix × input rate; cold ≈ 1.25 ×. At 28k: $0.003 warm. At the 470k prefix observed on live issue #41: ~$0.05 per warm resume, ~$0.47 for ten back-to-back warm seams, ~$5.88 for ten cold-spaced ones. The evidence repository has the table.
 
-[^roman]: `deploy/chunk-cost-results.md` (its header now marks it superseded): coarse median $0.145 (mean $0.248, range $0.091–$0.793), fine median $0.113 (mean $0.148, range $0.074–$0.344), n=6 each, after an n=3 first pass showing +68% failed to replicate. The $0.79 outlier was a coarse run that rambled into a second chunk: wandering, not boundaries, drove the spread even here.
+[^roman]: The first experiment's results file (its header now marks it superseded): coarse median $0.145 (mean $0.248, range $0.091–$0.793), fine median $0.113 (mean $0.148, range $0.074–$0.344), n=6 each, after an n=3 first pass showing +68% failed to replicate. The $0.79 outlier was a coarse run that rambled into a second chunk: wandering, not boundaries, drove the spread even here.
 
-[^bare]: `deploy/bare-loop-cost.py`, nine trials of the same task as a plain headless run: mean $0.1751, median $0.1719, range $0.05–$0.30, against the durable coarse run's $0.145 median, a tie within noise on these sample sizes.
+[^bare]: The bare-loop runner, nine trials of the same task as a plain headless run: mean $0.1751, median $0.1719, range $0.05–$0.30, against the durable coarse run's $0.145 median, a tie within noise on these sample sizes.
 
-[^canary]: `src/canary.py` and `deploy/canary-results.md`: five probes per pass, ~$0.09; first three passes $0.0941/$0.0932/$0.0938, all in band; live warm-resume $0.0030–0.0031 against the published $0.0035; the handoff tax $0.0632–$0.0638 live. Runs as a one-shot (`--once`, CI-able), a fixed Temporal Schedule, or a self-adjusting workflow whose cadence tightens on alerts and stretches on clean streaks. Daily cadence costs about $33 a year.
+[^canary]: The canary and its results file: five probes per pass, ~$0.09; first three passes $0.0941/$0.0932/$0.0938, all in band; live warm-resume $0.0030–0.0031 against the published $0.0035; the handoff tax $0.0632–$0.0638 live. Runs as a one-shot (`--once`, CI-able), a fixed Temporal Schedule, or a self-adjusting workflow whose cadence tightens on alerts and stretches on clean streaks. Daily cadence costs about $33 a year.
