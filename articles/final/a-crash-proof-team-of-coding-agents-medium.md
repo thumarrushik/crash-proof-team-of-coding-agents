@@ -174,7 +174,7 @@ Put the conductors and the team together and one issue travels a full loop, ever
 
 **Intake.** A schedule fires the poll on an interval. The poll reads the repository — open issues, open pull requests, which issues have closed — routes each item to a team by its label, and starts one durable job per ready item with a deterministic ID. An issue marked *blocked by* another is held until that other issue closes.
 
-**Build.** The issue's job runs the agent in bounded, resumable chunks, heartbeating its session ID the whole time. When the agent reports success, the transcript is exported to a readable audit log and a pull request is opened from the work branch — by the harness, never by the agent.
+**Build.** The issue's job runs the agent in bounded, resumable chunks, heartbeating its session ID the whole time; the agent commits as it works, so the branch accumulates a real history of checkpoints rather than one anonymous blob. When the agent reports success, the transcript is exported to a readable audit log and a pull request is opened from the work branch, carrying that full commit history — pushed by the harness, never by the agent.
 
 **Review and merge.** The open pull request is picked up on the next poll and routed to the review lane as its own job. The review agent reads the diff and runs the suite, and its verdict is a single field in the required report: a pass/fail boolean that *is* the merge switch. True posts an approval and merges; false requests changes. A merge against a branch that has fallen behind triggers an automatic branch update — the same "update this branch" move you would click in the GitHub UI — and a retry.
 
