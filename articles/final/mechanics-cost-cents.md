@@ -31,7 +31,7 @@ Everything below was run strictly one at a time. An earlier batch taught us that
 | **Continuous** (one session to done) | **$0.113** | the floor: runs of $0.058 / $0.132 / $0.149 |
 | **Crash, resumed warm** | **+$0.0035** | a cache *read* of the prefix, ~3% of the base |
 | **Crash, resumed cold** (65 min idle) | **+$0.021** | a *partial* cache write, ~6× warm |
-| **Fine-chunked** (2-turn cap) | **$0.034 – $2.13** | 1, 8, and 14 chunks: a ~63× spread |
+| **Fine-chunked** (2-turn cap) | **$0.034 to $2.13** | 1, 8, and 14 chunks: a ~63× spread |
 
 Three of those four rows are cents, and they are the rows the durability machinery owns. A warm resume re-reads the accumulated conversation at the cheap cache-read rate: a third of a cent. That figure *is* the crash-recovery number: the heartbeat resume from the parent article is exactly this operation. A live worker-kill confirmed it end to end at $0.0404 total on a separate task. Even the cold row undersells itself. After sixty-five minutes idle, the first touch paid a cache write on only *half* the prefix (14.9k of ~32k tokens) and then immediately re-warmed. Claude Code's extended-lifetime caching holds far past the classic five-minute window. The full cold penalty never materialized at all.[^four]
 
@@ -51,7 +51,7 @@ Chunks still earn their keep at any size: they are where the workflow gets visib
 
 ## The Baseline With No Engine at All
 
-The fair comparison for all of this is the bare loop. The round-one task again, run as a plain headless `claude -p` (no Temporal, no workspace bundle, no resume). Nine trials: mean $0.175, median $0.172, range $0.05–$0.30. A tie within noise with the durable coarse run on that task (median $0.145). **The engine adds approximately zero tokens.** (The bare loop skips the skill bundle but wanders more without it; the two effects roughly wash.)[^bare]
+The fair comparison for all of this is the bare loop. The round-one task again, run as a plain headless `claude -p` (no Temporal, no workspace bundle, no resume). Nine trials: mean $0.175, median $0.172, range $0.05 to $0.30. A tie within noise with the durable coarse run on that task (median $0.145). **The engine adds approximately zero tokens.** (The bare loop skips the skill bundle but wanders more without it; the two effects roughly wash.)[^bare]
 
 The difference is not the bill while things work; it is the bill when they break. The bare loop's session ID lives in process memory, so a crash costs a full re-run of everything the run had accumulated. The durable run pays the same bill and recovers for a third of a cent. A live end-to-end job (filed issue to merged pull request through the full team pipeline) confirmed the overhead in production shape. A clean eleven cents, zero retries. Durability, at these prices, is effectively free insurance on top of an identical premium.
 
@@ -86,7 +86,7 @@ Its first flights independently reproduced the published numbers (warm resume $0
 
 ## Sources
 
-- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034–$2.13 at 1/8/14 chunks): runner and results in the evidence repository, 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
+- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034 to $2.13 at 1/8/14 chunks): runner and results in the evidence repository, 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
 - **The boundary estimator and prefix scaling** (no-op resume $0.00311; still-warm at 6.5 minutes; linear projection to a 470k prefix): runner and results in the evidence repository. **Practitioner.**
 - **The superseded first experiment and the bare-loop baseline** (fine ≈ coarse on the small task; the n=3 +68% artifact; bare loop $0.175 mean ×9): both in the evidence repository, the superseded results file kept published with its correction header. **Practitioner.**
 - **The live cross-checks**: the $0.0404 worker-kill recovery and the $0.11 issue-to-PR pipeline job. **Practitioner.**
@@ -95,12 +95,12 @@ Its first flights independently reproduced the published numbers (warm resume $0
 
 [^method]: The boundary estimator: one session built to a fixed ~28k-token prefix, then resumed with `--max-turns 1` and a no-tools instruction; the resume's `total_cost_usd` is the boundary tax with work variance held at zero. Same prefix every trial, so the numbers are tight ($0.00311 warm ×3, $0.00312 at 390 seconds ×3; the 6.5-minute "cold" probe came back still warm, ratio 1.0×).
 
-[^four]: The four-cost experiment, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3–9 turns, prefixes 84k–332k); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). The full write-up is in the evidence repository.
+[^four]: The four-cost experiment, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3 to 9 turns, prefixes 84k to 332k); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). The full write-up is in the evidence repository.
 
 [^linear]: Warm boundary ≈ 0.1 × prefix × input rate; cold ≈ 1.25 ×. At 28k: $0.003 warm. At the 470k prefix observed on live issue #41: ~$0.05 per warm resume, ~$0.47 for ten back-to-back warm seams, ~$5.88 for ten cold-spaced ones. The evidence repository has the table.
 
-[^roman]: The first experiment's results file (its header now marks it superseded): coarse median $0.145 (mean $0.248, range $0.091–$0.793), fine median $0.113 (mean $0.148, range $0.074–$0.344), n=6 each, after an n=3 first pass showing +68% failed to replicate. The $0.79 outlier was a coarse run that rambled into a second chunk: wandering, not boundaries, drove the spread even here.
+[^roman]: The first experiment's results file (its header now marks it superseded): coarse median $0.145 (mean $0.248, range $0.091 to $0.793), fine median $0.113 (mean $0.148, range $0.074 to $0.344), n=6 each, after an n=3 first pass showing +68% failed to replicate. The $0.79 outlier was a coarse run that rambled into a second chunk: wandering, not boundaries, drove the spread even here.
 
-[^bare]: The bare-loop runner, nine trials of the same task as a plain headless run: mean $0.1751, median $0.1719, range $0.05–$0.30, against the durable coarse run's $0.145 median, a tie within noise on these sample sizes.
+[^bare]: The bare-loop runner, nine trials of the same task as a plain headless run: mean $0.1751, median $0.1719, range $0.05 to $0.30, against the durable coarse run's $0.145 median, a tie within noise on these sample sizes.
 
-[^canary]: The canary and its results file: five probes per pass, ~$0.09; first three passes $0.0941/$0.0932/$0.0938, all in band; live warm-resume $0.0030–0.0031 against the published $0.0035; the handoff tax $0.0632–$0.0638 live. Runs as a one-shot (`--once`, CI-able), a fixed Temporal Schedule, or a self-adjusting workflow whose cadence tightens on alerts and stretches on clean streaks. Daily cadence costs about $33 a year.
+[^canary]: The canary and its results file: five probes per pass, ~$0.09; first three passes $0.0941/$0.0932/$0.0938, all in band; live warm-resume $0.0030 to 0.0031 against the published $0.0035; the handoff tax $0.0632 to $0.0638 live. Runs as a one-shot (`--once`, CI-able), a fixed Temporal Schedule, or a self-adjusting workflow whose cadence tightens on alerts and stretches on clean streaks. Daily cadence costs about $33 a year.
