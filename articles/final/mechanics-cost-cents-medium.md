@@ -19,6 +19,9 @@ Put a durable-execution engine under a coding agent and it sounds like paying tw
 
 Total run cost is two terms. The agent's actual work, plus the overhead of any boundary you cross: a resume after a crash, a seam between chunks. The first term swings wildly (the same task takes the agent three turns or nine). So comparing totals across runs buries the boundary signal in noise. The estimator that works holds the work at **zero**. Build a session to a fixed prefix, then resume it with a no-op (one turn, "reply OK, no tools") and read the bill. Whatever that no-op costs *is* the boundary: the price of re-establishing the conversation, with the variance removed.¹
 
+![The boundary estimator: build one session to a fixed 28k-token prefix, then resume it with a one-turn no-op ("reply OK, no tools") so the bill is pure boundary; resumed back-to-back it costs $0.0035 (a cache read, ~3% of the base run), resumed after 65 idle minutes it costs $0.021 (a partial cache write that then re-warms); the boundary is linear in the prefix, roughly 0.1x the input rate warm and 1.25x cold](../../assets/diagrams/boundary-method.png)
+*The estimator. A no-op resume does zero work, so whatever it costs is the boundary itself. Stay inside the cache lifetime and every seam is nearly free.*
+
 Everything below was run strictly one at a time. An earlier batch taught us that lesson the hard way: concurrent runs contaminated each other's numbers. Cost is the CLI's own `total_cost_usd`, identical on a laptop or a cloud VM. That is a property of the API's prompt caching, not of the infrastructure.
 
 ## The Four Numbers
