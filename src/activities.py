@@ -41,6 +41,7 @@ from shared import (
     TranscriptExportResult,
     UpdateBranchInput,
     UpdateBranchResult,
+    agent_env,
     normalize_team,
     WORKER_AFFINITY,
     stable_worker_id,
@@ -616,6 +617,9 @@ async def run_claude_chunk(input: ChunkInput) -> ChunkResult:
         # nothing from the worker machine's user or enclosing-project config.
         setting_sources=["project"],
         output_format=REPORT_SCHEMA,
+        # The worker env minus the harness's GitHub credentials: the agent
+        # must never inherit the token the push/merge activities use.
+        env=agent_env(dict(os.environ)),
     )
 
     client = ClaudeSDKClient(options=options)

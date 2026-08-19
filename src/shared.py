@@ -92,6 +92,22 @@ def pin_queue(lane_queue: str, pinned: str) -> str:
     return pinned or lane_queue
 
 
+# The harness credentials the agent must never inherit. The deny rules block
+# `git push` and the clone URL is token-scrubbed, but the worker's own process
+# env still carries the GitHub token for the push/merge activities — withhold
+# exactly those keys from the agent subprocess so "the agent never holds a
+# credential that can change the outside world" is true by construction, not
+# just by rule.
+_AGENT_ENV_DENY: tuple[str, ...] = ("GITHUB_TOKEN", "GH_TOKEN")
+
+
+def agent_env(base: dict[str, str]) -> dict[str, str]:
+    """The environment the agent subprocess is launched with: the worker's env
+    minus the harness's GitHub credentials. Everything else (HOME for the
+    transcript store, PATH, the agent's own auth) passes through untouched."""
+    return {k: v for k, v in base.items() if k not in _AGENT_ENV_DENY}
+
+
 def model_for_chunk(input: "TaskInput", chunk: int, escalated: bool = False) -> str | None:
     """Which model a given chunk runs on. Pure function of replayed state, so
     the workflow can call it deterministically: the ladder escalates the brain
