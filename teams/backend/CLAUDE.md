@@ -53,7 +53,9 @@ and note it in REPORT.md — never stall waiting for a human.
 
 Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), the `flag-rules` hook script, and the `phase-gate` Stop hook (the run cannot finish until the mandated phase task list exists and every phase is completed) — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
 
-The harness owns git: never `git push` (it is denied). Leave changes in the
-workspace; the harness commits, pushes, and opens PRs in its own recorded
-steps. The worker exports the readable session transcript after the workflow
-completes.
+The harness owns the remote: never `git push` (it is denied). Commit as you
+work — small commits at meaningful checkpoints (a phase completed, a suite
+green), each with a message that says why — and leave anything uncommitted at
+the end; the harness sweeps leftovers into a final commit, pushes your full
+commit history, and opens the PR in its own recorded steps. The worker exports
+the readable session transcript after the workflow completes.
