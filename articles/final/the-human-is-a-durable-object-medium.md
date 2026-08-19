@@ -23,7 +23,7 @@ The bug underneath all of that is a category error, and naming it is most of the
 
 ## Four Primitives Make a Human
 
-Every operator capability in this system (ask a running job a question, steer it, cancel it) is built from the same small set of moves the workflow engine gives you for talking to a running job. ([How It's Built](how-its-built.md) tours them.) Model the person on those same moves and the whole gate is a few lines.
+Every operator capability in this system (ask a running job a question, steer it, cancel it) is built from the same small set of moves the workflow engine gives you for talking to a job in flight. ([How It's Built](how-its-built.md) tours them.) Model the person on those same moves and the whole gate is a few lines.
 
 **The human reads: a query.** A running job can already answer questions from its live state without touching a database. We added one: *what are you blocked on, and how long until your deadline?* Point a small operator command-line tool at the fleet and you have an approvals inbox assembled from the workflows themselves. No side store to keep in sync.¹
 
@@ -69,7 +69,6 @@ A gate answers approve or deny, and there is a temptation to treat deny as the e
 
 ![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated: approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
 *The denial that fixes itself: bounded, then human. Every exit is attributed; the cap is the design.*
-
 
 When a pull request is not approved, it goes back to be fixed instead of just stopping. Three things count as not approved:
 
