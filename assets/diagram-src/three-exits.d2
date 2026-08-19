@@ -1,0 +1,25 @@
+# One chunk in, one typed record out, three exits the workflow can switch on.
+direction: right
+horizontal-gap: 140
+vertical-gap: 70
+
+chunk: "One Bounded Chunk\nHeadless Claude Code, Capped at N Turns,\nHeartbeating the Session ID" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+record: "One Typed Record\nSession ID · Outcome · Cost ·\nTurns · Validated Report" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+resume: "Exit 1 · Retryable Error\nAn API Drop, a Mid-Run Crash:\nThe Retry Resumes the SAME Session" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+next: "Exit 2 · Out of Turns\nNot an Error, a Checkpoint:\nThe Next Chunk Resumes" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+stop: "Exit 3 · Terminal\nNon-Retryable:\nThe Job Stops, Loudly" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+chunk -> record
+record -> resume
+record -> next
+record -> stop

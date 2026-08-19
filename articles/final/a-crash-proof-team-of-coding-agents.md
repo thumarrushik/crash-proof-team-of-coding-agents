@@ -115,27 +115,22 @@ Point that same machinery at a whole repository and it does something bigger. Th
 
 ## How a Chunk Actually Runs
 
-Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record: a session ID, an outcome, a cost, a turn count, the validated report, and nothing else. That typing is the wall: the workflow can only read fields on that record, so nothing the agent did unpredictably can leak into the replayable layer.
+Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record (a session ID, an outcome, a cost, a turn count, the validated report) and nothing else. That typing is the wall: the workflow can only read fields on that record, so nothing the agent did unpredictably can leak into the replayable layer. And the record leaves the workflow exactly three exits, which are nearly the whole control logic: a retryable failure (an API error, a mid-run crash) raises a typed error and the declared retry policy resumes the same session; running out of turns is not an error at all, just the cue to schedule the next chunk; anything genuinely terminal stops the job, loudly.
+
+![One chunk, one typed record, three exits: a bounded headless chunk returns a typed record; a retryable error resumes the same session, out of turns is a checkpoint that schedules the next chunk, and a terminal result stops the job loudly](../../assets/diagrams/three-exits.png)
+*How a chunk runs. The workflow never sees inside the box; it reads one typed record and switches on three exits. Continue, resume, or stop: outcomes a database could run.*
 
 Launching the agent is a short list of settings:
 
-- **Load configuration from the project directory only**, never from the machine's own user config. This is the quiet heavy lifter: the rules ride inside the workspace, so the same agent runs identically on every worker on every machine.
+- **Configuration from the project directory only**, never the machine's user config. The rules ride inside the workspace, so the same agent runs identically on every worker.
 - **Resume the prior session.**
 - **Cap the turns**, so a chunk stops cleanly with its transcript intact.
-- **Auto-accept file edits; gate every other tool behind an explicit allow-list.**
-- **Force the closing report to match a schema**, so the workflow reads a real pass/fail value instead of parsing prose.
+- **Auto-accept file edits; every other tool needs an explicit allow-list entry.**
+- **The closing report must match a schema**, so the workflow reads a real pass/fail value instead of parsing prose.
 
-Read the deny rules as architecture, not only safety. Deleting a tree and escalating privileges are the obvious entries; `git push` is the interesting one. The agent writes code but can never reach a remote: every push and merge in this system is done by the harness, in its own step, with its own credentials. Hooks do the bookkeeping (one appends every tool call to an audit log, another flags a wasteful pattern a later experiment taught us to catch), and the workspace re-stamps the whole policy before every chunk, byte-for-byte identical on every attempt. The guardrail cannot drift.
+Read the deny rules as architecture, not only safety. Deleting a tree and escalating privileges are the obvious entries; `git push` is the interesting one: the agent writes code but can never reach a remote, so the harness does every push and merge, in its own step, with its own credentials. Hooks keep the books (every tool call lands in an audit log), and the workspace re-stamps the whole policy before every chunk, byte-for-byte identical on every attempt. The guardrail cannot drift.
 
-When a chunk fails, the function does not decide what happens next. It raises a typed error and the workflow's declared retry policy takes over. The taxonomy is three-way, and it is nearly the whole control logic:
-
-- **Retryable** (an API error, a mid-run failure): the transcript survived, so the retry resumes the session instead of restarting the task.
-- **Not an error** (out of turns): the function returns normally and the workflow schedules the next chunk.
-- **Non-retryable** (anything genuinely terminal): the job stops, loudly.
-
-Continue, resume, or stop: three outcomes a database could switch on, which was the entire point of sealing the agent away from the decision.
-
-None of this is a bespoke protocol the agent had to be taught. It is a stock Claude Code project (settings, hooks, skills, memory), assembled fresh every chunk, and the agent works in it exactly as it would in any local checkout. The bolt-by-bolt detail lives in the engineering companion, [How It's Built](how-its-built.md); what this article needs is the shape: one function, one typed record, three exits, one re-stamped policy. And the shape was not our first answer. The first answer is still buried in this codebase, and it is worth showing precisely because it *worked*, until measurement talked us out of it.
+None of this is a bespoke protocol. It is a stock Claude Code project (settings, hooks, skills, memory), assembled fresh every chunk; the bolt-by-bolt detail lives in the engineering companion, [How It's Built](how-its-built.md). The shape is what matters: one function, one typed record, three exits, one re-stamped policy. And the shape was not our first answer. The first answer is worth showing precisely because it *worked*, until measurement talked us out of it.
 
 ## The Detour We Measured Our Way Out Of
 
