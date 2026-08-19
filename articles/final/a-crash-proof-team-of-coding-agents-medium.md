@@ -8,7 +8,7 @@
 
 There is a moment in every infrastructure demo where you stop trusting the slides and ask the presenter to pull the plug. We opened this project by pulling it ourselves.
 
-The setup was ordinary on purpose. A worker process was running a headless coding agent (headless meaning one command in a terminal, no chat window) on a small test-first Python task, and the agent was minutes in, actively writing files, nothing finished, nothing saved anywhere. We killed the worker's entire process tree with an unblockable signal. No goodbye, no flush, no checkpoint. For about two minutes, nothing happened at all. Then a different process on a restarted worker noticed the silence, picked up the same half-finished conversation, and ran it to completion: the same session, remembering everything it had learned, for a total bill of four cents.
+The setup was ordinary on purpose. A worker process was running a headless coding agent (headless meaning one command in a terminal, no chat window) on a small test-first Python task, and the agent was minutes in, actively writing files, nothing finished, nothing saved anywhere. We killed the worker's entire process tree with an unblockable signal. No goodbye, no flush, no checkpoint. For about two minutes, nothing happened at all. Then a different process on a restarted worker noticed the silence, picked up the same half-finished conversation, and ran it to completion: the same session, remembering everything it had learned, for a total bill of four cents. The staged kill is just the legible version of what happens uninvited every week: an API overload, a rate limit, a deploy that restarts the worker. The same machinery turns each of those into added latency instead of a lost run.
 
 That is the durability half of this article, and it is the smaller half. The bigger half is what durability buys once you have it: a durable *team*. The work is split into single-purpose durable jobs, and only one of them runs Claude Code itself (it does all the judgment work, building the feature, reviewing the diff, resolving the conflict) while the rest carry the delivery pipeline around it, each governed by playbooks it actually follows and rules re-asserted before every slice of work. That team carried a filed GitHub issue all the way to a merged pull request, resolving a real merge conflict along the way, with no human decision in the loop. (One mechanical asterisk, footnoted where that story is told.)
 
@@ -33,9 +33,9 @@ The obvious way to drive a headless agent is a loop. Ask it to continue, refresh
 while :; do claude -p "continue" --resume "$SID" --max-turns 6; done
 ```
 
-The real thing parses each run's output to keep the session ID current, but that is the shape. It works right up until the process holding it dies. And when that process dies, exactly one thing survives, because it is a file on disk: the transcript. Everything else was memory. The current session ID. The retry count. The instruction someone typed an hour ago. The bare fact that a job was running at all.
+The real thing parses each run's output to keep the session ID current, but that is the shape. One term falls out of it that the rest of this article leans on: each capped run is a **chunk**, a bounded slice of the session that stops cleanly with its transcript intact. The loop works right up until the process holding it dies. And when that process dies, exactly one thing survives, because it is a file on disk: the transcript. Everything else was memory. The current session ID. The retry count. The instruction someone typed an hour ago. The bare fact that a job was running at all.
 
-An agent run is precisely the kind of job you cannot afford to forget, because it combines every trait that makes forgetting expensive. It runs for hours and bills by the minute, so an abandoned run is not just lost work but a lost invoice. It carries context that took real effort to accumulate (the explored codebase, the failed approaches, the half-written fix), none of which a fresh start gets back for free. And because it touches real systems while nobody is watching, it tends to fail at two in the morning, in exactly the state you least want to reconstruct from logs. Try to remember all of this yourself and the shopping list writes itself: durable state, a single-writer lock, a retry taxonomy, a liveness probe, a status endpoint. Somewhere around the third item you realize you are hand-building a distributed system you never meant to own. Or you can give the job the one thing the conversation already has: a record that outlives the process.
+An agent run is exactly the kind of job you cannot afford to forget. It runs for hours and bills by the token, it carries context a fresh start cannot get back (the explored codebase, the failed approaches, the half-written fix), and because it runs unattended against real systems, it fails at two in the morning, in exactly the state you least want to reconstruct from logs. Try to remember all of this yourself and the shopping list writes itself: durable state, a single-writer lock, a retry taxonomy, a liveness probe, a status endpoint. Somewhere around the third item you are hand-building a distributed system you never meant to own. Or you can give the job the one thing the conversation already has: a record that outlives the process.
 
 ## The Missing Half Has a Name
 
@@ -48,7 +48,12 @@ The core move is a refusal to trust process memory. A database does not keep you
 
 The reconstruction is **deterministic replay**: re-run the job's code from the first line, substituting the recorded result at every step that already happened. Same code, same inputs, same decisions, same state. The catch lives in the word *same*: one clock reading, one coin flip, one network call in the replayed layer, and the replay diverges from its own history.
 
-That constraint forces a clean split, and three plain words carry the rest of this article. A **workflow** is the code that decides what a job does next: the deterministic, replayable layer, the part that must never flip a coin. A **worker** is an ordinary process on some machine that physically does the work, and it is meant to be mortal; that is the whole trick. An **activity** is a single step the engine treats as a sealed box: it may call the network, write files, roll dice, anything, because its insides are never replayed, and it retries under a policy you declare rather than code. And while a step runs, it can send **heartbeats**: small liveness pulses that may carry a little data with them, so that if the pulses stop for too long, the server declares that attempt dead and starts a retry that can read the last pulse the dead attempt sent.⁶
+That constraint forces a clean split, and four plain words carry the rest of this article:
+
+- A **workflow** is the code that decides what a job does next: the deterministic, replayable layer, the part that must never flip a coin.
+- A **worker** is an ordinary process on some machine that physically does the work, and it is meant to be mortal; that is the whole trick.
+- An **activity** is a single step the engine treats as a sealed box: it may call the network, write files, roll dice, anything, because its insides are never replayed, and it retries under a policy you declare rather than code.
+- A **heartbeat** is a small liveness pulse a running step sends, and it may carry a little data with it. If the pulses stop for too long, the server declares that attempt dead and starts a retry that can read the last pulse the dead attempt sent.⁶
 
 That last capability (a retry that can read the dead attempt's final heartbeat) is the mechanism the rest of this design rests on.
 
@@ -74,7 +79,7 @@ That is the distinction worth naming, because it is the whole point. Every durab
 ![Recovering a Crashed Run: attempt 1 heartbeats the live session ID; a SIGKILL kills the whole worker; attempt 2 reads the session ID from the last heartbeat and resumes the same conversation](../../assets/diagrams/heartbeat.png)
 *Recovering a Crashed Run. Attempt 2 recovers the session ID from the dead attempt's final pulse. A re-read, not a re-run.*
 
-We proved it the blunt way, in the kill you watched at the top of this article, and the evidence is one line the recovered run left in its workspace:
+We proved it the blunt way, in the kill from the top of this article, and the evidence is one line the recovered run left in its workspace:
 
 ```json
 {"event": "resume_session_from_heartbeat", "attempt": 2,
@@ -83,11 +88,17 @@ We proved it the blunt way, in the kill you watched at the top of this article, 
 
 The input session ID is null: no completed chunk existed to hand back, so the ID came *only* from the heartbeat. The run finished as the **same** session in one chunk, at $0.0404 total: not a recovery penalty, just the resumed session re-reading its own context at the cache rate and finishing the work.⁷
 
-Three things have to be right, and each is a caveat worth stealing. The heartbeat has to be recorded before the crash: the SDK's default throttle on persisting heartbeat details is too coarse for a short chunk, so this project's worker tightens it on purpose.⁸ The worker has to die as a whole group: kill only the parent and the agent's child process is orphaned, finishes the work anyway, and *masks* the recovery: our first recovery demos "succeeded" exactly this way, and they were lying before we caught it. And the crash has to land while the chunk is genuinely in flight, because a kill that arrives between chunks is just an ordinary retry with nothing to recover.
+Three things have to be right, and each is a caveat worth stealing.
+
+- **The heartbeat has to reach the server before the crash.** The SDK throttles how often heartbeat details are actually persisted, and the default is too coarse for a short chunk: kill early enough and the session ID never made it out. This project's worker tightens the throttle on purpose.⁸
+- **The worker has to die as a whole group.** Kill only the parent and the agent's child process is orphaned, finishes the work anyway, and *masks* the recovery. Our first recovery demos "succeeded" exactly this way, and they were lying before we caught it.
+- **The crash has to land while a chunk is genuinely in flight.** A kill that arrives between chunks is just an ordinary retry with nothing to recover: the previous chunk already recorded its result.
 
 The everyday value is not that deliberate kill; a worker rarely dies outright. What actually stops a headless run is the API on the other end: an overload during a busy hour, a rate limit, a dropped stream. The agent surfaces those on its result; the activity raises them as typed, retryable failures; the retry policy backs off (five seconds, doubling to a two-minute cap, six attempts), and every retry *resumes* the conversation instead of restarting the task. An overload window becomes added latency rather than a failed run.
 
-Point that same machinery at a whole repository and it does something bigger. The heartbeat, the resume, and the declared retries that just carried one agent through a crash are what will carry a whole *team* of agents from a filed issue to a merged pull request, resolving a real merge conflict along the way. That team is the back half of this article. But every agent on it runs inside the same sealed box you just watched recover, so it is worth opening that box to see exactly how one is built.
+One sentence carries this whole section. Every failure, from a rate limit to a dead machine, becomes the same cheap operation: read the last known session ID and resume the conversation, never restart the task.
+
+Point that same machinery at a whole repository and it does something bigger. The heartbeat, the resume, and the declared retries that just carried one agent through a crash are what will carry a whole *team* of agents from a filed issue to a merged pull request, resolving a real merge conflict along the way. That team is the back half of this article. But every agent on it runs inside the same sealed box you just saw recover, so it is worth opening that box to see exactly how one is built.
 
 ## How a Chunk Actually Runs
 
@@ -116,7 +127,7 @@ So we measured the whole bill, holding one task constant across every scenario o
 
 The first is the baseline. A continuous, uninterrupted run costs about eleven cents: $0.058, $0.132, and $0.149 across three runs, an honest spread rather than a tidy mean, with the agent taking anywhere from three to nine turns for the identical task.
 
-The second is the price of surviving a crash, and it is almost insultingly small: about a third of a cent warm, two cents cold. A resumed session redoes no work; it re-reads the accumulated conversation at the discounted cache rate, which is why the recovery you watched at the top of this article cost four cents rather than a second full bill. Even a cold resume, after the session sat idle for over an hour, paid only a partial cache re-write and then re-warmed.
+The second is the price of surviving a crash, and it is almost insultingly small: about a third of a cent warm, two cents cold. A resumed session redoes no work; it re-reads the accumulated conversation at the discounted cache rate, which is why the recovery from the top of this article cost four cents rather than a second full bill. Even a cold resume, after the session sat idle for over an hour, paid only a partial cache re-write and then re-warmed.
 
 The third number is the warning. The same task, chopped into fine two-turn chunks on identical code, ran $0.034, then $0.25, then $2.13: a sixty-three-fold spread, with the worst run costing nineteen times the continuous base. And the culprit is not the mechanism we expected. The per-boundary cache re-read stays a cheap fraction of a cent; the culprit is **behavioral**. A tight turn cap changes what the model does with its turns, and a run that wanders across fourteen chunks and twenty-eight turns (to finish what a continuous session did in nine) pays for every wander. (An earlier, smaller experiment had even sworn chunking was cost-neutral; the fuller one shattered that on a more open-ended task. The correction story, the method, and the pricing canary that re-checks every number on a schedule are the economics companion, [*Mechanics Cost Cents, Behavior Costs Dollars*](mechanics-cost-cents.md).)
 
