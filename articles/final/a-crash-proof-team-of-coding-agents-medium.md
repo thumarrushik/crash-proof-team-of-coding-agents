@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Kill the worker mid-task and the agent finishes the job anyway: same session, four cents, resumed from its last heartbeat rather than any saved checkpoint. This is what durability buys when one coding agent becomes a governed team.
+### Claude Code remembers the conversation; Temporal remembers the job. Kill the worker mid-task and the agent finishes anyway — the same session, resumed from its last heartbeat rather than any saved checkpoint. This is what durability buys when one coding agent becomes a governed team.
 
 ---
 
