@@ -43,6 +43,35 @@ class TeamOrchestrationTests(unittest.TestCase):
         unblocked = plan_issue_activities([backend_work], completed_issue_numbers=(10,))
         self.assertTrue(unblocked[0].ready)
 
+    def test_transitive_chain_runs_strictly_serially(self) -> None:
+        """A <- B <- C: each dependent becomes ready only after its own blocker
+        CLOSES, so a declared chain executes serially across polls while
+        anything undeclared-and-unblocked stays free to run in parallel."""
+        a = GitHubIssue(number=1, title="A", body="first", labels=("team/backend",))
+        b = GitHubIssue(number=2, title="B", body="Blocked by: #1", labels=("team/backend",))
+        c = GitHubIssue(number=3, title="C", body="Blocked by: #2", labels=("team/backend",))
+        free = GitHubIssue(number=9, title="unrelated", body="no deps", labels=("team/frontend",))
+        issues = [a, b, c, free]
+
+        poll1 = {p.source: p.ready for p in plan_issue_activities(issues)}
+        self.assertEqual(poll1, {"issue-1": True, "issue-2": False,
+                                 "issue-3": False, "issue-9": True})
+
+        poll2 = {p.source: p.ready
+                 for p in plan_issue_activities(issues, completed_issue_numbers=(1,))}
+        self.assertEqual(poll2, {"issue-1": True, "issue-2": True,
+                                 "issue-3": False, "issue-9": True})
+
+        poll3 = {p.source: p.ready
+                 for p in plan_issue_activities(issues, completed_issue_numbers=(1, 2))}
+        self.assertTrue(poll3["issue-3"])
+
+    def test_multiple_blockers_all_must_close(self) -> None:
+        d = GitHubIssue(number=4, title="D", body="Blocked by: #1 #2",
+                        labels=("team/backend",))
+        self.assertFalse(plan_issue_activities([d], completed_issue_numbers=(1,))[0].ready)
+        self.assertTrue(plan_issue_activities([d], completed_issue_numbers=(1, 2))[0].ready)
+
     def test_blocker_label_is_supported(self) -> None:
         issue = GitHubIssue(
             number=12,

@@ -301,11 +301,19 @@ async def open_pull_request(input: OpenPRInput) -> OpenPRResult:
     except OSError:
         pass
 
+    # The agent commits as it works (its mandate says so), so a clean status
+    # here is normal. Sweep any leftovers into a final commit, then decide
+    # whether there is anything to ship by comparing against the base branch —
+    # never by whether the sweep found something.
     await _git(["add", "-A"], cwd=wd)
     _, status = await _git(["status", "--porcelain"], cwd=wd)
-    if not status.strip():
-        return OpenPRResult(opened=False, message="no changes — nothing to open a PR for")
-    await _git(["commit", "-m", f"{input.title} (closes #{input.issue_number})"], cwd=wd)
+    if status.strip():
+        await _git(["commit", "-m", f"{input.title} (closes #{input.issue_number})"], cwd=wd)
+    _, ahead = await _git(
+        ["rev-list", "--count", f"origin/{input.base}..HEAD"], cwd=wd
+    )
+    if ahead.strip() == "0":
+        return OpenPRResult(opened=False, message="no commits ahead of base — nothing to open a PR for")
 
     authed = f"https://x-access-token:{token}@github.com/{input.repo}.git"
     code, out = await _git(["push", "--force", authed, f"HEAD:{input.branch}"], cwd=wd)
