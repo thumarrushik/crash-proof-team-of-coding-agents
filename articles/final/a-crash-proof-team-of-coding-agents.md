@@ -70,11 +70,19 @@ Two details make resume survive that boundary. First, each run gets one stable w
 
 ## Recovering a Crashed Run from Its Last Heartbeat
 
-This is where the sealed box earns its place. While the agent works, a timer inside the activity fires a heartbeat every thirty seconds no matter what the agent is doing. The timer is deliberately dumb: a pulse tied to the agent's own output would make a long, silent tool call (a slow test suite, a dependency install) look identical to a dead worker, so the timer removes the ambiguity. The opposite failure, an agent still alive and pulsing but wedged in a loop, never trips the heartbeat timeout, so a separate, longer ceiling on the whole chunk bounds that case instead: two timeouts for two distinct ways to be stuck. Every pulse carries the latest known session ID, announced at the start of the run.
+This is where the sealed box earns its place, and the whole mechanism fits on a clock.
 
-Kill the worker and the pulses stop. After the two-minute heartbeat timeout, the retry reads the session ID straight out of the dead attempt's last heartbeat and relaunches the agent with a resume. No completed checkpoint is required; the last heartbeat is the checkpoint.
+1. **Every thirty seconds**, a timer inside the activity pulses the server: *still alive, and the session ID is `698c…`*. The timer is deliberately dumb: it fires on the clock, not on the agent's output, so a long silent tool call (a slow test suite, a dependency install) cannot be mistaken for death.
+2. **Kill the worker** and the pulses stop. Nothing was returned; nothing was saved.
+3. **Two silent minutes later**, the server declares the attempt dead and schedules a retry on any live worker.
+4. **The retry reads the dead attempt's last pulse**, takes the session ID out of it, and relaunches the agent with a resume. The agent reopens its transcript and picks up mid-thought.
 
-That is the distinction worth naming, because it is the whole point. Every durable-execution engine can resume a *completed* step by replaying its recorded result. This resumes a *live* agent from an attempt that recorded nothing at all. The unit of recovery is not a finished step; it is a coding agent's conversation, caught mid-thought.
+Step 4 works because the kill could not reach the two things that matter. Process memory died with the worker, but the transcript lives on disk, the last heartbeat lives on the server, and the session ID in that pulse is the *name* of the transcript. One link, and it is the entire recovery.
+
+![What Survives the Kill: process memory dies with the worker, but the transcript survives on disk and the last heartbeat survives on the server; the session ID in the pulse names the transcript, so attempt 2 reads the ID, reopens the transcript, and resumes](../../assets/diagrams/what-survives.png)
+*What Survives the Kill. The crash erases memory; it cannot touch the transcript on disk or the last pulse on the server, and the session ID joins the two.*
+
+No completed checkpoint is required; the last heartbeat is the checkpoint. That is the distinction worth naming. Every durable-execution engine can resume a *completed* step by replaying its recorded result; this resumes a *live* agent from an attempt that recorded nothing at all. The unit of recovery is not a finished step; it is a coding agent's conversation, caught mid-thought.
 
 ![Recovering a Crashed Run: attempt 1 heartbeats the live session ID; a SIGKILL kills the whole worker; attempt 2 reads the session ID from the last heartbeat and resumes the same conversation](../../assets/diagrams/heartbeat.png)
 *Recovering a Crashed Run. Attempt 2 recovers the session ID from the dead attempt's final pulse. A re-read, not a re-run.*
@@ -93,6 +101,11 @@ Three things have to be right, and each is a caveat worth stealing.
 - **The heartbeat has to reach the server before the crash.** The SDK throttles how often heartbeat details are actually persisted, and the default is too coarse for a short chunk: kill early enough and the session ID never made it out. This project's worker tightens the throttle on purpose.[^8]
 - **The worker has to die as a whole group.** Kill only the parent and the agent's child process is orphaned, finishes the work anyway, and *masks* the recovery. Our first recovery demos "succeeded" exactly this way, and they were lying before we caught it.
 - **The crash has to land while a chunk is genuinely in flight.** A kill that arrives between chunks is just an ordinary retry with nothing to recover: the previous chunk already recorded its result.
+
+Death is not the only way to be stuck, which is why there are two alarms, not one. A killed worker goes *silent*, and the heartbeat timeout catches that in two minutes. A wedged agent does the opposite: it loops forever and pulses the whole time, so the heartbeat alarm never fires, and a longer, hard ceiling on the whole chunk catches that case instead.
+
+![Two Ways to Be Stuck: a killed worker goes silent and trips the two-minute heartbeat timeout, which retries with a resume from the last pulse; a wedged agent keeps pulsing, so only the hard time limit on the whole chunk stops it](../../assets/diagrams/two-timeouts.png)
+*Two Ways to Be Stuck, Two Alarms. Silence trips the heartbeat timeout; a healthy pulse with no progress runs into the chunk ceiling.*
 
 The everyday value is not that deliberate kill; a worker rarely dies outright. What actually stops a headless run is the API on the other end: an overload during a busy hour, a rate limit, a dropped stream. The agent surfaces those on its result; the activity raises them as typed, retryable failures; the retry policy backs off (five seconds, doubling to a two-minute cap, six attempts), and every retry *resumes* the conversation instead of restarting the task. An overload window becomes added latency rather than a failed run.
 

@@ -1,0 +1,20 @@
+# Two distinct ways to be stuck, each with its own alarm.
+grid-rows: 2
+horizontal-gap: 300
+vertical-gap: 110
+
+dead: "Stuck, Way 1: Dead and Silent\nThe Worker Was Killed;\nThe Pulses Stop" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+wedged: "Stuck, Way 2: Alive but Wedged\nThe Agent Loops on the Same Failure,\nPulsing Happily the Whole Time" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+hb: "Alarm 1: The Heartbeat Timeout\nTwo Silent Minutes, Then a Retry\nThat Resumes From the Last Pulse" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+ceiling: "Alarm 2: The Chunk Ceiling\nA Hard Time Limit on the Whole Chunk;\nThe Only Alarm a Live Pulse Can't Fool" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+dead -> hb: "Silence Trips It"
+wedged -> ceiling: "The Clock Trips It"
