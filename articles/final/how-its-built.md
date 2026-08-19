@@ -89,9 +89,15 @@ The flagship walks the filed-issue-to-merged-PR loop. The details worth having w
 
 **Routing** goes by the issue's `team/…` label, with a catch-all lane when it carries none, so an unlabeled issue is never silently dropped. **Sequencing** honors *blocked by* in either dialect — a line in the issue's body or a `blocked-by` label. **Deduplication** is the server's: each job's ID derives deterministically from the issue, started with an "allow duplicates only after failure" policy, so a running or completed job refuses a second start while a failed one may retry on a later sweep — the reason the poller keeps no memory of its own, and the reason one transient error cannot deadlock an issue forever (a lesson a live fleet run taught the hard way, when the stricter refuse-everything policy did exactly that). **Namespace crossings** — the scheduled intake and the conflict escalation both — happen from *inside an activity*, which is allowed to do arbitrary I/O: open a client to the target namespace and start the job there, idempotent across the boundary because of the deterministic ID.
 
+![The two speeds: three issues are filed; the scheduled poll starts the two unblocked backend issues in parallel while holding the frontend issue that declared "Blocked by: #2"; when #2 merges and its issue closes, the next poll releases the held issue, which builds against what #2 landed and merges — serial, because it was declared](../../assets/diagrams/two-speeds.png)
+*The Two Speeds. Parallel is the default; serial is declared. A blocked issue is held on every sweep and released only when its blocker closes — not when it merely looks done.*
+
 **The commit history is the agent's own.** Each working lane's mandate says commit at meaningful checkpoints — a phase completed, a suite gone green — with messages that say why, and the PR activity pushes that full history rather than squashing it. The harness's final commit only sweeps whatever the agent left uncommitted, and "nothing to ship" is judged against the base branch, never against a clean status.
 
 **And the red verdict does not have to be a dead end.** With the optional fix loop on, a failed review (or a human's Request Changes) hands the PR back to the owning lane to fix, re-validate, and re-review, re-asking the human when the merge gate is also on, bounded to a few rounds; the mechanics and the live run are in the [companion piece](the-human-is-a-durable-object.md).
+
+![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated: approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
+*The fix loop's journey. A denial with a reason loops back at most three rounds; silence and the cap both end at a human. A timeout is never a request for changes.*
 
 ## Every Run Leaves Evidence
 

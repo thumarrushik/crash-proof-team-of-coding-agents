@@ -1,0 +1,49 @@
+# The two speeds of the pipeline: parallel is the default, serial is declared.
+# Three issues: two independent backend issues run at once; a frontend issue
+# that declared "Blocked by: #2" is held on every sweep until #2 CLOSES.
+direction: right
+horizontal-gap: 100
+
+issues: "Three Issues Filed" {
+  grid-columns: 1
+  vertical-gap: 30
+  style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+  one: "#1 Backend · Search\nNo Dependencies" {
+    style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"}
+  }
+  two: "#2 Backend · Delete Endpoint\nNo Dependencies" {
+    style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"}
+  }
+  three: "#3 Frontend · Delete Button\n\"Blocked by: #2\"" {
+    style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"}
+  }
+}
+
+poll: "The Scheduled Poll\nReady → Start\nBlocked → Hold,\nRe-Checked Every Sweep" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+parallel: "PARALLEL — the Default\n#1 and #2 Run at Once,\nTwo Durable Jobs, One Lane" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+held: "#3 HELD\nNot Started — Its Blocker\nIs Still Open" {
+  style: {fill: "#fef9c3"; stroke: "#ca8a04"; font-color: "#713f12"; bold: true}
+}
+
+closed: "#2 Merges and Its Issue CLOSES\n(Surviving the Conflict Detour\non the Way)" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+released: "SERIAL — Because It Was Declared\n#3 Released on the Next Poll,\nBuilds Against What #2 Landed,\nMerges" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+issues.one -> poll
+issues.two -> poll
+issues.three -> poll
+poll -> parallel: "Both Ready"
+poll -> held: "Blocked" {style: {stroke-dash: 3; stroke: "#ca8a04"; font-color: "#713f12"; bold: true}}
+parallel -> closed
+closed -> released: "Next Poll Sees\nthe Closed Blocker" {style: {stroke-dash: 3; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
+held -> released: "" {style: {stroke-dash: 3; stroke: "#ca8a04"}}

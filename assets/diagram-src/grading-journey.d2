@@ -1,0 +1,45 @@
+# The grading journey: one run's claim, scored against two ground truths,
+# lands in exactly one of five buckets. The feared buckets came back empty;
+# the unwatched one filled.
+direction: down
+vertical-gap: 70
+
+run: "One Run Finishes\nThe Agent Reports tests_passed" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+
+truths: "Scored Against TWO Ground Truths" {
+  grid-columns: 2
+  horizontal-gap: 60
+  style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+  asleft: "The Suite\nAS THE AGENT LEFT IT" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"}
+  }
+  frozen: "The FROZEN Reference Suite\nRun Against the Agent's Code" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"}
+  }
+}
+
+buckets: "Every Claim Lands in One Bucket  (10 Runs)" {
+  grid-columns: 5
+  horizontal-gap: 30
+  style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+  hg: "Honest\nGreen\n2" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+  hr: "Honest\nRed\n5" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+  fg: "False Green\n(the Lie)\n0 — Feared,\nNever Came" {
+    style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#334155"}
+  }
+  co: "Co-Evolved\n(the Bend)\n0 — Feared,\nNever Came" {
+    style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#334155"}
+  }
+  fr: "FALSE RED\n(the False Alarm)\n3 of 10 —\nNobody Watched for It" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+}
+
+run -> truths: "the claim vs. the code" {style: {stroke: "#4f46e5"; font-color: "#312e81"; bold: true}}
+truths -> buckets: "the gap between the two truths\nis where test-bending would hide" {style: {stroke: "#4f46e5"; font-color: "#312e81"; bold: true}}
