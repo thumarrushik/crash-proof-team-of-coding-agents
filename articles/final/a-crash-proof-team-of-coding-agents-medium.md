@@ -216,12 +216,12 @@ Collect those exports and you have a corpus of how your agents actually behave, 
 
 Six real gaps, told plainly, because the honest ones are the load-bearing ones.
 
-- **Worker affinity.** The transcript and workspace are local files: the engine can recover the *workflow* anywhere, but a retried chunk has to land where the *session* lives. The repo now ships the sticky-queue fix (opt-in): the first chunk runs on the shared lane queue, reports its worker's stable per-worker queue, and the workflow pins every later chunk and the transcript export there, so a restart on the same host resumes correctly and a chunk never silently lands where the session is absent. The routing is unit-proven on the time-skipping server; the honest edge remains that a *permanently* dead machine took its local files with it, so true machine-loss still wants shared storage for the transcript and workspace. That multi-machine run is the receipt still owed. See [How It's Built](how-its-built.md).
+- **Worker affinity.** The transcript and workspace are local files: the engine can recover the *workflow* anywhere, but a retried chunk has to land where the *session* lives. The sticky-queue fix below handles the common case, a worker that restarts on the same host. The honest edge remains: a *permanently* dead machine took its local files with it, so true machine-loss still wants shared storage for the transcript and workspace, and that multi-machine run is the receipt still owed ([How It's Built](how-its-built.md) has the mechanism).
 - **The filesystem is not checkpointed, and steps run at-least-once.** A retried chunk resumes against a directory the dead attempt half-mutated. It converged in every test here, but *converges in practice* is not *idempotent by construction*. Outward actions want idempotency keys; the structural fix is a fresh git worktree per chunk.
 - **A hard kill can orphan the agent.** The agent's child process may finish its chunk anyway, racing the retry: the exact effect that masked our first recovery attempts. Production workers belong in a process group or container that takes their children down with them.
 - **Workflow code is a compatibility surface.** Replaying an old history against reordered code can wedge an in-flight run. Evolving an orchestration in production is a versioning discipline, not just editing a function.
 - **A permissions landmine.** The agent's most permissive mode combined with resume in headless mode was broken upstream and has since been marked fixed.¹¹ Re-check it against your version. This project sidesteps it with accept-edits plus an explicit allow-list.
-- **The merge gate is an agent's verdict.** Approve-and-merge is gated on a single schema-validated boolean: the review agent's tests-pass verdict. Whether such a self-reported boolean can be believed is measured in a companion: it failed three times in ten, every miss a false alarm. None of those misses came from the isolated reviewer condition a real merge rides on ([*The Agent Grades Its Own Homework*](the-agent-grades-its-own-homework.md)). For this demo, that is the point; for production it is a placeholder. Insert your human gate exactly there: a protected branch or a durable approval step the workflow waits in. That approval step is built and verified against a live server. The companion piece [*The Human Is a Durable Object*](the-human-is-a-durable-object.md) is the walkthrough.
+- **The merge gate is an agent's verdict.** Approve-and-merge is gated on a single schema-validated boolean: the review agent's tests-pass verdict. Whether such a self-reported boolean can be believed is measured in a companion: it failed three times in ten, every miss a false alarm — though all three misses came from the builder arm, while the isolated reviewer arm was honest five for five ([*The Agent Grades Its Own Homework*](the-agent-grades-its-own-homework.md)). For this demo, that is the point; for production it is a placeholder. Insert your human gate exactly there: a protected branch or a durable approval step the workflow waits in. That approval step is built and verified against a live server. The companion piece [*The Human Is a Durable Object*](the-human-is-a-durable-object.md) is the walkthrough.
 
 ## Defaults Worth Stealing
 
@@ -232,6 +232,7 @@ If you build any version of this, on any stack, these are the settled defaults t
 - **Kill, and deploy, by process group.** An orphaned agent child finishes the work anyway and lies to you about whether your recovery works.
 - **Deny `git push` to every agent.** The harness, with its own credentials, in its own recorded step, is the only hand that touches the outside world.
 - **Route by queue, not by prompt.** A lane's queue and skill bundle are an identity a worker cannot drift out of; a persona in a prompt is not.
+- **Pin the resume to the worker that holds the session.** Opt-in sticky queues: the first chunk runs on the shared lane queue and reports its worker's own stable queue; the workflow pins every later chunk there. A restarted host resumes correctly, and a chunk never silently lands where the session is absent.
 - **Deterministic job IDs, duplicates allowed only after failure.** Running and completed jobs are refused, so the poller needs no memory and the escalation loop cannot run away. Failed jobs may retry on a later sweep, so one transient error cannot deadlock an issue forever. (A live fleet run found the stricter refuse-everything version of this rule doing exactly that; the evidence repository has the receipt.)
 - **Write the rule as a hook, not a prompt.** Every time this project measured the two head-to-head, the rule was probabilistic and the hook was law. That held down to a rule losing outright to a direct instruction while the hook caught twelve of twelve. Priced at the tool boundary in [*Flag, Block, or Beg*](flag-block-or-beg.md) and at the finish line in [*Done Is Not a Claim*](done-is-not-a-claim.md).
 
@@ -242,6 +243,17 @@ One practitioner teardown of Claude Code's own codebase estimates that roughly *
 The two sides are already circling each other. Temporal's own AI cookbook wraps model *API calls* in activities; a production write-up wraps the agent framework the same stateless way; another project built durable checkpointing around whole Claude Code runs on its own runtime.¹³,¹⁴,¹⁵ In the sources we checked, none composes the two the way this project does: headless Claude Code *sessions*, the session ID carried in heartbeat details mid-chunk and in workflow state after a completed one. That claim has a short shelf life, so re-check it before you build.
 
 But the composition is the natural one, and the seam really is small. Claude Code brings the durable conversation. Temporal brings the durable job. The agent could always remember the conversation; everything in this article is what became possible the moment something remembered the job.
+
+## The Family
+
+This article is the trunk; six companions each own one branch, and they read in this order:
+
+- [How It's Built](how-its-built.md) — the rivets: the settings, the tuning, the lane plumbing, the details the story above skips
+- [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md) — the bill: every boundary priced, the method, and the canary that re-checks it on a schedule
+- [Flag, Block, or Beg](flag-block-or-beg.md) — the tool-call boundary: what a prompt, a flag, and a block each buy, measured
+- [Done Is Not a Claim](done-is-not-a-claim.md) — the finish boundary: the same hard deny, moved to the exit, inverts the result
+- [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md) — the verdict boundary: the merge switch's boolean against ground truth
+- [The Human Is a Durable Object](the-human-is-a-durable-object.md) — the person: the one human decision, modeled as durable state, deny-safe on silence
 
 ---
 
