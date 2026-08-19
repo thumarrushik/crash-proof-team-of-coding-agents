@@ -1,0 +1,35 @@
+# The review-driven fix loop: a denial with a reason loops back, bounded;
+# silence and the cap both end at a human. Replaces the old HTML render.
+direction: right
+
+trigger: "1 · PR Not Approved\nRed Tests, a Human's 'Request Changes',\nor a Gate Deny WITH a Note" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+fix: "2 · The Owning Lane Fixes It\nThe Review's Own Finding\nIs the Fix Job's Brief" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+push: "3 · The Harness Pushes\nNever the Agent" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+rereview: "4 · Re-Reviewed at the New Head\nand Re-Asked at the Human Gate" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+stop: "The Cap: 3 Rounds, Then Stop\nComment, and Wait for a Person\nBounded on Purpose" {
+  style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+}
+merged: "Approve → Merged\nSigned With a Name" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+silence: "Silence → Denied by the Deadline\nA Dead Stop: a Timeout Is\nNEVER a Request for Changes" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+trigger -> fix -> push -> rereview
+rereview -> merged: "Approved"
+rereview -> silence: "Nobody Answered"
+rereview -> trigger: "Denied With a Note →\nAnother Round (Under the Cap)" {
+  style: {stroke-dash: 3; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+trigger -> stop: "4th Time Here?" {
+  style: {stroke-dash: 3; stroke: "#334155"; font-color: "#334155"}
+}

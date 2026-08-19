@@ -1,35 +1,34 @@
-# The human gate: the workflow blocks on a validated decision with a deadline.
-# Query = the inbox; update + validator = the decision (rejected before history
-# if unsolicited or unattributed); timer = the deny-safe deadline.
+# The human gate, human-first: either a name or the clock decides,
+# and both leave exactly one signed decision in the permanent record.
 direction: right
 horizontal-gap: 110
 
-wf: "The Durable Task, Blocked on Purpose\nAction: Merge PR #4 · Gate Open" {
+wf: "The Durable Job, Blocked on Purpose\nIt Wants to Merge PR #4 — and Waits" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
-  wait: "wait_condition(decision): a Wait That\nSurvives Crashes, Deploys, and Weeks of\nSilence, at Zero Cost" {
+  wait: "A Wait That Survives Crashes, Deploys,\nand Weeks of Silence, at Zero Cost\n(a workflow wait_condition)" {
     style: {fill: "#ffffff"; stroke: "#4f46e5"}
   }
 }
 
-human: "The Operator CLI" {
-  style: {fill: "#ecfdf5"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
-  inbox: "Query: the Inbox\nWhat Is Waiting on Me,\nand Its Deadline" {
-    style: {fill: "#ffffff"; stroke: "#16a34a"}
+human: "The Human (a Small Operator CLI)" {
+  style: {fill: "#fffbeb"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+  inbox: "1 · Read: What Is Waiting on Me,\nand How Long Until Its Deadline\n(a Read-Only Query)" {
+    style: {fill: "#ffffff"; stroke: "#d97706"}
   }
-  decide: "Update: the Decision\napprove | reject · --by <who>\nValidated BEFORE It Enters History" {
-    style: {fill: "#ffffff"; stroke: "#16a34a"}
+  decide: "2a · Decide: Approve or Reject, Signed --by <name>\nRefused Before It Enters the Record\nIf Unsolicited or Unsigned (a Validated Update)" {
+    style: {fill: "#ffffff"; stroke: "#d97706"}
   }
 }
 
-deadline: "The Deadline Timer\n24h of Silence =\nDENY, Recorded as\nDecided-By: 'deadline'" {
+deadline: "2b · Nobody Answers for 24h?\nThe Gate DENIES Itself,\nSigned 'deadline' (a Durable Timer)" {
   style: {fill: "#fef2f2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
 }
 
-outcome: "Approved: Merge Runs\nRejected or Expired:\nNo Irreversible Act" {
-  style: {fill: "#f8fafc"; stroke: "#64748b"; font-color: "#334155"; bold: true}
+outcome: "3 · Exactly One Signed Decision\nIn the Permanent History\nApprove → Merge · Deny or Silence → Nothing Irreversible" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
 
-human.inbox -> wf: "Read-Only" {style: {stroke-dash: 3; stroke: "#16a34a"}}
-human.decide -> wf: "Rejected If Unsolicited\nor Unattributed" {style: {stroke: "#16a34a"; bold: true}}
-deadline -> wf: "Fires If Nobody Answers" {style: {stroke: "#dc2626"; bold: true}}
-wf -> outcome: "One Attributable\nDecision, Always" {style: {stroke: "#4f46e5"; bold: true}}
+human.inbox -> wf: "read-only" {style: {stroke-dash: 3; stroke: "#d97706"}}
+human.decide -> wf: "the only door in" {style: {stroke: "#d97706"; bold: true}}
+deadline -> wf: "fires only on silence" {style: {stroke: "#dc2626"; bold: true}}
+wf -> outcome: "" {style: {stroke: "#7c3aed"; bold: true}}

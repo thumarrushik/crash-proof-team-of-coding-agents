@@ -9,13 +9,13 @@ long: "1 · One Long Agent Run\n90 Minutes · Hours of\nAccumulated Context" {
 chop: "2 · The First Design · Savepoints\nChop It Into Bounded Chunks;\nEach One Finishes or Resumes\nthe Same Session" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }
-hist: "3 · Every Completed Chunk → the History\nA Durable Checkpoint the Workflow Sees" {
+hist: "3 · Each Finished Chunk →\na Durable Checkpoint in the History" {
   style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
-retire: "4 · Then Two Things Retired It\nHeartbeat Recovery Survives a Crash With No Savepoint,\nand Fine Chunking Made Cost Unpredictable\n→ Coarse Chunks by Default" {
-  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+retire: "4 · Retired, on the Evidence\nHeartbeats Recover With No Savepoint;\nFine Chunks Made the Bill Unpredictable\n→ Coarse Chunks by Default" {
+  style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
 }
 
 long -> chop: "Cap the Turns"
 chop -> hist: "On Success or Time-Out"
-hist -> retire: "It Worked, but Measurement Won"
+hist -> retire: "It Worked. Measurement Won."

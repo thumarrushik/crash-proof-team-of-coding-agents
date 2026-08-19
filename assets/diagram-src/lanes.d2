@@ -1,29 +1,34 @@
-# From one agent to a team of lanes. Landscape: schedule + poll fan out to
-# three team lanes; one escalation crosses from review to backend.
+# Trusted by the queue, not the prompt: three identical PEER lanes;
+# only the queue they poll differs. The poll and the escalation both
+# cross namespaces the same way: a client call from inside an activity.
 direction: right
-horizontal-gap: 105
-vertical-gap: 40
+horizontal-gap: 110
 
 sched: "A Temporal Schedule\nFires Every Interval" {
   style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
-poll: "The Scheduled Poll\nStateless: Temporal Is\nthe Queue and De-Dup\nRepeats Refused · Failed May Retry" {
+poll: "The Scheduled Poll — Stateless\nTemporal Itself Is the Queue and the Memory:\nan Already-Running Job Is Refused,\na Failed One May Retry" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }
-backend: "Backend Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
-  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
-}
-review: "Review Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
-  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
-}
-frontend: "Frontend Lane\nOwn Namespace · Queue\nWorker · Skill Bundle" {
-  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+teams: "Three Peer Lanes, One per Team" {
+  grid-columns: 1
+  vertical-gap: 40
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+  frontend: "Frontend Lane\nIts Own Namespace · Queue · Worker · Skills" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  review: "Review Lane\nIts Own Namespace · Queue · Worker · Skills" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  backend: "Backend Lane\nIts Own Namespace · Queue · Worker · Skills" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
 }
 
 sched -> poll
-poll -> backend: "Start in the\nTeam's Namespace"
-poll -> review
-poll -> frontend
-review -> backend: "A Real Conflict →\nthe Owning Team" {
-  style: {stroke-dash: 3; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+poll -> teams.frontend: "Starts Each Job in\nThat Team's Namespace"
+poll -> teams.review
+poll -> teams.backend
+teams.review -> teams.backend: "A Real Conflict →\nthe Owning Team" {
+  style: {stroke-dash: 3; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }

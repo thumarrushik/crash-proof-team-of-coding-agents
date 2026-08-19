@@ -11,7 +11,7 @@
   .stage{position:relative;width:1400px;height:760px;padding:48px 64px}
   .title{font-family:"SF Mono",Menlo,monospace;font-size:18px;letter-spacing:.24em;
     color:var(--t3);text-transform:uppercase;margin-bottom:36px}
-  .chunk{position:absolute;left:64px;top:280px;width:360px;height:170px;border-radius:18px;
+  .chunk{position:absolute;left:64px;top:280px;width:380px;height:170px;border-radius:18px;
     border:2px solid rgba(251,191,36,.6);
     background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.04));
     display:flex;flex-direction:column;justify-content:center;padding:0 30px;gap:8px}
@@ -34,18 +34,19 @@
   .e3 b{color:var(--red)}
   .fork{position:absolute;left:654px;top:170px;width:3px;height:420px;background:rgba(203,213,225,.35)}
   .tick{position:absolute;left:654px;width:46px;height:3px;background:rgba(203,213,225,.45)}
+  .tick::after{content:"";position:absolute;right:-2px;top:-5px;border:6px solid transparent;border-left:8px solid rgba(203,213,225,.6)}
   .t1{top:170px}.t2{top:373px}.t3{top:578px}
 </style></head><body>
 <div class="stage">
   <div class="title">How a Chunk Ends · Three Typed Exits</div>
   <div class="chunk"><b>One Bounded Chunk</b>
-    <span>headless Claude Code · turn-capped<br>heartbeats carry the session id</span></div>
+    <span>headless Claude Code, capped at N turns<br>heartbeats carry the session id</span></div>
   <div class="arrow a-main"></div>
   <div class="rec" style="left:445px;top:320px">typed result<br>record</div>
   <div class="fork"></div>
   <div class="tick t1"></div><div class="tick t2"></div><div class="tick t3"></div>
   <div class="exit e1"><b>Retryable error → resume</b>
-    <span>API drop, execution error, report handshake miss:<br>the retry reopens the SAME session from its heartbeat</span></div>
+    <span>an API drop, a crash, a missed final report:<br>the retry reopens the SAME session from its heartbeat</span></div>
   <div class="exit e2"><b>Out of turns → next chunk</b>
     <span>error_max_turns is a checkpoint, not a failure:<br>the workflow schedules another chunk that resumes</span></div>
   <div class="exit e3"><b>Non-retryable → stop</b>

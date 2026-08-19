@@ -1,27 +1,35 @@
-# Claude Code is already half a durable system; the job is the missing half.
-# Landscape: three "already has / lacks" cards, then Temporal completes it.
+# A durable agent system is two halves; Claude Code ships one,
+# the job half is a dashed empty slot, and Temporal fills it.
 direction: right
-horizontal-gap: 260
+horizontal-gap: 120
 
-cc: "What Claude Code Already Is" {
-  grid-columns: 3
-  horizontal-gap: 180
+sys: "A Durable Agent System = Two Halves" {
+  grid-columns: 2
+  horizontal-gap: 60
   style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
-  convo: "The Conversation\nAlready Durable\nA Transcript on Disk,\nResumable by ID" {
-    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  have: "The Conversation Half — Already Shipped" {
+    grid-columns: 1
+    style: {fill: "#f0fdf4"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+    convo: "The Conversation Survives\nA Transcript on Disk, Resumable by ID" {
+      style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"}
+    }
+    guard: "The Guardrails Hold\nDeny Rules · Hooks · OS Sandbox" {
+      style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"}
+    }
   }
-  guard: "The Guardrails\nAlready Enforced\nDeny Rules · Audit Hooks\nOS Sandbox" {
-    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
-  }
-  job: "The Job\nStill Forgotten\nMachine-Local; Nothing Moves\nIt When the Box Dies" {
-    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  miss: "The Job Half — Missing" {
+    grid-columns: 1
+    style: {fill: "#fef2f2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true; stroke-dash: 5}
+    gone: "Nothing Notices a Dead Machine\nNothing Moves the Work\nNothing Remembers a Job Ran at All" {
+      style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"}
+    }
   }
 }
 
-temporal: "Temporal\nRemembers the Job\n(the Other Half)" {
+temporal: "Temporal\nDurable Execution" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }
 
-temporal -> cc.job: "Completes\nthe Missing Half" {
-  style: {stroke-dash: 3; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+temporal -> sys.miss: "Supplies This Half" {
+  style: {stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }

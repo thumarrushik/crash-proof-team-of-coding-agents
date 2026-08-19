@@ -1,0 +1,39 @@
+# The whole system in one held breath. Clockwise loop:
+# 1-2-3-4 across the top, 7-6-5 across the bottom right-to-left.
+grid-rows: 2
+horizontal-gap: 130
+vertical-gap: 140
+
+gh: "1 · GitHub\nAn Issue Is Filed; Its Label\nNames the Owning Team" {
+  style: {fill: "#f1f5f9"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
+}
+poll: "2 · The Scheduled Poll\nEvery Interval, One Durable\nJob per Ready Item" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+lane: "3 · The Team's Lane\nIts Own Namespace · Queue\nWorker · Skill Bundle" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+job: "4 · One Durable Job" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  agent: "The Agent, Sealed in an Activity\nBounded Chunks · a Heartbeat Every 30s\nCarries the Session ID (Crash = Resume)" {
+    style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+  }
+}
+evidence: "7 · Every Run Leaves Evidence\nTranscript · Tool Log · Report\n→ One Bucket → New Guardrails" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+merge: "6 · Review, Gate, Merge\nGreen Tests → Approve · a Human Gate\nIf On · Conflicts Self-Heal or Escalate" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+pr: "5 · A Pull Request Opens\nPushed by the Harness,\nNever by the Agent" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+
+gh -> poll -> lane
+lane -> job.agent: "Runs"
+job.agent -> pr
+pr -> merge: "Next Poll" {style: {stroke-dash: 3}}
+merge -> evidence
+evidence -> gh: "The Issue Closes; Dependents Unblock" {
+  style: {stroke-dash: 3; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}

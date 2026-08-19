@@ -1,20 +1,20 @@
 # Durable execution: append to the ledger, replay after a crash
 direction: right
 
-w1: "A Mortal Worker\nRuns the Job" {
+w1: "1 · A Mortal Worker\nRuns the Job" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }
-hist: "The Event History\nAn Append-Only Ledger on the Server\nEvery Step Recorded: A Step Scheduled,\na Result Returned, a Timer Fired" {
+hist: "The Event History\nAn Append-Only Ledger on the Server\nEvery Step the Job Ever Took" {
   style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
-crash: "The Worker Dies\nMid-Job" {
+crash: "2 · The Worker Dies Mid-Job\nIts Memory Is Gone" {
   style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
 }
-w2: "Any New Worker\nReplays the Ledger and Continues\nFrom Exactly Where the Job Was" {
+w2: "3 · Any New Worker Replays the Ledger\nand Continues Exactly Where the Job Was" {
   style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
 }
 
-w1 -> hist: "Append Every Step"
+w1 -> hist: "Appends Every Step" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
 w1 -> crash
 crash -> w2
-hist -> w2: "Replay to Rebuild State"
+hist -> w2: "Replays to Rebuild the State" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}

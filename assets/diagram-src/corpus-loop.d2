@@ -14,7 +14,7 @@ corpus: "2 · Every Run Ships Its Evidence\nTranscripts · Tool-Call Logs · Rep
 review: "3 · A Reviewer Reads the Corpus\nand Finds a Recurring Waste Pattern" {
   style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
 }
-measure: "5 · Re-Run and Score\nThe Rule Nudges · The Hook Is Law" {
+measure: "5 · Re-Run and Score the Fix\nThe Written Rule: ~20% Nudge\nThe Hook: 12 of 12 Caught" {
   style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
 }
 guard: "4 · The Lesson Is Codified\nA Workspace Rule + a Hook\nThat Flags It Deterministically" {
@@ -24,6 +24,6 @@ guard: "4 · The Lesson Is Codified\nA Workspace Rule + a Hook\nThat Flags It De
 runs -> corpus -> review
 review -> guard: "Codify the Lesson"
 guard -> measure
-measure -> runs: "The Guardrail Now Rides Every Future Run and Retry" {
+measure -> runs: "The Guardrail Rides Every Future Run" {
   style: {stroke-dash: 3; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }

@@ -17,13 +17,13 @@ build: "3 · The Issue Lane\nAgent Works in Resumable Chunks\n→ Opens a Pull R
 }
 
 unblock: "7 · The Next Poll\nA Closed Issue Releases the\nDependents It Was Blocking → They Ship" {
-  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
 merged: "6 · PR Merged\nIssue Closed" {
   style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
 }
 merge: "5 · Merge the PR\nStale Branch → Update & Retry\nReal Conflict → the Owning Team\nResolves and Re-Merges" {
-  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  style: {fill: "#fef9c3"; stroke: "#ca8a04"; font-color: "#713f12"; bold: true}
 }
 review: "4 · The Review Lane\nReads the Diff → Approves\nOnly If the Tests Pass" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
@@ -31,8 +31,8 @@ review: "4 · The Review Lane\nReads the Diff → Approves\nOnly If the Tests Pa
 
 issue -> intake: "Durable,\nRetried"
 intake -> build: "Start in Its\nNamespace"
-build -> review: "Picked Up\nNext Poll"
-review -> merge: "Approve" {style: {stroke-dash: 3; stroke: "#4f46e5"; font-color: "#312e81"}}
+build -> review: "Handed Over on\nthe NEXT Poll"
+review -> merge: "Approve" {style: {stroke: "#4f46e5"; font-color: "#312e81"}}
 merge -> merged
 merged -> unblock
 unblock -> intake: "The Loop Closes on the Next Poll" {style: {stroke-dash: 3; stroke: "#0891b2"; font-color: "#164e63"}}

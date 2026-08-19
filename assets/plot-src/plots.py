@@ -70,18 +70,18 @@ def figure():
             # Escape the dollar signs: a label with a PAIR of "$" (e.g. "$0.25 (+$0.14)")
             # triggers matplotlib mathtext, which eats both signs; "\$" renders literally.
             money = f"\\${d:.3f}" if d < 0.1 else f"\\${d + 5e-4:.2f}"
-            lbl = money + (f"  (+\\${d - base:.2f})" if d - base > 0.05 else "")
+            lbl = money + ("  (63x the cheapest run)" if d > 2 else (f"  (+\\${d - base:.2f})" if d - base > 0.05 else ""))
             axB.text(c, d * 1.5, lbl, ha="center", fontsize=10, color=PURPLE)
         # No "→" here: the xkcd/Comic Sans font has no glyph for it (renders as tofu).
-        axB.annotate("14 chunks / 28 turns to finish\nwhat one session did in 9 turns\n+$2.0 over the base",
-                     xy=(14, 2.125), xytext=(4.3, 0.85), fontsize=9.5, color=RED,
+        axB.annotate("same code, three runs",
+                     xy=(8, 0.25), xytext=(3.4, 0.9), fontsize=9.5, color=RED,
                      arrowprops=dict(arrowstyle="->", color=RED, lw=1.8))
         axB.set_yscale("log")
-        axB.set_xlabel("chunks the agent took (fine chunking)")
+        axB.set_xlabel("how many chunks the same task got split into")
         axB.set_ylabel("run cost (USD, log)")
         axB.set_xticks([1, 8, 14])
         axB.set_xlim(0, 16)
-        axB.set_title("Fine chunking adds cost,\nunpredictably (+\\$0 to +\\$2)")
+        axB.set_title("Fine chunking: same code,\n\\$0.03 or \\$2.13 — unpredictable")
         axB.spines[["top", "right"]].set_visible(False)
 
         fig.suptitle("Same TDD task, haiku, measured: a resume is cheap; fine chunking is unpredictable",
