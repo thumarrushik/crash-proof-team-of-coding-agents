@@ -115,15 +115,27 @@ Point that same machinery at a whole repository and it does something bigger. Th
 
 ## How a Chunk Actually Runs
 
-Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record: a session ID, an outcome, a cost, a turn count, the validated report, and nothing else. That typing is the wall. The workflow can only read fields on that record, so nothing the agent did unpredictably has a path into the replayable layer.
+Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record: a session ID, an outcome, a cost, a turn count, the validated report, and nothing else. That typing is the wall: the workflow can only read fields on that record, so nothing the agent did unpredictably can leak into the replayable layer.
 
-Launching the agent inside that function is a short list of settings, and one of them does the quiet heavy lifting: the agent is told to load its configuration from the project directory *only*, never from the machine's own user config. That single choice is why the policy is true rather than hopeful: the rules ride inside the workspace, so the same agent runs on every worker on every machine. The rest read as you would guess: resume the prior session, cap the run at a fixed number of turns so a chunk stops cleanly with its transcript intact, auto-accept file edits but gate every other tool behind an explicit allow-list, and force the closing report to match a schema so the workflow reads a real pass/fail value instead of parsing prose.
+Launching the agent is a short list of settings:
 
-Read the deny rules as architecture, not only safety. Deleting a tree and escalating privileges are the obvious entries; `git push` is the interesting one. The agent writes code and is never allowed to reach a remote, so every push and every merge in this entire system is done by the harness, in its own step, with its own credentials. One hook appends every tool call to an audit log as it happens; another flags a wasteful pattern a later experiment taught us to catch. And because the workspace re-stamps this policy before *every* chunk, the rules are byte-for-byte the same on every attempt, through every retry and every resume. The guardrail cannot drift.
+- **Load configuration from the project directory only**, never from the machine's own user config. This is the quiet heavy lifter: the rules ride inside the workspace, so the same agent runs identically on every worker on every machine.
+- **Resume the prior session.**
+- **Cap the turns**, so a chunk stops cleanly with its transcript intact.
+- **Auto-accept file edits; gate every other tool behind an explicit allow-list.**
+- **Force the closing report to match a schema**, so the workflow reads a real pass/fail value instead of parsing prose.
 
-When a chunk fails, the function does not decide what to do about it. It raises a typed error and lets the workflow's declared retry policy handle the backoff, and the taxonomy under that is three-way, very nearly the whole of the control logic. An API error or a mid-run failure is *retryable*: the transcript survived, so the retry resumes the session instead of restarting the task. Running out of turns is not an error at all: the function returns normally and the workflow schedules the next chunk. Anything else terminal is *non-retryable* and stops the job, loudly. Continue, resume, or stop: three outcomes a database could switch on, which was the entire point of sealing the agent away from the decision.
+Read the deny rules as architecture, not only safety. Deleting a tree and escalating privileges are the obvious entries; `git push` is the interesting one. The agent writes code but can never reach a remote: every push and merge in this system is done by the harness, in its own step, with its own credentials. Hooks do the bookkeeping (one appends every tool call to an audit log, another flags a wasteful pattern a later experiment taught us to catch), and the workspace re-stamps the whole policy before every chunk, byte-for-byte identical on every attempt. The guardrail cannot drift.
 
-None of this is a bespoke protocol the agent had to be taught. It is a stock Claude Code project (settings, hooks, skills, memory) assembled fresh every chunk, and the agent works inside it exactly as it would in any local checkout. The rivets (the settings file itself, the skills the workspace lays down, the exact tuning on every retry) are laid out bolt by bolt in the engineering companion, [How It's Built](how-its-built.md); what this article needs is the shape: one function, one typed record, three exits, and a policy the workspace re-stamps before every chunk so the guardrail cannot drift. And the shape was not our first answer. The first answer is still buried in this codebase, and it is worth showing precisely because it *worked*, until measurement talked us out of it.
+When a chunk fails, the function does not decide what happens next. It raises a typed error and the workflow's declared retry policy takes over. The taxonomy is three-way, and it is nearly the whole control logic:
+
+- **Retryable** (an API error, a mid-run failure): the transcript survived, so the retry resumes the session instead of restarting the task.
+- **Not an error** (out of turns): the function returns normally and the workflow schedules the next chunk.
+- **Non-retryable** (anything genuinely terminal): the job stops, loudly.
+
+Continue, resume, or stop: three outcomes a database could switch on, which was the entire point of sealing the agent away from the decision.
+
+None of this is a bespoke protocol the agent had to be taught. It is a stock Claude Code project (settings, hooks, skills, memory), assembled fresh every chunk, and the agent works in it exactly as it would in any local checkout. The bolt-by-bolt detail lives in the engineering companion, [How It's Built](how-its-built.md); what this article needs is the shape: one function, one typed record, three exits, one re-stamped policy. And the shape was not our first answer. The first answer is still buried in this codebase, and it is worth showing precisely because it *worked*, until measurement talked us out of it.
 
 ## The Detour We Measured Our Way Out Of
 
@@ -238,9 +250,10 @@ Collect those exports and you have a corpus of how your agents actually behave, 
 
 ## What This Doesn't Solve
 
-Five real gaps, told plainly, because the honest ones are the load-bearing ones.
+Six real gaps, told plainly, because the honest ones are the load-bearing ones.
 
-- **The filesystem is not checkpointed, and steps run at-least-once.** A retried chunk resumes against a directory the dead attempt half-mutated. It converged in every test here, but *converges in practice* is not *idempotent by construction*: outward actions want idempotency keys, and the structural fix is a fresh git worktree per chunk. A *permanently* dead machine also takes the local transcript and workspace with it: restarts are covered by the sticky-queue pinning below, but machine-loss wants shared storage ([How It's Built](how-its-built.md) has the mechanism and the live run).
+- **The filesystem is not checkpointed, and steps run at-least-once.** A retried chunk resumes against a directory the dead attempt half-mutated. It converged in every test here, but *converges in practice* is not *idempotent by construction*: outward actions want idempotency keys, and the structural fix is a fresh git worktree per chunk.
+- **A permanently dead machine takes the workspace with it.** The transcript and working directory are local files, so a host that never comes back loses them. Restarts are covered by the sticky-queue pinning below; machine-loss wants shared storage ([How It's Built](how-its-built.md) has the mechanism and the live run).
 - **A hard kill can orphan the agent.** The agent's child process may finish its chunk anyway, racing the retry: the exact effect that masked our first recovery attempts. Production workers belong in a process group or container that takes their children down with them.
 - **Workflow code is a compatibility surface.** Replaying an old history against reordered code can wedge an in-flight run. Evolving an orchestration in production is a versioning discipline, not just editing a function.
 - **A permissions landmine.** The agent's most permissive mode combined with resume in headless mode was broken upstream and has since been marked fixed.¹¹ Re-check it against your version. This project sidesteps it with accept-edits plus an explicit allow-list.
