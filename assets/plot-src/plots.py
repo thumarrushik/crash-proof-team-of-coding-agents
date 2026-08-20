@@ -71,7 +71,12 @@ def figure():
             # triggers matplotlib mathtext, which eats both signs; "\$" renders literally.
             money = f"\\${d:.3f}" if d < 0.1 else f"\\${d + 5e-4:.2f}"
             lbl = money + ("  (63x the cheapest run)" if d > 2 else (f"  (+\\${d - base:.2f})" if d - base > 0.05 else ""))
-            axB.text(c, d * 1.5, lbl, ha="center", fontsize=10, color=PURPLE)
+            # Per-point placement: the 8-chunk label goes RIGHT of its point (the
+            # red annotate arrow arrives from the upper left and would strike a
+            # centered-above label); the 14-chunk label goes BELOW-LEFT (above the
+            # point lands outside the axes, under the title). 1-chunk stays above.
+            x_lbl, y_mult, ha = {1: (c, 1.5, "center"), 8: (c + 0.5, 1.0, "left"), 14: (c - 0.5, 0.6, "right")}[c]
+            axB.text(x_lbl, d * y_mult, lbl, ha=ha, fontsize=10, color=PURPLE)
         # No "→" here: the xkcd/Comic Sans font has no glyph for it (renders as tofu).
         axB.annotate("same code, three runs",
                      xy=(8, 0.25), xytext=(3.4, 0.9), fontsize=9.5, color=RED,

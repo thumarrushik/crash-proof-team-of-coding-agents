@@ -39,9 +39,7 @@ released: "SERIAL — Because It Was Declared\n#3 Released on the Next Poll,\nBu
   style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
 }
 
-issues.one -> poll
-issues.two -> poll
-issues.three -> poll
+issues -> poll: "Every Sweep\nReads All Three"
 poll -> parallel: "Both Ready"
 poll -> held: "Blocked" {style: {stroke-dash: 3; stroke: "#ca8a04"; font-color: "#713f12"; bold: true}}
 parallel -> closed
