@@ -28,7 +28,7 @@ Everything below was run strictly one at a time. An earlier batch taught us that
 
 | Scenario | Measured | Mechanism |
 |---|--:|---|
-| **Continuous** (one session to done) | **$0.113** | the floor: runs of $0.058 / $0.132 / $0.149 |
+| **Continuous** (one session to done) | **$0.113** | the baseline, a mean of $0.058 / $0.132 / $0.149 |
 | **Crash, resumed warm** | **+$0.0035** | a cache *read* of the prefix, ~3% of the base |
 | **Crash, resumed cold** (65 min idle) | **+$0.021** | a *partial* cache write, ~6× warm |
 | **Fine-chunked** (2-turn cap) | **$0.034 to $2.13** | 1, 8, and 14 chunks: a ~63× spread |
