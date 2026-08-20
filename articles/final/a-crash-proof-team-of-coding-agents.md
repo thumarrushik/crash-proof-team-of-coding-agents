@@ -134,9 +134,7 @@ None of this is a bespoke protocol. It is a stock Claude Code project (settings,
 
 ## The Detour We Measured Our Way Out Of
 
-An activity's result is all-or-nothing: nothing lands in the history until the attempt finishes. Wrap a ninety-minute agent run in one activity and a crash at minute eighty-nine erases everything the workflow could see. So the first design chopped the run into **savepoints** on the turn cap. A capped run either finishes or runs out of turns mid-task, and in that second case the transcript survives, resumable by ID; chain those together and you get a chunked session, each completed piece writing progress, cost, and the session ID into the history. It worked: a savepoint-era kill test recovered on a restarted worker and finished all ten of its tests, one session end to end.
-
-But every completed-chunk boundary is another resume: an agent invocation that re-establishes the growing conversation before it does any new work. Once heartbeat recovery existed, those boundaries were buying a durability we already had. And they were quietly doing something worse to the cost, which is the part we did not see coming.
+The first design chopped the run into **savepoints** on the turn cap: an activity's result is all-or-nothing, so completing a bounded chunk was the only way to write progress, cost, and the session ID into the history before the end. It worked; a savepoint-era kill test recovered on a restarted worker and finished all ten of its tests, one session end to end. But once heartbeat recovery existed, those completed-boundary checkpoints were buying a durability we already had, and each one was another resume. Worse, they were quietly doing something to the cost we did not see coming. (The full detour, savepoint diagram and all, is in [How It's Built](how-its-built.md).)
 
 ## What Durability Actually Costs
 
