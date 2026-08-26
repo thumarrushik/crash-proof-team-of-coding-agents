@@ -36,6 +36,15 @@ $0.0185 — that probe rode a fatter session; both in band), integrity recalled
 flight. Figure: `assets/diagrams/canary-bands.png`
 (`assets/plot-src/canary-plot.py`, generated from the history file).
 
+## Pass four and five (2026-08-20)
+
+Both green, run three weeks after the first flight during the article-family
+review loop. Totals $0.0938 / $0.0938 (identical to the third first-flight
+pass to the fourth decimal). Live values vs published: warm_resume $0.0031
+(published $0.0035), handoff_tax $0.0639 (in band), fork_warmth $0.0030 +
+new sid, integrity recalled 2/2. Five weeks of provider evolution moved
+nothing: the published economics still reproduce.
+
 ## Operating it
 
 - One pass, no infra: `uv run src/canary.py --once` (exit 1 on alert — CI-able).
