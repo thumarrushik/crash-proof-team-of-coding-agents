@@ -4,14 +4,14 @@ Reproduce: `deploy/hitl-live.sh` (starts an ephemeral `temporal server start-dev
 
 ### A. approve via CLI
 
-- workflow id: `hitl-approve-2388371a`
+- workflow id: `hitl-approve-d4963a8f`
 - merges performed: `['pr-4']`
 - decision: approved=`True` by=`rushik` note=`LGTM`
 - gate seen by query: `{'action': 'merge', 'detail': 'PR #4 on o/r', 'timeout_h': 0.08333333333333333}`
 - operator `--list` inbox:
 
 ```
-hitl-approve-2388371a
+hitl-approve-d4963a8f
   action: merge  detail: PR #4 on o/r  deadline: 0.08333333333333333h
 ```
 - operator decision reply: `recorded: approved by rushik`
@@ -19,7 +19,7 @@ hitl-approve-2388371a
 
 ### B. reject via CLI
 
-- workflow id: `hitl-reject-1699254f`
+- workflow id: `hitl-reject-731b920a`
 - merges performed: `[]`
 - decision: approved=`False` by=`rushik` note=`hold for security review`
 - operator decision reply: `recorded: rejected by rushik`
@@ -27,7 +27,7 @@ hitl-approve-2388371a
 
 ### C. nobody answers (5s deadline)
 
-- workflow id: `hitl-deadline-91acef3c`
+- workflow id: `hitl-deadline-c340e9ad`
 - merges performed: `[]`
 - decision: approved=`False` by=`deadline` note=`auto-denied after 0.001388888888888889h`
 - event history: 28 events — update-accepted×0, update-completed×0, activity-completed×3, timer started×1/fired×1
@@ -46,5 +46,3 @@ hitl-approve-2388371a
 - PASS — C timer fired
 
 **ALL PASS** (10/10).
-
-Design doc for this gate: `deploy/hitl-design.md`.

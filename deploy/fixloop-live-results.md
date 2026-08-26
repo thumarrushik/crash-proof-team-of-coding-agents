@@ -4,17 +4,17 @@ Reproduce: `deploy/fixloop-live.sh`. Real `RunClaudeTask` workflows drive the lo
 
 ### chain: red -> fix -> green -> approve -> merge
 
-- run: `fl-37dfa2`
-- fix jobs started: ['fl-37dfa2-backend-fix-pr-4-r1']
+- run: `fl-2d2c68`
+- fix jobs started: ['fl-2d2c68-backend-fix-pr-4-r1']
 - fix pushes: `['claude/issue-1']`
-- re-review jobs started: ['fl-37dfa2-review-pr-4-r1']
+- re-review jobs started: ['fl-2d2c68-review-pr-4-r1']
 - merges: `['pr-4']`
 - human-gate updates in history: 1
 - operator reply: `recorded: approved by rushik`
 
 ### cap: red at max rounds -> no fix, await human
 
-- run: `cap-a0781a`
+- run: `cap-73e8d5`
 - fix jobs started: []
 - merges: `[]`
 
