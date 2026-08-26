@@ -13,7 +13,7 @@
 
 There is a class of action no amount of green tests should authorize on its own: the merge to a protected branch, the deploy, the spend past a threshold. The irreversible acts. The [main article](a-crash-proof-team-of-coding-agents.md) builds a team of coding agents that carries a filed issue all the way to a merged pull request with no human decision in the loop. It gates that merge on one thing: a schema-validated boolean, the review agent's tests-pass verdict. For a demo repository that is the whole point. For anything that ships to people it is a placeholder. A sibling article measures exactly how far that boolean can be trusted: [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 
-So this companion adds a person, at exactly one moment, deliberately. Not with a notification, but with a place. A gate the durable job waits in, where even silence gets a name in the permanent record the engine keeps of everything the job did (Temporal calls that record the **event history**).
+So this companion adds a person, at exactly one moment, deliberately. Not with a notification, but with a place. A gate the durable job waits in, where even silence gets a name in the permanent record the engine keeps of everything the job did (Temporal calls that record the **event history**). And because a denial with a reason is a request rather than a dead end, the second half of this piece closes that loop too: a bounded fix round that re-asks the human.
 
 ## Consent Is a State, Not a Message
 
@@ -33,7 +33,7 @@ Every operator capability in this system (ask a running job a question, steer it
 
 **The human is waited for, with a deadline: a durable timer.** The heart of the gate is one call: wait until a decision exists, or until the clock runs out. Because the wait is a workflow primitive, it survives worker crashes and deploys, exactly as the main article's kill-9 runs demonstrated for this same workflow. It holds nothing open while it waits. A human's absence costs the system nothing. And when the deadline fires, the gate closes on the **deny** side. It records a decision attributed to `deadline`, with a note saying how long it waited.³ Six months later the history does not merely show that the merge did not happen. It shows that nobody answered, how long the system waited, and which policy closed the gate. Even silence gets a byline.
 
-The gate defaults off. Autonomy stays the resting state of the whole system; accountability is one boolean on the job.
+The gate defaults off. Autonomy stays the resting state of the whole system; accountability is one boolean on the job. And modeled this way, the human is just another durable object in the system: queryable, addressable, waited on by a timer, and written into the permanent record, present or absent.
 
 ## We Ran It for Real
 
@@ -76,7 +76,7 @@ When a pull request is not approved, it goes back to be fixed instead of just st
 - a human left a native "Request Changes" review on the PR;
 - or a human denied at the merge gate with a note.
 
-Any of the three hands the PR to the team that owns the code. Its agent reads the feedback, makes the change, and re-runs the tests to validate it. The harness pushes the result (the agent itself is denied `git push`, as everywhere in this system). That push re-reviews the PR, and if the gate is on, re-opens it, so the human is asked again. Approve merges; another rejection fixes again. The loop is bounded: after a few rounds it stops, posts a comment that it is handing off, and waits for a person to take it.
+Any of the three hands the PR to the team that owns the code. Its agent reads the feedback, makes the change, and re-runs the tests to validate it. The harness pushes the result (the agent itself is denied `git push`, as everywhere in this system). That push re-reviews the PR and, if the gate is on, re-opens the gate, so the human is asked again. Approve merges; another rejection fixes again. The loop is bounded: after a few rounds it stops, posts a comment that it is handing off, and waits for a person to take it.
 
 One case is deliberately excluded, because the distinction is the whole point of the gate. A denial that came from the *deadline* never triggers a fix. A timeout is a safe stop, not a request for changes.
 
@@ -94,7 +94,7 @@ We ran the whole loop on a real server, the same way we ran the gate. The leaf s
 
 Seven checks, all green. The denial stopped being a dead end and became one more durable loop, bounded and attributable like everything else.
 
-This is where the system's escalations run out. Retry harder, self-heal the branch, hand the conflict to the lane that owns the code: every rung below this one is a machine's answer. And machines' answers top out. For an irreversible act, or a task the strongest model still cannot land, the system's answer is to wait, durably and deadline-bounded, for someone accountable. The machines needed the whole article to become trustworthy participants. The human needed four primitives, because the durable record was already there.
+This is where the system's escalations run out. Retry harder, self-heal the branch, hand the conflict to the lane that owns the code (the escalation rungs the main article climbs): every rung below this one is a machine's answer. And machines' answers top out. For an irreversible act, or a task the strongest model still cannot land, the system's answer is to wait, durably and deadline-bounded, for someone accountable. The machines needed the flagship's entire build to become trustworthy participants. The human needed four primitives, because the durable record was already there.
 
 ## Steal These
 
