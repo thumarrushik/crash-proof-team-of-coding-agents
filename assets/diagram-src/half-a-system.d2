@@ -1,35 +1,19 @@
-# A durable agent system is two halves; Claude Code ships one,
-# the job half is a dashed empty slot, and Temporal fills it.
-direction: right
-horizontal-gap: 120
+# Act I: the machine two-thirds built. Deliberately NO answer drawn: no
+# engine, no supplier. The third socket is empty, and stays empty until
+# the closing image fills it (the-whole-at-last.d2).
+direction: down
 
-sys: "A Durable Agent System = Two Halves" {
-  grid-columns: 2
+sys: "A Durable Agent System = Three Parts" {
+  grid-columns: 3
   horizontal-gap: 60
-  style: {fill: "#f8fafc"; stroke: "#334155"; font-color: "#0f172a"; bold: true}
-  have: "The Conversation Half\nAlready Shipped" {
-    grid-columns: 1
-    style: {fill: "#f0fdf4"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
-    convo: "The Conversation Survives\nA Transcript on Disk, Resumable by ID" {
-      style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"}
-    }
-    guard: "The Guardrails Hold\nDeny Rules · Hooks · OS Sandbox" {
-      style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"}
-    }
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+  conv: "The Conversation: SHIPS\nA Transcript on Disk,\nResumable by ID" {
+    style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
   }
-  miss: "The Job Half\nMissing" {
-    grid-columns: 1
-    style: {fill: "#fef2f2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true; stroke-dash: 5}
-    gone: "Nothing Notices a Dead Machine\nNothing Moves the Work\nNothing Remembers a Job Ran at All" {
-      style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"}
-    }
+  guard: "The Guardrails: SHIP\nDeny Rules · Hooks ·\nOS Sandbox" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
   }
-}
-
-temporal: "Temporal · Durable Execution\nSupplies the Missing Half" {
-  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
-}
-
-temporal -> sys.miss: {
-  style: {stroke: "#4f46e5"; bold: true}
+  hole: "The Job: EMPTY\nThe Part That Would Notice\na Dead Machine and\nMove the Work" {
+    style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#64748b"; bold: true; stroke-dash: 5}
+  }
 }

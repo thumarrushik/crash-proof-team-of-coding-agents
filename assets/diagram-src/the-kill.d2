@@ -1,0 +1,25 @@
+# The cold open, as witnessed. Deliberately NO mechanism: no heartbeat, no
+# server, no engine. The reader should feel eeriness, then curiosity.
+direction: right
+horizontal-gap: 110
+
+alive: "A Worker, Mid-Task\nAn Agent Writing Files:\nNothing Finished, Nothing Saved" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+kill: "Kill, Unblockable\nThe Whole\nProcess Tree" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+silence: "About Two Minutes:\nNothing At All" {
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}
+back: "A Restarted Worker\nPicks Up the SAME Session\nand Finishes the Task" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+receipt: "The Receipt\n\$0.04" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+alive -> kill
+kill -> silence
+silence -> back: "how?"
+back -> receipt

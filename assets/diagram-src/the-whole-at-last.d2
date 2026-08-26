@@ -1,0 +1,37 @@
+# The closing bracket: the Act I machine drawn complete, and the wry
+# proportion underneath. The missing half was never intelligence.
+direction: down
+vertical-gap: 90
+
+machine: "The Durable Agent System, Complete" {
+  grid-columns: 3
+  horizontal-gap: 60
+  style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#334155"; bold: true}
+  conv: "The Conversation\nA Transcript on Disk,\nResumable by ID" {
+    style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+  }
+  guard: "The Guardrails\nDeny Rules · Hooks ·\nOS Sandbox" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  job: "The Job (the Socket, Filled)\nLedger · Pulse · Queue:\nIt Notices a Dead Machine\nand Moves the Work" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+}
+
+bar: "One Teardown's Estimate of Claude Code Itself" {
+  grid-columns: 2
+  horizontal-gap: 20
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  ai: "1.6%\nAI Decision\nLogic" {
+    width: 150
+    style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+  }
+  harness: "98.4% Operational Harness: Permissions, State, Recovery, Tools" {
+    width: 1050
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+}
+
+machine -> bar: "The Missing Half\nWas Never Intelligence" {
+  style: {stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}

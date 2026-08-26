@@ -1,0 +1,45 @@
+# The resurrection on a clock, plus the two things the kill could not reach.
+# Merges the old heartbeat strip and what-survives into one image.
+clock: "The Clock" {
+  direction: right
+  horizontal-gap: 90
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  a1: "Attempt 1\nA Pulse Every 30s,\nEach Carrying the Session ID" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  kill: "T+0:00\nSIGKILL,\nWhole Tree" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  silence: "T+0:00 to T+2:00\nSilence\n(Nothing Pulses)" {
+    style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  }
+  dead: "T+2:00\nThe Server Declares\nthe Attempt Dead" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  a2: "T+2:01\nAttempt 2, Restarted Worker,\nResumes the SAME Session" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+  a1 -> kill -> silence -> dead -> a2
+}
+
+survivors: "What the Kill Could Not Reach" {
+  direction: right
+  horizontal-gap: 220
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  pulse: "The Last Pulse, on the Server\nCarrying the Session ID" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  transcript: "The Transcript, on Disk\nFiled Under That Same ID" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  pulse -> transcript: "The ID Names\nthe Transcript" {
+    style: {stroke-dash: 5; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+}
+
+survivors.pulse -> clock.a2: "Read" {
+  style: {stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+survivors.transcript -> clock.a2: "Reopened" {
+  style: {stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
