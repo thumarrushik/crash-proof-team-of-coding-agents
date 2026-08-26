@@ -90,7 +90,7 @@ The fix is a **sticky per-worker queue**, opt-in so a single-worker lane is unch
 
 The routing has been proven twice. Offline, on the time-skipping test server. And live: two worker identities on a real server; the pinned identity SIGKILLed mid-run; a 45-second dead window in which the surviving identity started exactly zero pinned activities; and a restarted same-identity process resuming the same session to completion. Every check was read from the event history.
 
-The honest edge is that the live run's two identities shared one filesystem, so true machine-loss (the local files gone with the machine) still wants shared storage for the transcript and workspace under the same key. That two-filesystem run is the receipt still owed.
+The honest edge was that the live run's two identities shared one filesystem, so true machine-loss (the local files gone with the machine) still wants shared storage for the transcript and workspace under the same key. That two-filesystem run has since been paid: `deploy/machine-loss-live.sh` stages A's workspace and transcript to a shared-storage directory, deletes machine A's roots outright, and machine B resumes the same session from the heartbeat ID, seven checks green (`deploy/machine-loss-results.md`, 2026-08-20). The harness still does not ship the sync itself; the staging copy stands in for the shared mount a production deployment would run.
 
 ## Pipeline Details the Story Skips
 
