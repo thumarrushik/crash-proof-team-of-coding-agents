@@ -8,10 +8,7 @@
 
 ---
 
-![What Durability Costs: two measured panels relative to the roughly eleven-cent continuous base. Left: an interrupted run adds $0.0035 warm ($0.117 total) or $0.021 cold ($0.134 total) to resume. Right: fine-chunking the same task adds from near-zero to about two dollars ($0.034, $0.25, $2.13 at 1, 8, and 14 chunks)](../../assets/diagrams/cost-comparison.png)
-*What Durability Costs (measured, small model). Left: a warm resume only re-reads context at the cache rate; a cold one pays a partial re-write. Right: fine chunking adds near-zero to two dollars, unpredictably.*
-
-Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents. This one is the ledger behind that number. We measured every boundary the harness has (the continuous run, the crash resume, warm and cold, the chunk seam, the no-engine baseline). The pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
+Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents. This one is the ledger behind that number. We measured every boundary the harness has: the continuous run; the crash resume, warm and cold; the chunk seam (the harness runs the agent in bounded, resumable chunks, and a seam is where one chunk ends and the next resumes); and the no-engine baseline. The pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
 
 *The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion evidence repository, with its runner beside it. Dollar figures are haiku-priced; a stronger tier scales them up.*
 
@@ -33,9 +30,12 @@ Everything below was run strictly one at a time. An earlier batch taught us that
 | **Crash, resumed cold** (65 min idle) | **+$0.021** | a *partial* cache write, ~6× warm |
 | **Fine-chunked** (2-turn cap) | **$0.034 to $2.13** | 1, 8, and 14 chunks: a ~63× spread |
 
+![What Durability Costs: two measured panels relative to the roughly eleven-cent continuous base. Left: an interrupted run adds $0.0035 warm ($0.117 total) or $0.021 cold ($0.134 total) to resume. Right: fine-chunking the same task adds from near-zero to about two dollars ($0.034, $0.25, $2.13 at 1, 8, and 14 chunks)](../../assets/diagrams/cost-comparison.png)
+*What Durability Costs (measured, small model). Left: a warm resume only re-reads context at the cache rate; a cold one pays a partial re-write. Right: fine chunking adds near-zero to two dollars, unpredictably.*
+
 Three of those four rows are cents, and they are the rows the durability machinery owns. A warm resume re-reads the accumulated conversation at the cheap cache-read rate: a third of a cent. That figure *is* the crash-recovery number: the heartbeat resume from the parent article is exactly this operation. A live worker-kill confirmed it end to end at $0.0404 total on a separate task. Even the cold row undersells itself. After sixty-five minutes idle, the first touch paid a cache write on only *half* the prefix (14.9k of ~32k tokens) and then immediately re-warmed. Claude Code's extended-lifetime caching holds far past the classic five-minute window. The full cold penalty never materialized at all.²
 
-The boundary tax also scales predictably, which is what makes it designable. It is linear in the prefix: about 0.1× the input rate warm, 1.25× cold. At the estimator session's 28k-token prefix a warm boundary is $0.003. Projected onto a real long job's 470k prefix (live issue #41), a crash-resume is about five cents, ten back-to-back warm chunk seams about forty-seven cents, and ten *cold* seams about six dollars. The design rule falls out of the arithmetic: boundaries are nearly free exactly as long as they stay inside the cache lifetime. Space your chunks by hours and you convert every seam from a re-read into a re-write.³
+The boundary tax also scales predictably, which is what makes it designable. It is linear in the prefix: about 0.1× the input rate warm, 1.25× cold. At the estimator session's 28k-token prefix a warm boundary is $0.003. Projected onto a real long job's 470k prefix (live issue #41), a crash-resume is about five cents, ten back-to-back warm chunk seams about forty-seven cents, and ten *cold* seams about six dollars. The design rule falls out of the arithmetic: boundaries are nearly free exactly as long as they stay inside the cache lifetime. Space your chunks by hours and you convert every seam from a re-read into a re-write.³ The fourth row of the table is the anomaly, and it earned its own section.
 
 ## We Got This Wrong Before We Got It Right
 
@@ -51,7 +51,7 @@ Chunks still earn their keep at any size: they are where the workflow gets visib
 
 ## The Baseline With No Engine at All
 
-The fair comparison for all of this is the bare loop. The round-one task again, run as a plain headless `claude -p` (no Temporal, no workspace bundle, no resume). Nine trials: mean $0.175, median $0.172, range $0.05 to $0.30. A tie within noise with the durable coarse run on that task (median $0.145). **The engine adds approximately zero tokens.** (The bare loop skips the skill bundle but wanders more without it; the two effects roughly wash.)⁵
+The fair comparison for all of this is the bare loop. The round-one task again, run as a plain headless `claude -p` (no Temporal, no workspace bundle, no resume). Nine trials: mean $0.175, median $0.172, range $0.05 to $0.30. A tie within noise with the durable coarse run on that task (median $0.145). **The engine adds approximately zero tokens.** (The bare loop skips the skill bundle but wanders more without it; the two effects roughly wash.)⁵ The price the engine does charge is operational, not token-denominated: a server to run, an SDK's determinism rules to obey. Paid in complexity, and out of scope for this ledger.
 
 The difference is not the bill while things work; it is the bill when they break. The bare loop's session ID lives in process memory, so a crash costs a full re-run of everything the run had accumulated. The durable run pays the same bill and recovers for a third of a cent. A live end-to-end job (filed issue to merged pull request through the full team pipeline) confirmed the overhead in production shape. A clean eleven cents, zero retries. Durability, at these prices, is effectively free insurance on top of an identical premium.
 
@@ -67,7 +67,13 @@ The threshold is crisp. The moment a task **outlives the process that started it
 
 ## The Canary, Because Prices Are a Snapshot
 
-Every number in this article leans on provider behavior that can change without notice: cache-read rates, cache lifetimes, resume semantics. "Effectively free" is a pricing snapshot, not an architecture property. So the repository treats its own published numbers the way an uptime monitor treats an endpoint. A scheduled **economics canary** re-probes five invariants (a session can be seeded; a same-model resume is a cheap cache *read*; a cross-model resume pays a cache *write* (caches are per-model: the handoff tax); a fork-resume stays cheap and mints a new session ID; a fork still recalls planted conversation memory) for about nine cents a pass.⁶
+Every number in this article leans on provider behavior that can change without notice: cache-read rates, cache lifetimes, resume semantics. "Effectively free" is a pricing snapshot, not an architecture property. So the repository treats its own published numbers the way an uptime monitor treats an endpoint. A scheduled **economics canary** re-probes five invariants for about nine cents a pass:⁶
+
+- a session can be seeded;
+- a same-model resume is a cheap cache *read*;
+- a cross-model resume pays a cache *write*. Caches are per-model, so moving a session to a different model pays a re-write; call that the **handoff tax**;
+- a fork-resume stays cheap and mints a new session ID;
+- a fork still recalls planted conversation memory.
 
 Its first flights independently reproduced the published numbers (warm resume $0.0030 live against $0.0035 published). Every probe landed in band. The bands are deliberately generous: this is a regime detector, not a price tracker. It alerts in *both* directions on the handoff tax. A cross-model cache suddenly becoming free would be exactly the kind of silent regime change worth knowing about. When the economics under this article drift, the canary is designed to say so before the article does.
 
