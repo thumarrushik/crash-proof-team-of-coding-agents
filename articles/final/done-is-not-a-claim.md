@@ -46,7 +46,7 @@ Three arms: **control** (nothing), **beg** (the `CLAUDE.md` definition-of-done),
 
 **The rule did not reliably help.** With a definition-of-done in `CLAUDE.md`, the step happened in 2 of 5. No better than control and, on this run, a touch worse. A prompt rule is a request, and the pull toward finishing does not care about a request. This is the companion's law restated at the finish line: persuasion is probabilistic.
 
-**The gate made it 5 of 5.** The `Stop` hook blocked a premature "done" three times across the five runs. Each time, the agent read the reason, went back and recorded the proof, and only then stopped. No run hit the block cap (Claude Code overrides a `Stop` hook after several consecutive blocks, so the veto is bounded) without satisfying the check. And here is the number that matters against the companion's warning. The mid-flight block finished the task 1 in 5; this finish-boundary gate finished it **5 in 5**, at no cost or turn penalty. Forcing one skipped step is nearly free.
+**The gate made it 5 of 5.** The `Stop` hook blocked a premature "done" three times across the five runs. Each time, the agent read the reason, went back and recorded the proof, and only then stopped. No run hit the block cap (the bounded veto, covered below) without satisfying the check. And here is the number that matters against the companion's warning. The mid-flight block finished the task 1 in 5; this finish-boundary gate finished it **5 in 5**, at no cost or turn penalty. Forcing one skipped step is nearly free.
 
 ## It Is Not Whether You Block, It Is Where
 

@@ -10,7 +10,7 @@
 
 Vocabulary, in one breath, for anyone arriving cold: this system runs headless Claude Code sessions under Temporal, a durable-execution engine. A **workflow** is the deterministic, replayable layer that decides what happens next. An **activity** is a sealed step that may do real-world work. A **chunk** is one bounded activity-run of the agent, capped at a fixed number of turns. A **heartbeat** is the liveness pulse a running activity sends. The flagship earns each of those words. This article spends them.
 
-Prerequisites, if you want to run any of it: a Temporal dev server (`temporal server start-dev`), `uv`, a logged-in `claude` CLI, and a `GITHUB_TOKEN` with contents and pull-request write scopes. `deploy/quickstart.sh` checks all four.
+Prerequisites, if you want to run any of it: a Temporal dev server (`temporal server start-dev`), `uv`, a logged-in `claude` CLI, and a `GITHUB_TOKEN` with contents and pull-request write scopes. `deploy/quickstart.sh` checks the first three; the token matters only once the GitHub pipeline runs.
 
 ## The Rivets on a Chunk
 
