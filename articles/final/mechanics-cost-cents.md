@@ -75,7 +75,7 @@ Every number in this article leans on provider behavior that can change without 
 - a fork-resume stays cheap and mints a new session ID;
 - a fork still recalls planted conversation memory.
 
-Its first flights independently reproduced the published numbers (warm resume $0.0030 live against $0.0035 published). Every probe landed in band. The bands are deliberately generous: this is a regime detector, not a price tracker. It alerts in *both* directions on the handoff tax. A cross-model cache suddenly becoming free would be exactly the kind of silent regime change worth knowing about. When the economics under this article drift, the canary is designed to say so before the article does.
+Its first flights independently reproduced the published numbers (warm resume $0.0030 live against $0.0035 published). Every probe landed in band. Two later passes, run five weeks on during this family's review sweep, landed at the same $0.0938 total with every band green again: the economics were still holding as of 2026-08-20. The bands are deliberately generous: this is a regime detector, not a price tracker. It alerts in *both* directions on the handoff tax. A cross-model cache suddenly becoming free would be exactly the kind of silent regime change worth knowing about. When the economics under this article drift, the canary is designed to say so before the article does.
 
 ## Steal These
 
