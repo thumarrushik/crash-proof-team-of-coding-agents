@@ -1,0 +1,53 @@
+# The centerpiece of the economics story: the tie that retired the first
+# conclusion, and the spread that replaced it. Bar widths are the metaphor.
+direction: down
+vertical-gap: 80
+
+small: "Round One: the Small Task" {
+  grid-columns: 1
+  vertical-gap: 30
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  card: "The n=3 First Pass Said +68 Percent\nIt Did Not Replicate\n(Kept Published, With Its Correction)" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true; stroke-dash: 3}
+  }
+  coarse: "Coarse · Median \$0.145" {
+    width: 330
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  fine: "Fine · Median \$0.113" {
+    width: 300
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  tie: "A Tie, Within Noise:\nGranularity Was a Steering Dial,\nNot a Cost Lever" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+}
+
+open: "Round Two: the Open-Ended Task, Same Code" {
+  direction: down
+  vertical-gap: 40
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  base: "The Continuous Base · \$0.113" {
+    width: 300
+    style: {fill: "#ffffff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true; stroke-dash: 5}
+  }
+  b1: "1 Chunk · \$0.034" {
+    width: 220
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  b2: "8 Chunks · \$0.25" {
+    width: 420
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  b3: "14 Chunks · \$2.13 · a ~63x Spread" {
+    width: 900
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  base -> b1: "" {style: {opacity: 0}}
+  b1 -> b2: "" {style: {opacity: 0}}
+  b2 -> b3: "" {style: {opacity: 0}}
+}
+
+small -> open: "The Same Question,\nAsked of a Task\nBig Enough to Wander In" {
+  style: {stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}

@@ -8,16 +8,13 @@
 
 ---
 
-Vocabulary, in one breath, for anyone arriving cold: this system runs headless Claude Code sessions under Temporal, a durable-execution engine. A **workflow** is the deterministic, replayable layer that decides what happens next. An **activity** is a sealed step that may do real-world work. A **chunk** is one bounded activity-run of the agent, capped at a fixed number of turns. A **heartbeat** is the liveness pulse a running activity sends. The flagship earns each of those words. This article spends them.
+The flagship tells you a worker died mid-task and the session walked away from it. This article is where that stops being a trick: the settings that make it true, the retry numbers, the queue plumbing, and one whole design we built, proved live, and then retired because a measurement said we should. Most of what follows was shaped by a run that went wrong in a specific way. The runs are named as we go, because the scars are the documentation.
 
-Prerequisites, if you want to run any of it: a Temporal dev server (`temporal server start-dev`), `uv`, a logged-in `claude` CLI, and a `GITHUB_TOKEN` with contents and pull-request write scopes. `deploy/quickstart.sh` checks the first three; the token matters only once the GitHub pipeline runs.
+Vocabulary, in one breath, for anyone arriving cold: this system runs headless Claude Code sessions under Temporal, a durable-execution engine. A **workflow** is the deterministic, replayable layer that decides what happens next. An **activity** is a sealed step that may do real-world work. A **chunk** is one bounded activity-run of the agent, capped at a fixed number of turns. A **heartbeat** is the liveness pulse a running activity sends. The flagship earns each of those words. This article spends them.
 
 ## The Rivets on a Chunk
 
 The flagship opens the box: one chunk is a single ordinary function, and what comes back is a typed record the workflow can only read fields on: the wall that keeps the agent's chaos out of the replayable layer. What the flagship does not show are the rivets.
-
-![How a chunk ends, three typed exits: a bounded headless chunk emits a typed result record. A retryable error resumes the same session from its heartbeat, out-of-turns is a checkpoint that schedules the next resuming chunk, and only a genuinely terminal result stops the workflow, loudly, with the record kept](../../assets/diagrams/chunk-exits.png)
-*How a chunk ends. Three typed exits: resume, continue, or stop loudly. Nothing ends silently. Color key, used across this family: indigo = the durable machinery · amber = judgment (agent or human) · purple = the durable record · green = a good exit · red = failure · dashed = crosses a team or a poll boundary.*
 
 The launch is a short list of settings, driven through the Python `claude-agent-sdk` (`ClaudeAgentOptions`, built in `src/activities.py`):
 
@@ -45,6 +42,9 @@ The policy itself is a small settings file (`settings.json`). Humans control it.
 
 The deny list is the org floor the flagship reads as architecture; the two hooks are the audit pair. The first appends every tool call to `hook-log.jsonl` as it happens; the second runs the team's watched-rule flags. (`flag-rules.py` is a small stdin-JSON matcher driven by the lane's committed `rules.json`; both live under `teams/<team>/.claude/` in the repo. Without both files the hook exits silently and flags nothing.) Beyond the settings file, each chunk also installs the team's **skills** (real playbook files the agent discovers and invokes through Claude Code's own Skill tool) and a project memory, a `CLAUDE.md`, that points the agent at them. It is a stock Claude Code project, assembled fresh every chunk; Temporal does not replace that ecosystem: it decides when the project runs, where, and which skills come with it.
 
+![How a chunk ends, three typed exits: a bounded headless chunk emits a typed result record. A retryable error resumes the same session from its heartbeat, out-of-turns is a checkpoint that schedules the next resuming chunk, and only a genuinely terminal result stops the workflow, loudly, with the record kept](../../assets/diagrams/chunk-exits.png)
+*How a chunk ends. Three typed exits: resume, continue, or stop loudly. Nothing ends silently. Color key, used across this family: indigo = the durable machinery · amber = judgment (agent or human) · purple = the durable record · green = a good exit · red = failure · dashed = crosses a team or a poll boundary.*
+
 When a chunk fails, the function raises a typed error and lets the workflow's declared retry policy handle the backoff. The tuning is deliberate: the agent chunk's policy (5s, doubling to a 2-minute cap, 6 attempts) is shaped for the API failure a headless run actually meets rather than the rare crash, while the plain GitHub steps around it get a plainer policy: a refused merge is not an overload.[^1]
 
 ## The Detour We Measured Our Way Out Of
@@ -58,13 +58,13 @@ An activity's result is all-or-nothing: nothing lands in the history until the a
 
 But every completed-chunk boundary is another resume: an agent invocation that re-establishes the growing conversation before it does any new work. Once heartbeat recovery existed, those boundaries were buying a durability we already had. And they were quietly doing something worse to the cost. Fine-chunking the same task later ran $0.034 to $2.13 on identical code, a spread driven by agent behavior rather than any cache tax. That measurement, and the experiment that fooled us before it, is the economics companion, [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md).
 
-## Steering Mechanics
+## Three Verbs, a Few Dozen Lines
 
 The flagship shows the three verbs the surviving boundaries buy (query, steer, cancel) and prices the hand-build alternative in a table. The mechanics behind those verbs are smaller than they sound, a few dozen lines of workflow and activity code. **The status query answers from the workflow's own replicated state**, so it needs no database and works even while the agent is mid-tool-call. **A steer is a signal the workflow folds into the *next* chunk's prompt**, and one that lands during the final chunk buys an extra chunk rather than vanishing. **A cancel rides the heartbeat channel**: the activity asks the running agent to stop, the agent exits cleanly rather than burning tokens as an orphan, and the job records a canceled state you can query. (The query and steer demos are recorded in the lab notebook this project distills.)
 
-## The Org Chart, and What Changed Since
+## Why Adding a Teammate Is Boring
 
-Two conductor workflows, nine single-purpose activities in the measured runs, each a sealed box handing back typed data: that is the org chart the flagship names. And the update since those runs: **the repo now ships twelve activities**, the fix-loop members having arrived after the recorded demos.
+Two conductor workflows, nine single-purpose activities in the measured runs, each a sealed box handing back typed data: that is the org chart the flagship names.
 
 ![The Team of Activities: two workflows (the durable task and the scheduled poll) conduct a team of nine one-job activities grouped into three columns. The work and intake column runs the agent, exports the transcript, and scouts GitHub for work; the pull-request column opens the PR, posts the review verdict, and merges the approved PR; the conflict-repair column updates a stale branch, escalates a real conflict to the owning team, and pushes the resolved branch. Each step is a durable activity: retried, heartbeated, recorded](../../assets/diagrams/team-of-activities.png)
 *The Team of Activities. Two workflows conduct nine one-job specialists (nine at the time of the measured runs; the repo now ships twelve). Read the columns as sub-teams: doing the work and finding it; the pull-request lifecycle; and repairing a conflict. Every box is a durable activity, so every box is retried, heartbeated, and recorded without anyone writing that code.*
@@ -82,13 +82,18 @@ The flagship establishes what a lane is (a namespace, a queue, a worker, a skill
 ![Trusted by the Queue, Not the Prompt: a Temporal schedule fires a stateless scheduled poll, which starts a job in each team's own namespace (backend, frontend, and review), each lane owning its namespace, queue, worker, and skill bundle; the review lane hands a real conflict to the backend lane from inside an activity, because a workflow cannot start a child workflow across namespaces](../../assets/diagrams/lanes.png)
 *Trusted by the Queue, Not the Prompt. Three identical peer lanes; only the queue they poll differs. The scheduled poll and the cross-lane escalation both reach another namespace the same small way: a client call made from inside an activity.*
 
-**Backpressure** is the queue itself plus a cap on how many chunks a single worker will run at once, tunable, because a busy lane can head-of-line block its own fast activities (post, merge, push) behind hour-class agent chunks, which we observed live with eight queued reviews. You scale a hot lane by adding workers to it.
+**Backpressure** we met live: eight reviews queued behind hour-class agent chunks, a busy lane head-of-line blocking its own fast activities (post, merge, push). The answer is the queue itself plus a cap, tunable, on how many chunks a single worker will run at once. You scale a hot lane by adding workers to it.
+
+## The One Place Durability Isn't Symmetric
 
 Adding workers surfaces the one place the design has to be careful, because the durability is not fully symmetric. Temporal can recover the *workflow* on any worker, but a chunk's session lives in *local files*: the transcript under the Claude projects directory keyed by the working directory, and the workspace under the temp directory keyed by the workflow ID. On a single-worker lane that is invisible. Put two workers on a lane and a resumed chunk could land on the worker that never held the session, and the resume finds nothing.
 
 The fix is a **sticky per-worker queue**, opt-in so a single-worker lane is unchanged. Each worker listens on two queues: the shared lane queue, and its own stable queue named for the host (stable so it survives a process restart, which is exactly when the local files are still on disk). The first chunk runs on the lane queue, any worker takes it, and it reports its per-worker queue back as typed data. The workflow reads that off the chunk result and pins every later chunk and the transcript export to it, deterministically, because the queue name came across the seam like everything else. A restart on the same host now resumes on the right box, and a chunk can no longer silently land where the session is absent. (In the repo: set `WORKER_AFFINITY=1`; the per-worker queue is named `<lane>-w-<hostname>` in `src/shared.py`.)
 
 The routing has been proven twice. Offline, on the time-skipping test server. And live: two worker identities on a real server; the pinned identity SIGKILLed mid-run; a 45-second dead window in which the surviving identity started exactly zero pinned activities; and a restarted same-identity process resuming the same session to completion. Every check was read from the event history.
+
+![The sticky per-worker queue, and its live proof: the first chunk arrives on the shared lane queue, its typed result carries the worker's own stable queue name back across the seam, and every later chunk is pinned there; in the live run the pinned identity was SIGKILLed mid-run, the surviving identity started zero pinned activities during the 45-second dead window, and a restarted same-identity process resumed the same session to completion](../../assets/diagrams/sticky-queue.png)
+*The One Place Durability Isn't Symmetric. The queue name crosses the seam like everything else, so the resume lands where the session lives. Two identities, one filesystem; the machine-loss run is the separate receipt.*
 
 The honest edge was that the live run's two identities shared one filesystem, so true machine-loss (the local files gone with the machine) still wants shared storage for the transcript and workspace under the same key. That two-filesystem run has since been paid: `deploy/machine-loss-live.sh` stages A's workspace and transcript to a shared-storage directory, deletes machine A's roots outright, and machine B resumes the same session from the heartbeat ID, seven checks green (`deploy/machine-loss-results.md`, 2026-08-20). The harness still does not ship the sync itself; the staging copy stands in for the shared mount a production deployment would run.
 
@@ -99,7 +104,7 @@ The flagship walks the filed-issue-to-merged-PR loop. The details worth having w
 ![From Filed Issue to Merged PR: a comic-strip of seven steps. 1, a GitHub issue is filed and its label routes it to a team. 2, durable intake: a scheduled poll starts one durable job per ready item. 3, the issue lane's agent works in resumable chunks and opens a pull request. 4, the review lane reads the diff and approves only if the tests pass. 5, merging the PR self-heals a stale branch or hands a real conflict to the owning team. 6, the PR is merged and the issue closes. 7, the next poll releases the dependents the closed issue was blocking, and the loop closes](../../assets/diagrams/pipeline.png)
 *From Filed Issue to Merged PR. Every box past the filed issue is a real activity from the team. The conflict detour and the unblock loop are not special cases; they are the same durable machinery running one more time.*
 
-**Routing** goes by the issue's `team/…` label, with a catch-all lane when it carries none, so an unlabeled issue is never silently dropped. **Sequencing** honors *blocked by* in either dialect: a line in the issue's body or a `blocked-by` label. **Deduplication** is the server's: each job's ID derives deterministically from the issue, started with an "allow duplicates only after failure" policy (Temporal's `WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY`), so a running or completed job refuses a second start while a failed one may retry on a later sweep: the reason the poller keeps no memory of its own, and the reason one transient error cannot deadlock an issue forever (a lesson a live fleet run taught the hard way, when the stricter refuse-everything policy did exactly that). **Namespace crossings** (the scheduled intake and the conflict escalation both) happen from *inside an activity*, which is allowed to do arbitrary I/O: open a client to the target namespace and start the job there, idempotent across the boundary because of the deterministic ID.
+**Routing** goes by the issue's `team/…` label, with a catch-all lane when it carries none, so an unlabeled issue is never silently dropped. **Sequencing** honors *blocked by* in either dialect: a line in the issue's body or a `blocked-by` label. **Deduplication** carries a scar. A live fleet run taught the lesson the hard way: under the stricter refuse-everything reuse policy, one transient error deadlocked an issue forever, because the failed job's ID could never be started again. The fix is the policy the repo ships, and it is the server's, not the poller's: each job's ID derives deterministically from the issue, started with an "allow duplicates only after failure" policy (Temporal's `WorkflowIDReusePolicy.ALLOW_DUPLICATE_FAILED_ONLY`), so a running or completed job refuses a second start while a failed one may retry on a later sweep: the reason the poller keeps no memory of its own, and the reason one transient error can no longer deadlock an issue. **Namespace crossings** (the scheduled intake and the conflict escalation both) happen from *inside an activity*, which is allowed to do arbitrary I/O: open a client to the target namespace and start the job there, idempotent across the boundary because of the deterministic ID.
 
 ![The two speeds: three issues are filed; the scheduled poll starts the two unblocked backend issues in parallel while holding the frontend issue that declared "Blocked by: #2"; when #2 merges and its issue closes, the next poll releases the held issue, which builds against what #2 landed and merges: serial, because it was declared](../../assets/diagrams/two-speeds.png)
 *The Two Speeds. Parallel is the default; serial is declared. A blocked issue is held on every sweep and released only when its blocker closes, not when it merely looks done.*
@@ -107,9 +112,6 @@ The flagship walks the filed-issue-to-merged-PR loop. The details worth having w
 **The commit history is the agent's own.** Each working lane's mandate says commit at meaningful checkpoints (a phase completed, a suite gone green) with messages that say why, and the PR activity pushes that full history rather than squashing it. The harness's final commit only sweeps whatever the agent left uncommitted, and "nothing to ship" is judged against the base branch, never against a clean status.
 
 **And the red verdict does not have to be a dead end.** With the optional fix loop on, a failed review (or a human's Request Changes) hands the PR back to the owning lane to fix, re-validate, and re-review, re-asking the human when the merge gate is also on, bounded to a few rounds; the mechanics and the live run are in the [companion piece](the-human-is-a-durable-object.md).
-
-![The bounded fix loop: a not-approved PR (red suite, human Request Changes, or a gate deny with a note) is fixed by the owning lane, pushed by the harness, re-reviewed at the new head, and re-gated: approve merges with a name, silence denies attributed to the deadline, and the round cap hands the PR to a human](../../assets/diagrams/fix-loop.png)
-*The fix loop's journey. A denial with a reason loops back at most three rounds; silence and the cap both end at a human. A timeout is never a request for changes.*
 
 ## Every Run Leaves Evidence
 
@@ -120,7 +122,7 @@ The flagship's denouement shows the two planes of evidence joined on the session
 
 The activity clones the repository with a token and then scrubs that token out of the remote, so the agent cannot recover the clone credential from the repo's own config. And the token is withheld from the agent subprocess's environment entirely, so the credential the push activities use never exists anywhere the agent can look. **Three layers, one claim**: the deny rule blocks the push command, the scrub keeps the token out of the checkout, and the environment filter keeps it out of the process. One layer this design still owes: the hook log lives inside the workspace the agent can edit, so a determined agent could tamper with its own trail mid-chunk; shipping the log outside the workspace is the hardening that closes it. And before any push, the harness excludes its own scratch (the configuration folder, the memory file, the report, every audit log) from the commit, so the control plane's policy and its paper trail never ride inside the product it ships. The agent writes the code; the control plane is the only thing that touches the outside world.
 
-## The Corpus, Measured
+## The Rule Nudged; the Hook Was Law
 
 The flagship tells the learn-loop story: the `ls`-recheck waste, the rule versus the hook. Here are the numbers behind it, because the aggregate teaches more than the slogan. (Shipping the corpus is deliberately dumb: an object-store copy of each run's export folder, keyed by session ID, not part of the harness itself; a frozen example is `deploy/fleet-corpus-2026-08-06.tar.gz`.)[^2]
 
@@ -137,6 +139,8 @@ Across the six corpus runs, the leanest finished in eight or nine tool calls; th
 - [Done Is Not a Claim](done-is-not-a-claim.md): the finish boundary, measured
 - [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md): the merge switch's boolean vs ground truth
 - [The Human Is a Durable Object](the-human-is-a-durable-object.md): the human merge gate on four workflow primitives
+
+Prerequisites, if you want to run any of it: a Temporal dev server (`temporal server start-dev`), `uv`, a logged-in `claude` CLI, and a `GITHUB_TOKEN` with contents and pull-request write scopes. `deploy/quickstart.sh` checks the first three; the token matters only once the GitHub pipeline runs.
 
 ---
 

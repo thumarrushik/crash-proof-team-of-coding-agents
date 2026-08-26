@@ -30,7 +30,7 @@ The action to govern here is different from a tool call. It is the *finish* itse
    only the gate stands between agent and exit
 ```
 
-## The Experiment
+## One Skippable Step, Three Arms
 
 Same rig as the companion: isolated headless runs on Claude's cheap fast model, one checklist task, arms differing only in policy, everything observed, each run scored for completion. The task is a four-step chore ending in a step agents love to skip. After writing the code and running the check, *record* that you verified it by writing a one-line proof file. Recording the proof is the last step, so finishing the task and doing that step are the same event here. That proof file is the done-marker, and "done" is defined by the marker existing, so a run that merely asserts done is caught. The marker is always writable, so the gate can never trap the agent on unfinishable work. It can only force a step that was there to be done.
 
@@ -70,7 +70,7 @@ None of these is a reason to skip the gate. They are reasons to write it as a ch
 
 ## The Takeaway
 
-Memory steers; only hooks enforce. And the one thing you most need to enforce about an autonomous agent is that it actually finished. Prose can define done. A `PostToolUse` flag can record that done was faked. But only a gate on the finish can refuse the quit until the work is real.
+Memory steers; only hooks enforce. And the one thing you most need to enforce about an autonomous agent is that it actually finished.
 
 **Practical rule:** gate "done" with a `Stop` hook on a check the agent cannot talk its way around. Make the check satisfiable and costly to fake, and let the block cap keep it a forcing function rather than a jail. Persuasion asks the agent to finish; the gate refuses to let it leave until it has.
 

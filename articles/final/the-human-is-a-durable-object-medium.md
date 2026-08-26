@@ -8,9 +8,6 @@
 
 ![The human gate as a waiting room: the durable job holds at the gate while a deadline timer arms; either a named approval or the deadline itself writes exactly one attributed decision into the event history: even silence gets a byline](../../assets/medium-heroes/the-human-is-a-durable-object.png)
 
-![The gate: the operator reads what is blocked through a query and decides through a validated update; a deadline timer denies attributably if nobody answers; either way, exactly one attributable decision lands in the event history](../../assets/diagrams/human-gate.png)
-*The Human Gate. Either a name or the clock decides, and both leave exactly one signed decision in the permanent history. Color key, used across this family: indigo = the durable machinery · amber = judgment (agent or human) · purple = the durable record · green = a good exit · red = failure · dashed = crosses a team or a poll boundary.*
-
 There is a class of action no amount of green tests should authorize on its own: the merge to a protected branch, the deploy, the spend past a threshold. The irreversible acts. The [main article](a-crash-proof-team-of-coding-agents.md) builds a team of coding agents that carries a filed issue all the way to a merged pull request with no human decision in the loop. It gates that merge on one thing: a schema-validated boolean, the review agent's tests-pass verdict. For a demo repository that is the whole point. For anything that ships to people it is a placeholder. A sibling article measures exactly how far that boolean can be trusted: [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 
 So this companion adds a person, at exactly one moment, deliberately. Not with a notification, but with a place. A gate the durable job waits in, where even silence gets a name in the permanent record the engine keeps of everything the job did (Temporal calls that record the **event history**). And because a denial with a reason is a request rather than a dead end, the second half of this piece closes that loop too: a bounded fix round that re-asks the human.
@@ -35,6 +32,9 @@ Every operator capability in this system (ask a running job a question, steer it
 
 The gate defaults off. Autonomy stays the resting state of the whole system; accountability is one boolean on the job. And modeled this way, the human is just another durable object in the system: queryable, addressable, waited on by a timer, and written into the permanent record, present or absent.
 
+![The gate: the operator reads what is blocked through a query and decides through a validated update; a deadline timer denies attributably if nobody answers; either way, exactly one attributable decision lands in the event history](../../assets/diagrams/human-gate.png)
+*The Human Gate. Either a name or the clock decides, and both leave exactly one signed decision in the permanent history. Color key, used across this family: indigo = the durable machinery · amber = judgment (agent or human) · purple = the durable record · green = a good exit · red = failure · dashed = crosses a team or a poll boundary.*
+
 ## We Ran It for Real
 
 This project's method is a rule: nothing claimed stays a claim if it can be measured. A human gate is a claim about *time and state*. So we ran the real workflow, the same one that runs the coding agent, against a real Temporal server running locally. We drove it with the real operator tool and read the real event history afterward. Four leaf steps (**activities**, in Temporal's vocabulary) were stubbed: the agent chunk (one bounded slice of the coding agent's session), the transcript export, the review post, and the merge. Those are the steps that spend tokens, reach GitHub, or read the session's own files from disk. The gate machinery itself is untouched, and every part of it is real.⁴
@@ -49,7 +49,9 @@ Three scenarios, ten checks, all green.
 
 Read the last column, because it is the whole argument in one place. When a person decides, the history carries an accepted update with their name on it and the deadline timer sits unused. When nobody decides, there is no human update anywhere in the record and the timer fires instead. The deny is attributed to the deadline rather than fabricated against a person. Before the approval, the inbox query listed the pending gate, exactly as an operator would see it. The difference between "she approved this" and "the clock ran out" is not a log line we chose to write. It is the shape of the recorded history.
 
-## Two Things the Live Run Taught Us
+In the main system the gate sits at one place: the review lane (a *lane* is the main article's word for one team's own isolated queue and workers; the review lane owns reviews and merges), right after the agent posts its verdict and just before the merge. Approve, and the existing self-healing merge runs. Deny, or let the deadline deny for you, and the merge simply never happens, with the reason on the record. It is the same gate you can drop in front of any irreversible act you choose: a deploy, a spend, a write to a protected branch.
+
+## What Only a Live Run Finds
 
 Running it for real, rather than only in the time-skipping unit tests, surfaced two problems a green test suite had hidden. Both are in the record because the method requires it.
 
@@ -58,10 +60,6 @@ Running it for real, rather than only in the time-skipping unit tests, surfaced 
 **Do not freeze the waiter while you deliver the decision.** The demo harness ran the operator tool as a subprocess on the same thread that was hosting the worker. That briefly froze the worker exactly while it needed to apply the decision the subprocess was sending. The two blocked on each other until the attempt timed out. The fix was to deliver the decision off the worker's thread. It is a harness detail, not a property of the gate. But it is the kind of thing only a live run finds, and worth writing down so the next person does not lose an afternoon to it.
 
 Neither bug was in the gate's logic. Both were in the plumbing around it, and both are the sort of failure this family's whole thesis is about. The mechanism is small, and the operational harness around it is where the real work lives.
-
-## Where It Plugs In
-
-In the main system the gate sits at one place: the review lane (a *lane* is the main article's word for one team's own isolated queue and workers; the review lane owns reviews and merges), right after the agent posts its verdict and just before the merge. Approve, and the existing self-healing merge runs. Deny, or let the deadline deny for you, and the merge simply never happens, with the reason on the record. Turning it on is one field on the job; leaving it off keeps the fully autonomous behavior the main article demonstrates. It is the same gate you can drop in front of any irreversible act you choose: a deploy, a spend, a write to a protected branch.
 
 ## The Denial That Fixes Itself
 

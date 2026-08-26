@@ -32,7 +32,7 @@ The three interventions are not three settings on one dial. They live on three d
 
 That is the claim the parent article asserts and this one measures: a rule asks, a flag records, only a block prevents. All three turned out to be true. What design alone cannot tell you is the price on the third one.
 
-## The Experiment
+## One Urge, Four Policies
 
 One task, run four ways on Claude's cheap fast model. Each arm is an isolated headless run loading *only* its own workspace policy. The task builds a tiny Python utility and, deliberately, asks the agent to run `ls` to confirm each file after writing it. That standardizes the urge. Every arm's agent has the same reason to list, and the arms differ only in what the policy does about it. The four arms:
 
@@ -58,6 +58,12 @@ Read it one row at a time.
 
 **Block prevented it every time, and that is exactly where the surprise was.** Completed orientation `ls`: zero in 5 of 5 runs. Prevention is total; a deny hook denies. But look at the last column: block finished the task in only 1 of 5 runs. That is the worst of a noisy field in which even the no-intervention control finished just 2 of 5. At five runs an arm, that is a one-run gap from baseline. Read it as direction, not proof. The direction is consistent, though: block posted the lowest turn count of any arm, the signature of runs that stopped early. Denied the `ls` the task had explicitly told it to run, the agent more often lost the thread and ended without finishing. Block's low cost is not efficiency; it is the sound of a run falling over. A hard *no*, on a step the agent believed it needed, can cost the task, not just the tokens.
 
+## Prevention Is Not Free, and Neither Is a Hook You Forgot
+
+The block result is the one to sit with, because the naive reading, *block everything you don't want*, is the expensive one. A block is a hard stop, and a hard stop lands on the agent mid-plan. When the thing you blocked was pure danger the agent never needed, that is exactly right. When it was something the agent was in the middle of using, the price is not the denied call; it is the derailed run, the way a stubborn agent fighting a bad test burns a whole session. This is why the crash-proof team behind this series *flagged* the orientation waste. It reserved outright `deny` for `rm -rf`, `sudo`, and `git push`, the acts with no legitimate use. **Flag waste; block danger.**
+
+And there is a failure mode with no line in any table: the hook that quietly stops firing. A settings edit, a moved script, a matcher typo, and the guardrail is gone, announcing nothing. A hook that no longer runs produces no error, only the silent absence of one. A deleted cron line makes no sound. So the hooks here ship with the guardrail every hook deserves and almost none have: eight offline tests that feed the real hook script a tool event. The tests assert it still denies what it should, still ignores real work, and still fails open on malformed input. When a hook regresses, a test goes red instead of a mistake going quiet.
+
 ## Determinism Is the Point, Not Volume
 
 Be careful what the flag arm proves, because it is easy to oversell. The honest version was written down once already, in the learn-loop experiment this method borrows from (the walkthrough is in [How It's Built](how-its-built.md)). There, a `PostToolUse` flag caught a *spontaneous* re-orientation habit 12 out of 12 times (the matching twelve is coincidence: different runs, different arithmetic). A prompt rule, meanwhile, cut it about 20% and was ignored on one run. The total tool count did not fall either way. The win from a flag is not that the agent improved. It is that the mistake is caught, every time, in a record you can trust. Determinism, not volume.
@@ -66,17 +72,11 @@ That record has since earned its keep. Each team now commits its own watched pat
 
 Which reframes beg rather than condemning it. In that earlier run the rule fought a habit and bought ~20%; here it fought an explicit instruction and bought nothing. That is not a contradiction. It is the rule's actual law: **a prompt's power falls as the agent's reason to ignore it rises.** Weak pull, some effect; a direct instruction to the contrary, none. A block does not have that property, because it is code in the harness, not a request to the model. That is the asymmetry the docs state plainly and most write-ups skip. A hook can *tighten* what the agent may do, but a prompt cannot *enforce* anything at all.
 
-## Prevention Is Not Free, and Neither Is a Hook You Forgot
-
-The block result is the one to sit with, because the naive reading, *block everything you don't want*, is the expensive one. A block is a hard stop, and a hard stop lands on the agent mid-plan. When the thing you blocked was pure danger the agent never needed, that is exactly right. When it was something the agent was in the middle of using, the price is not the denied call; it is the derailed run, the way a stubborn agent fighting a bad test burns a whole session. This is why the crash-proof team behind this series *flagged* the orientation waste. It reserved outright `deny` for `rm -rf`, `sudo`, and `git push`, the acts with no legitimate use. **Flag waste; block danger.**
-
-And there is a failure mode with no line in any table: the hook that quietly stops firing. A settings edit, a moved script, a matcher typo, and the guardrail is gone, announcing nothing. A hook that no longer runs produces no error, only the silent absence of one. A deleted cron line makes no sound. So the hooks here ship with the guardrail every hook deserves and almost none have: eight offline tests that feed the real hook script a tool event. The tests assert it still denies what it should, still ignores real work, and still fails open on malformed input. When a hook regresses, a test goes red instead of a mistake going quiet.
-
 ## The Takeaway
 
 Three layers, three jobs, and only one of them is enforcement. But enforcement is a blunt instrument, so aim it. A rule is where you put a *preference*: the agent should generally not do this, and you accept it sometimes will. A flag is where you put an *audit*: you need to know every time this happens, even when you can't or shouldn't stop it. A block is where you put a *policy*: this must not happen. A wrongly placed block can cost you the whole task, so you spend it only where the action has no business happening at all.
 
-**Practical rule:** put preferences in prose, audits in a `PostToolUse` flag, and only the genuinely forbidden in a `PreToolUse` block with a one-line reason attached. Then write the test that goes red when the block stops firing. Beg for what's nice; flag what you want to see; block what must never happen. Never confuse the log for the lock, or the lock for a nudge.
+**Practical rule:** put preferences in prose, audits in a `PostToolUse` flag, and only the genuinely forbidden in a `PreToolUse` block with a one-line reason attached. Then write the test that goes red when the block stops firing. Never confuse the log for the lock, or the lock for a nudge.
 
 One honest boundary: these are single-digit runs on one cheap model against one waste pattern. They are point estimates reproducible from the repo, not a benchmark. And the hook surface is far larger than the two tool-call events used here: its own deep-dive. But the layer law does not depend on the count. Persuasion is not enforcement, detection is not prevention, and prevention is not free. Further down the same road, an autonomous loop must also decide what *green* is allowed to mean: whether an agent's own "tests passed" can be believed at all. That is measured in the companion [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md).
 

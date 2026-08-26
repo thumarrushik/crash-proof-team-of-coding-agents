@@ -1,0 +1,46 @@
+# The one place durability isn't symmetric: the resume must land where the
+# session's local files live. The fix, then the live proof.
+direction: down
+vertical-gap: 90
+
+fix: "The Fix: Pin the Resume" {
+  direction: right
+  horizontal-gap: 150
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  laneq: "The Shared\nLane Queue" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  w: "The Worker Holding the Session" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+    files: "The Session's Files\nTranscript · Workspace" {
+      style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+    }
+  }
+  wf: "The Workflow" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  laneq -> w: "The First Chunk:\nAny Worker Takes It"
+  w -> wf: "Its Typed Result Carries the Worker's\nOwn Stable Queue Name (Host-Derived)" {
+    style: {stroke-dash: 5; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  wf -> w: "Every Later Chunk:\nPinned to That Queue" {
+    style: {stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+}
+
+proof: "The Live Proof" {
+  direction: right
+  horizontal-gap: 130
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  killed: "The Pinned Identity,\nSIGKILLed Mid-Run" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  window: "A 45-Second Dead Window:\nThe Surviving Identity Started\nZERO Pinned Activities" {
+    style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  }
+  resumed: "A Restarted Same-Identity Process\nResumes the Same Session\nto Completion" {
+    style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+  }
+  killed -> window -> resumed
+}
+
