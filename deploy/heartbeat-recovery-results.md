@@ -54,3 +54,14 @@ HEARTBEAT_THROTTLE_SECONDS=3 FLUSH_MARGIN=6 MODEL=haiku TEAM=testing \
   ./deploy/heartbeat-recovery.sh
 # → recovery-log.jsonl with event=resume_session_from_heartbeat on attempt 2
 ```
+
+## Replication (2026-08-20)
+
+Re-run via `deploy/quickstart.sh` during the article-family review sweep, on
+the then-current Claude Code CLI (post-v2.1.223 resume semantics). Same
+mechanism, confirmed: SIGKILL of the whole process tree mid-chunk, attempt 2
+recovered with `input_session_id: null` and
+`heartbeat_session_id: 4a900d1e-9087-450a-ad22-88cf5c16b13b`, the same
+session finished in one chunk. Surviving attempt's bill: $0.1845 (vs $0.0404
+recorded in July): the recovery is identical, the agent simply took more
+turns this time, the behavioral variance the economics companion prices.

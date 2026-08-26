@@ -29,7 +29,7 @@ checkpoint:
 It starts an ephemeral Temporal dev server, runs the SIGKILL-and-resume demo,
 prints `recovery-log.jsonl` (the one line that proves the resume), and tears
 everything down. Needs `uv`, the `temporal` CLI, and a logged-in `claude` CLI;
-the run bills real tokens (~4 cents on `haiku`).
+the run bills real tokens (4 to 20 cents on `haiku`, varying with how many turns the agent takes).
 
 No credentials handy? Verify the whole system offline and for free: hooks, the
 finish gate, scoring, the team folders, and the workflows on Temporal's
