@@ -297,7 +297,7 @@ This article is the trunk; six companions each own one branch, and they read in 
 
 [^1]: [Claude Code headless mode](https://code.claude.com/docs/en/headless): `--output-format json` returns `session_id`, cost, and (with a JSON schema) structured output; `--resume <id>` continues a stored session; transcripts are stored under `~/.claude/projects/<cwd-slug>/<session-id>.jsonl`, the working-directory path with non-alphanumerics replaced. Checked 2026-08-20. *Vendor/canonical.*
 
-[^2]: [`anthropics/claude-code-action@v1`](https://github.com/anthropics/claude-code-action) (GA) runs headless Claude Code on `pull_request`/cron and on `@claude` mentions, with automatic PR review; the docs note it is built on the Claude Agent SDK. Checked 2026-07-15. *Vendor/canonical.*
+[^2]: [`anthropics/claude-code-action@v1`](https://github.com/anthropics/claude-code-action) (GA) runs headless Claude Code from GitHub workflows: it activates on `@claude` mentions, issue assignment, or whatever events the workflow declares, `pull_request` and cron included, and lists automatic PR review as a documented use case; its configuration is aligned with the Claude Code SDK. Checked 2026-08-20. *Vendor/canonical.*
 
 [^3]: [Claude Code permissions](https://code.claude.com/docs/en/permissions) are evaluated deny → ask → allow (a deny is unoverridable) and "enforced by Claude Code, not by the model"; [`PreToolUse` hooks](https://code.claude.com/docs/en/hooks) can deny a call before it runs, while `PostToolUse` hooks receive the completed event as JSON and report back; Bash sandboxing uses Seatbelt (macOS) / bubblewrap (Linux). Checked 2026-08-20. *Vendor/canonical.*
 
@@ -305,7 +305,7 @@ This article is the trunk; six companions each own one branch, and they read in 
 
 [^5]: [Temporal docs](https://docs.temporal.io): durable execution persists workflow progress as an event history; workflows must be deterministic so history replay reconstructs state; activities host side effects and are retried by policy; Temporal descends from Cadence, built at Uber. *Vendor/canonical.*
 
-[^6]: [Temporal Python SDK](https://python.temporal.io/temporalio.activity.html): `activity.heartbeat(*details)` sends heartbeat details, and `activity.info().heartbeat_details` exposes the previous attempt's details to a retry. The worker throttles how often details are persisted (`max_heartbeat_throttle_interval` / `default_heartbeat_throttle_interval`). Checked 2026-07-15. *Vendor/canonical.*
+[^6]: [Temporal Python SDK](https://python.temporal.io/temporalio.activity.html): `activity.heartbeat(*details)` sends heartbeat details, and `activity.info().heartbeat_details` exposes the previous attempt's details to a retry. The worker throttles how often details are persisted (`max_heartbeat_throttle_interval` / `default_heartbeat_throttle_interval`). Checked 2026-08-20. *Vendor/canonical.*
 
 [^7]: The recovery run, 2026-07-15: the worker's whole process tree was SIGKILLed mid-chunk before any completed result; attempt 2 recovered the heartbeat session ID (with the input session ID null) and relaunched with resume; it completed as one chunk, $0.0404, the same session. Requires a heartbeat throttle short enough to persist the ID, and a process-group kill so the agent child can't orphan-finish the work. One accounting honesty: whatever the dead attempt burned before the kill never returned a result, so it appears in no ledger; the figure is the surviving attempt's bill.
 
