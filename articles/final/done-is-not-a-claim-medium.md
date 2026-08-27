@@ -70,7 +70,7 @@ None of these is a reason to skip the gate. They are reasons to write it as a ch
 
 ## The Takeaway
 
-Memory steers; only hooks enforce. And the one thing you most need to enforce about an autonomous agent is that it actually finished.
+A rule steers; only hooks enforce. And the one thing you most need to enforce about an autonomous agent is that it actually finished.
 
 **Practical rule:** gate "done" with a `Stop` hook on a check the agent cannot talk its way around. Make the check satisfiable and costly to fake, and let the block cap keep it a forcing function rather than a jail. Persuasion asks the agent to finish; the gate refuses to let it leave until it has.
 

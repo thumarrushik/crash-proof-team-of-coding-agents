@@ -40,7 +40,7 @@ The boundary tax also scales predictably, which is what makes it designable. It 
 ## We Got This Wrong Before We Got It Right
 
 ![We got this wrong before we got it right: on the small task, coarse and fine chunking tied (medians $0.145 and $0.113) and the n=3 result claiming +68% did not replicate and is kept published with its correction; on the open-ended task the same fine-chunked code ran $0.034, $0.25, and $2.13 against the $0.113 continuous base: same code, a ~63x spread](../../assets/diagrams/did-not-replicate.png)
-*We Got This Wrong Before We Got It Right. Left: the tie that retired the first conclusion. Right: the spread that replaced it. Haiku, point estimates, three runs an arm.*
+*We Got This Wrong Before We Got It Right. Left: the tie that retired the first conclusion. Right: the spread that replaced it. Haiku, point estimates; n=6 an arm on the small task, three on the open-ended one.*
 
 The first chunking experiment concluded the opposite of the table above. Both results are still published, because the disagreement is the finding.
 

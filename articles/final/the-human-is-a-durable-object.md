@@ -35,6 +35,8 @@ The gate defaults off. Autonomy stays the resting state of the whole system; acc
 ![The gate: the operator reads what is blocked through a query and decides through a validated update; a deadline timer denies attributably if nobody answers; either way, exactly one attributable decision lands in the event history](../../assets/diagrams/human-gate.png)
 *The Human Gate. Either a name or the clock decides, and both leave exactly one signed decision in the permanent history. Color key, used across this family: indigo = the durable machinery · amber = judgment (agent or human) · purple = the durable record · green = a good exit · red = failure · dashed = crosses a team or a poll boundary.*
 
+In the main system the gate sits at one place: the review lane (a *lane* is the main article's word for one team's own isolated queue and workers; the review lane owns reviews and merges), right after the agent posts its verdict and just before the merge. Approve, and the existing self-healing merge runs. Deny, or let the deadline deny for you, and the merge simply never happens, with the reason on the record. It is the same gate you can drop in front of any irreversible act you choose: a deploy, a spend, a write to a protected branch.
+
 ## We Ran It for Real
 
 This project's method is a rule: nothing claimed stays a claim if it can be measured. A human gate is a claim about *time and state*. So we ran the real workflow, the same one that runs the coding agent, against a real Temporal server running locally. We drove it with the real operator tool and read the real event history afterward. Four leaf steps (**activities**, in Temporal's vocabulary) were stubbed: the agent chunk (one bounded slice of the coding agent's session), the transcript export, the review post, and the merge. Those are the steps that spend tokens, reach GitHub, or read the session's own files from disk. The gate machinery itself is untouched, and every part of it is real.[^liverun]
@@ -49,7 +51,6 @@ Three scenarios, ten checks, all green.
 
 Read the last column, because it is the whole argument in one place. When a person decides, the history carries an accepted update with their name on it and the deadline timer sits unused. When nobody decides, there is no human update anywhere in the record and the timer fires instead. The deny is attributed to the deadline rather than fabricated against a person. Before the approval, the inbox query listed the pending gate, exactly as an operator would see it. The difference between "she approved this" and "the clock ran out" is not a log line we chose to write. It is the shape of the recorded history.
 
-In the main system the gate sits at one place: the review lane (a *lane* is the main article's word for one team's own isolated queue and workers; the review lane owns reviews and merges), right after the agent posts its verdict and just before the merge. Approve, and the existing self-healing merge runs. Deny, or let the deadline deny for you, and the merge simply never happens, with the reason on the record. It is the same gate you can drop in front of any irreversible act you choose: a deploy, a spend, a write to a protected branch.
 
 ## What Only a Live Run Finds
 
@@ -78,7 +79,7 @@ Any of the three hands the PR to the team that owns the code. Its agent reads th
 
 One case is deliberately excluded, because the distinction is the whole point of the gate. A denial that came from the *deadline* never triggers a fix. A timeout is a safe stop, not a request for changes.
 
-The shape is the same pair of durable handoffs that carried the merge conflict to the lane that owned it. The round number lives in each job's own ID, so the cap cannot be lost.[^fixloop]
+The shape is the same pair of durable handoffs the main article uses to carry a merge conflict to the lane that owns the code. The round number lives in each job's own ID, so the cap cannot be lost.[^fixloop]
 
 We ran the whole loop on a real server, the same way we ran the gate. The leaf steps are stubbed; the workflows themselves, the human gate, and the operator CLI are real.
 
