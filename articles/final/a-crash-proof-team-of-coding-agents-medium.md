@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Claude Code remembers the conversation; Temporal remembers the job. Kill the worker mid-task and the agent finishes anyway: the same session, resumed from its last heartbeat rather than any saved checkpoint. This is what durability buys when one coding agent becomes a governed team.
+### Claude Code remembers the conversation; Temporal remembers the job. Kill the worker mid-task and the agent finishes anyway: the same session, resumed from its last heartbeat rather than any saved checkpoint. First that makes one job crash-proof. Then many such jobs, each a single-purpose durable step with its own mandate, compose into a governed team, most of them never touching the agent at all.
 
 ---
 
@@ -164,14 +164,14 @@ So the turn cap has one clear rule: it sets how often the job reports in and can
 | A status endpoint scraped from logs | A progress query plus the event-history UI |
 | Steering a running task (never actually built) | A signal, folded into the next chunk's prompt |
 
-Point that same machinery at a whole repository and it does something bigger. The heartbeat, the resume, and the declared retries that just carried one agent through a crash are what will carry a whole *team* of agents through the issue-to-merge run promised at the top, conflict and all. That team is the rest of this article.
+Point that same machinery at a whole repository and it does something bigger. The heartbeat, the resume, and the declared retries that just carried one agent through a crash are what will carry a whole *team* of single-purpose durable jobs through the issue-to-merge run promised at the top, conflict and all, only a few of them ever calling the agent. That team is the rest of this article.
 
 ## Nine Specialists, Two Conductors
 
 ![The whole system in one held breath: an issue is filed on GitHub and its label names the owning team; the scheduled poll starts one durable job per ready item; the team's lane runs the agent in bounded, heartbeated chunks; a pull request opens, pushed by the harness; review gates the merge; every run leaves evidence that becomes new guardrails, and the closed issue unblocks its dependents](../../assets/diagrams/system-map.png)
 *The whole system, one loop. Hold this picture; the rest of this article, and every companion in the family, zooms into one box of it.*
 
-Everything so far makes *one* agent durable. And a durable job, unlike a bare process, can be given an owner, an address, and rules. And the durability does not thin out as the team grows: every lane's agent (a lane being one team's own slice of the system, defined in a moment) runs inside the same crash recovery, the same resume-from-heartbeat, the same declared retries, so a nine-member team is nine durable specialists, every seat under the same protection.
+Everything so far makes *one* job durable: the one that runs the agent. A durable job, unlike a bare process, can be given an owner, an address, and rules. So the team is not that agent cloned into a crowd; it is more single-purpose durable jobs built around it, each with its own mandate, every one inheriting the same crash recovery, the same resume-from-heartbeat, the same declared retries. A nine-member team is nine durable jobs under one protection, and only the few that call a model are agents at all. (A lane, a term defined in a moment, is one team's own slice of the system.)
 
 Here is what we actually built. **Two workflows conduct the delivery team.** One is the durable task you have already met: it runs the agent in bounded chunks and then ships the result. The other is a scheduled poll that looks at a repository for new work, on a timer that is always counting down toward its next sweep, as a durable job in its own right; keep that timer in mind, because it quietly drives everything that follows. And beneath those two conductors sits a team of single-purpose activities (nine in the runs measured here; twelve in the repo today), **each with exactly one job.** None of them is clever. Each is a sealed box that does one real-world thing and hands back typed data, and that narrowness is the point: it is what lets the retries, the heartbeats, and the audit trail apply to every one of them for free.
 
