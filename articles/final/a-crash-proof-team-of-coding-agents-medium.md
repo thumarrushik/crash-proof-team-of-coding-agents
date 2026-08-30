@@ -104,7 +104,10 @@ The first is the one you just watched, and it is the hard one: **the whole worke
 
 The second is smaller and far more common, so it earns its own test: **the agent process alone dies** while its worker keeps running. We SIGKILLed the Claude child outright, mid-chunk. Nothing global was lost, so the worker caught the broken stream, retried the chunk, and resumed the same session from the last heartbeat within seconds (the retry's first backoff), the worker itself never restarting and anything else it was running untouched.
 
-Two different failures, one recovery: read the last session ID from the heartbeat and resume, never restart. Only the alarm differs. A dead worker goes silent, and a liveness timeout catches it in about two minutes; a dead agent process throws an error the activity catches in seconds. We killed both, and both finished as the same session.⁷,⁸
+Two different failures, one recovery, and only the trigger differs. A dead worker goes silent, and a liveness timeout catches it in about two minutes; a dead agent process throws an error the activity catches in seconds. We killed both, and both finished as the same session.⁷,⁸
+
+![Two Failures, One Recovery: on the left, two red failures, the worker dying (reboot, deploy, or OOM; all memory gone) and the agent process dying (a Claude Code crash or an API error, the worker still alive); each runs through an indigo detection box, one caught by silence at the two-minute liveness timeout with a fresh worker rebuilding from history, the other caught by a raised error and retried in about five seconds on the same worker; both paths converge on one green box, resume the same session from the last heartbeat](../../assets/diagrams/two-failures.png)
+*Two Failures, One Recovery. A dead worker and a dead agent process reach the same move: resume the same session from the last heartbeat. Only detection speed and worker survival differ, and we killed both on purpose to prove it.*
 
 A silent worker is not the only way to be stuck, which is why there are two alarms, not one. The heartbeat timeout above catches silence; a wedged agent needs the other alarm, because it loops forever and pulses the whole time, so the heartbeat never fires, and only a longer, hard ceiling on the whole chunk stops it.
 

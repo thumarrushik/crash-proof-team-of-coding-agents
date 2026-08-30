@@ -1,0 +1,29 @@
+# Two failures, one recovery: a dead worker and a dead agent process both
+# resume the SAME session from the last heartbeat; only detection differs.
+# Measured 2026-08-30 (deploy/heartbeat-recovery.sh and child-kill-recovery.sh).
+direction: right
+horizontal-gap: 120
+vertical-gap: 90
+
+worker: "Failure 1: The Worker Dies\nReboot, Deploy, or OOM\nAll Its Memory Is Gone" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+agent: "Failure 2: The Agent Process Dies\nClaude Code Crash, or an API Error\nThe Worker Stays Alive" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+slow: "Detected by Silence\nTwo-Minute Liveness Timeout\nA Fresh Worker Rebuilds From History" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+fast: "Detected by a Raised Error\nRetry in About Five Seconds\nSame Worker, Never Restarted" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+recovery: "One Recovery\nResume the SAME Session\nFrom the Last Heartbeat" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+worker -> slow: "Slow Path"
+agent -> fast: "Fast Path"
+slow -> recovery
+fast -> recovery
