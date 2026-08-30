@@ -18,7 +18,7 @@ The three interventions are not three settings on one dial. They live on three d
 
 - **Beg.** A line in `CLAUDE.md` or the prompt. It shapes what the agent *tries* to do. The permissions docs put the limit in one sentence: instructions "shape what Claude tries to do, but they don't change what Claude Code allows." Persuasion, not enforcement.
 - **Flag.** A `PostToolUse` hook. It fires *after* a tool call succeeds and receives the result as JSON on stdin. It can log the result or hand a note back to the model. It cannot undo what already ran. Detection.
-- **Block.** A `PreToolUse` hook. It fires *before* the call runs, ahead of Claude Code's own permission prompt. It returns a decision (`allow`, `deny`, `ask`, and `defer`, which hands the decision back to the normal permission flow). A `deny` means the call never happens; the agent gets your reason and chooses another move. Prevention.
+- **Block.** A `PreToolUse` hook. It fires *before* the call runs, ahead of Claude Code's own permission prompt. It returns a decision (`allow`, `deny`, or `ask`), or no decision, which hands the call back to the normal permission flow. A `deny` means the call never happens; the agent gets your reason and chooses another move. Prevention.
 
 ```
       the agent wants to run `ls`
@@ -88,7 +88,7 @@ And there is a fourth move these three do not reach, at a different boundary ent
 
 ## Sources
 
-- **Claude Code hooks: the event lifecycle, the `PreToolUse` decision contract (`hookSpecificOutput.permissionDecision`, values allow / deny / ask / defer), the stdin JSON and exit-code semantics, and `PostToolUse` firing only after a tool succeeds.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
+- **Claude Code hooks: the event lifecycle, the `PreToolUse` decision contract (`hookSpecificOutput.permissionDecision`, values allow / deny / ask), the stdin JSON and exit-code semantics, and `PostToolUse` firing only after a tool succeeds.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
 - **Permissions: "instructions ... shape what Claude tries to do, but they don't change what Claude Code allows," and that a hook can tighten but not loosen what the permission layer allows.** `code.claude.com/docs/en/permissions`. Checked 2026-08-06. **Vendor/canonical.**
 - **The measured runs.** Four arms times five headless runs on `claude-haiku-4-5-20251001`, isolated to workspace policy (`--setting-sources project`), everything observed from the CLI JSON plus the audit log, each run scored for task completion. The runner, the hook scripts, the results file, and the eight offline hook tests live in the evidence repository. **Practitioner.**
 - **The determinism baseline (12/12 flag versus ~20% rule; "the win is determinism, not volume") and the flag-waste / block-danger split this experiment validates.** [How It's Built](how-its-built.md) and the learn-loop results in the evidence repository. **Practitioner.**
