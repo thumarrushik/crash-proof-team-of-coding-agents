@@ -92,3 +92,19 @@ HEARTBEAT_THROTTLE_SECONDS=3 FLUSH_MARGIN=8 MODEL=haiku TEAM=testing \
 # → recovery-log.jsonl: resume_session_from_heartbeat, attempt 2, ~5s after the kill,
 #   worker pid unchanged
 ```
+
+## Replication (2026-08-30, back to back with the worker-kill)
+
+Re-run immediately after a fresh `heartbeat-recovery.sh` (whole-worker kill) on
+the same ephemeral server, to confirm both failure modes recover the same day:
+
+- **Worker-kill** (whole tree): `heartbeat resume CONFIRMED`, attempt 2,
+  `input_session_id: null`, session `c2f495b9-8612-478f-b80b-b5112f762c8d`,
+  recovered after the ~2-minute liveness timeout.
+- **Child-kill** (this experiment): worker `21477` survived and was never
+  restarted; recovery-log at **+10s** (the retry backoff, vs +5s in the first
+  run); attempt 2, `input_session_id: null`, session
+  `73b85494-2640-4aeb-8aa8-a9541417ec44`; completed as one chunk, **$0.1740**.
+
+Same mechanism both times; the child-kill's kill-to-recovery gap sits in the
+5-10s band (the retry policy's first backoff), never the two-minute timeout.
