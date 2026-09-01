@@ -2,15 +2,13 @@
 
 ### We measured every boundary of a crash-proof coding agent: an eleven-cent task, a third-of-a-cent crash recovery, and the same code running $0.03 to $2.13. The durability engine was measurably free. The agent's behavior was the bill.
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
-
 ![Four price tags on a rail: the eleven-cent continuous base ($0.113) and two amber cents-priced mechanics ($0.0035 warm resume, $0.021 cold resume) dwarfed by one red dollars-priced behavior, $2.13 for fine-chunking into 14 chunks](../../assets/medium-heroes/mechanics-cost-cents.png)
 
 ---
 
 Put a durable-execution engine under a coding agent and it sounds like paying twice: once for the tokens, once for the machinery that babysits them. The [parent article](a-crash-proof-team-of-coding-agents.md) kills a worker mid-task and recovers the same session for four cents. This one is the ledger behind that number. We measured every boundary the harness has: the continuous run; the crash resume, warm and cold; the chunk seam (the harness runs the agent in bounded, resumable chunks, and a seam is where one chunk ends and the next resumes); and the no-engine baseline. The pattern that fell out organizes everything this family has observed since: **the mechanics cost cents; the behavior costs dollars.**
 
-*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion evidence repository, with its runner beside it. Dollar figures are haiku-priced; a stronger tier scales them up.*
+*The fine print: model `haiku`, Claude's cheap fast tier, July 2026; benchmark-sized tasks; single-digit run counts. Every number is a point estimate, observed rather than modeled. Each traces to an evidence file in the companion [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), with its runner beside it. Dollar figures are haiku-priced; a stronger tier scales them up.*
 
 ## How to Measure a Boundary Honestly
 
@@ -89,24 +87,35 @@ Its first flights independently reproduced the published numbers (warm resume $0
 - **Publish the superseded result next to its correction.** The n=3 artifact that did not replicate taught more than the clean run that did.
 - **Canary your own published numbers.** Anything that leans on provider pricing is a claim with a decay rate; probe it on a schedule.
 
+## The Family
+
+This is one branch of a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire. The rest, in reading order:
+
+- [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), the trunk: the kill, the team, the conflict that resolved itself
+- [How It's Built](how-its-built.md), the rivets: the settings, the tuning, the lane plumbing, the details the story skips
+- [Flag, Block, or Beg](flag-block-or-beg.md), the tool-call boundary: what a prompt, a flag, and a block each buy, measured
+- [Done Is Not a Claim](done-is-not-a-claim.md), the finish boundary: the same hard deny, moved to the exit, inverts the result
+- [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md), the verdict boundary: the merge switch's boolean against ground truth
+- [The Human Is a Durable Object](the-human-is-a-durable-object.md), the person: the one human decision, modeled as durable state, deny-safe on silence
+
 ---
 
-*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the evidence repository. Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runners, results, and the canary are reproducible from the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Sources
 
-- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034 to $2.13 at 1/8/14 chunks): runner and results in the evidence repository, 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
-- **The boundary estimator and prefix scaling** (no-op resume $0.00311; still-warm at 6.5 minutes; linear projection to a 470k prefix): runner and results in the evidence repository. **Practitioner.**
-- **The superseded first experiment and the bare-loop baseline** (fine ≈ coarse on the small task; the n=3 +68% artifact; bare loop $0.175 mean ×9): both in the evidence repository, the superseded results file kept published with its correction header. **Practitioner.**
+- **The four-cost experiment** (continuous $0.113; warm $0.0035; cold $0.021 at 65 min; fine-chunked $0.034 to $2.13 at 1/8/14 chunks): runner and results in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), 2026-07-15, model `haiku`, strictly sequential. **Practitioner.**
+- **The boundary estimator and prefix scaling** (no-op resume $0.00311; still-warm at 6.5 minutes; linear projection to a 470k prefix): runner and results in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
+- **The superseded first experiment and the bare-loop baseline** (fine ≈ coarse on the small task; the n=3 +68% artifact; bare loop $0.175 mean ×9): both in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), the superseded results file kept published with its correction header. **Practitioner.**
 - **The live cross-checks**: the $0.0404 worker-kill recovery and the $0.11 issue-to-PR pipeline job. **Practitioner.**
-- **The economics canary** (five probes, ~$0.09/pass, bands ~3× around published values, first three passes green): the canary code and its results in the evidence repository, 2026-07-29. **Practitioner.**
+- **The economics canary** (five probes, ~$0.09/pass, bands ~3× around published values, first three passes green): the canary code and its results in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents), 2026-07-29. **Practitioner.**
 - **Prompt caching and extended cache lifetimes**: code.claude.com/docs and Anthropic API documentation. *Vendor/canonical.* Checked 2026-07-15.
 
 [^method]: The boundary estimator: one session built to a fixed ~28k-token prefix, then resumed with `--max-turns 1` and a no-tools instruction; the resume's `total_cost_usd` is the boundary tax with work variance held at zero. Same prefix every trial, so the numbers are tight ($0.00311 warm ×3, $0.00312 at 390 seconds ×3; the 6.5-minute "cold" probe came back still warm, ratio 1.0×).
 
-[^four]: The four-cost experiment, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3 to 9 turns, 84k to 332k input tokens billed across each run's turns); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). The full write-up is in the evidence repository.
+[^four]: The four-cost experiment, 2026-07-15, strictly sequential: continuous ×3 ($0.058/$0.132/$0.149, 3 to 9 turns, 84k to 332k input tokens billed across each run's turns); warm boundary ×5 ($0.0035, all cache-reads, ~31k tokens); cold boundary ×3 after a 65-minute idle gap ($0.0206, a partial cache-write of 14.9k of ~32k tokens, then re-warmed); fine-chunked ×3 ($0.034/$0.25/$2.13 at 1/8/14 chunks). The full write-up is in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents).
 
-[^linear]: Warm boundary ≈ 0.1 × prefix × input rate; cold ≈ 1.25 ×. At 28k: $0.003 warm. At the 470k prefix observed on live issue #41: ~$0.05 per warm resume, ~$0.47 for ten back-to-back warm seams, ~$5.88 for ten cold-spaced ones. The evidence repository has the table.
+[^linear]: Warm boundary ≈ 0.1 × prefix × input rate; cold ≈ 1.25 ×. At 28k: $0.003 warm. At the 470k prefix observed on live issue #41: ~$0.05 per warm resume, ~$0.47 for ten back-to-back warm seams, ~$5.88 for ten cold-spaced ones. The [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents) has the table.
 
 [^roman]: The first experiment's results file (its header now marks it superseded): coarse median $0.145 (mean $0.248, range $0.091 to $0.793), fine median $0.113 (mean $0.148, range $0.074 to $0.344), n=6 each, after an n=3 first pass showing +68% failed to replicate. The $0.79 outlier was a coarse run that rambled into a second chunk: wandering, not boundaries, drove the spread even here.
 

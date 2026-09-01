@@ -2,8 +2,6 @@
 
 ### A prompt asks the agent to behave. A flag records when it doesn't. A block stops it cold: five for five on the waste, and one for five on the task. They are not three flavors of one thing; they are three layers, and the measurements say which job each layer is for.
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
-
 ![Three lanes for stopping one redundant `ls`: a dashed rule it walks straight through, a camera that photographs it and lets it pass, and a solid barrier that stops it before it runs, each lane annotated with its measured outcome: obeyed 0 of 5, caught 12 of 12, task finished 1 of 5](../../assets/medium-heroes/flag-block-or-beg.png)
 
 ---
@@ -82,13 +80,24 @@ One honest boundary: these are single-digit runs on one cheap model against one 
 
 And there is a fourth move these three do not reach, at a different boundary entirely: a `Stop` gate on *done* itself. It turns this article's block-derails-the-run result on its head. Same hard no, moved from the path to the exit, opposite outcome. That is the companion [Done Is Not a Claim](done-is-not-a-claim.md).
 
+## The Family
+
+This is one branch of a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire. The rest, in reading order:
+
+- [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), the trunk: the kill, the team, the conflict that resolved itself
+- [How It's Built](how-its-built.md), the rivets: the settings, the tuning, the lane plumbing, the details the story skips
+- [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md), the bill: every boundary priced, and the canary that re-checks the numbers on a schedule
+- [Done Is Not a Claim](done-is-not-a-claim.md), the finish boundary: the same hard deny, moved to the exit, inverts the result
+- [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md), the verdict boundary: the merge switch's boolean against ground truth
+- [The Human Is a Durable Object](the-human-is-a-durable-object.md), the person: the one human decision, modeled as durable state, deny-safe on silence
+
 ---
 
-*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runner, hook scripts, and evidence are reproducible from the evidence repository. Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The runner, hook scripts, and evidence are reproducible from the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Sources
 
 - **Claude Code hooks: the event lifecycle, the `PreToolUse` decision contract (`hookSpecificOutput.permissionDecision`, values allow / deny / ask), the stdin JSON and exit-code semantics, and `PostToolUse` firing only after a tool succeeds.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
 - **Permissions: "instructions ... shape what Claude tries to do, but they don't change what Claude Code allows," and that a hook can tighten but not loosen what the permission layer allows.** `code.claude.com/docs/en/permissions`. Checked 2026-08-06. **Vendor/canonical.**
-- **The measured runs.** Four arms times five headless runs on `claude-haiku-4-5-20251001`, isolated to workspace policy (`--setting-sources project`), everything observed from the CLI JSON plus the audit log, each run scored for task completion. The runner, the hook scripts, the results file, and the eight offline hook tests live in the evidence repository. **Practitioner.**
-- **The determinism baseline (12/12 flag versus ~20% rule; "the win is determinism, not volume") and the flag-waste / block-danger split this experiment validates.** [How It's Built](how-its-built.md) and the learn-loop results in the evidence repository. **Practitioner.**
+- **The measured runs.** Four arms times five headless runs on `claude-haiku-4-5-20251001`, isolated to workspace policy (`--setting-sources project`), everything observed from the CLI JSON plus the audit log, each run scored for task completion. The runner, the hook scripts, the results file, and the eight offline hook tests live in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
+- **The determinism baseline (12/12 flag versus ~20% rule; "the win is determinism, not volume") and the flag-waste / block-danger split this experiment validates.** [How It's Built](how-its-built.md) and the learn-loop results in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**

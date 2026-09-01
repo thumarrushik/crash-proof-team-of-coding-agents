@@ -2,8 +2,6 @@
 
 ### Green tests should not authorize a production merge; a person should. So we gave the team exactly one human decision, not a chat message that scrolls away, but a durable place the job waits in, deny-safe when nobody answers: ten checks out of ten on a real Temporal server.
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
-
 ---
 
 ![The human gate as a waiting room: the durable job holds at the gate while a deadline timer arms; either a named approval or the deadline itself writes exactly one attributed decision into the event history: even silence gets a byline](../../assets/medium-heroes/the-human-is-a-durable-object.png)
@@ -104,15 +102,26 @@ This is where the system's escalations run out. Retry harder, self-heal the bran
 - A denial with a reason is a request, not a dead end: loop it back into a bounded, opt-in fix, but never loop a timeout.
 - Test the time-and-state behavior on a time-skipping server, then run it once for real. The real run finds the plumbing bugs the unit tests cannot.
 
+## The Family
+
+This is one branch of a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire. The rest, in reading order:
+
+- [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), the trunk: the kill, the team, the conflict that resolved itself
+- [How It's Built](how-its-built.md), the rivets: the settings, the tuning, the lane plumbing, the details the story skips
+- [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md), the bill: every boundary priced, and the canary that re-checks the numbers on a schedule
+- [Flag, Block, or Beg](flag-block-or-beg.md), the tool-call boundary: what a prompt, a flag, and a block each buy, measured
+- [Done Is Not a Claim](done-is-not-a-claim.md), the finish boundary: the same hard deny, moved to the exit, inverts the result
+- [The Agent Grades Its Own Homework](the-agent-grades-its-own-homework.md), the verdict boundary: the merge switch's boolean against ground truth
+
 ---
 
-*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The gate, the operator tool, the live three-scenario run, and its evidence are reproducible from the evidence repository. Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*Companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md). The gate, the operator tool, the live three-scenario run, and its evidence are reproducible from the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Notes
 
 1. The read side is a workflow query, `get_pending_approval`, returning the open gate or nothing; the operator inbox lists running jobs and queries each (the CLI's `--list`). No external database backs it.
-2. The decision is a workflow update, `decide`, with a validator that rejects an update when no gate is open or when the decider is unnamed. The rejection happens before anything enters history; the update handler and its validator are in the evidence repository.
-3. The wait is `workflow.wait_condition(lambda: decision is not None, timeout=...)`; on `asyncio.TimeoutError` the workflow synthesizes a denial attributed to `deadline`. The gate helper is in the evidence repository.
-4. The live-run script starts an ephemeral `temporal server start-dev` (with the Update API enabled) and drives the real workflow (the real query, update, validator, and timer) with the real operator CLI. Four activities are stubbed (the agent chunk, the transcript export, the review post, and the merge) so the run needs no tokens and no live repo. Ten checks, all passing; full output in the evidence repository. A time-skipping unit test separately fast-forwards the 24-hour deadline in milliseconds.
+2. The decision is a workflow update, `decide`, with a validator that rejects an update when no gate is open or when the decider is unnamed. The rejection happens before anything enters history; the update handler and its validator are in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents).
+3. The wait is `workflow.wait_condition(lambda: decision is not None, timeout=...)`; on `asyncio.TimeoutError` the workflow synthesizes a denial attributed to `deadline`. The gate helper is in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents).
+4. The live-run script starts an ephemeral `temporal server start-dev` (with the Update API enabled) and drives the real workflow (the real query, update, validator, and timer) with the real operator CLI. Four activities are stubbed (the agent chunk, the transcript export, the review post, and the merge) so the run needs no tokens and no live repo. Ten checks, all passing; full output in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). A time-skipping unit test separately fast-forwards the 24-hour deadline in milliseconds.
 5. The transient surfaces as an RPC error whose message names a workflow task in a failed state, raised when an update races an in-flight workflow task. The operator CLI now retries exactly that error a few times with a short backoff, while a genuine validator rejection (a `WorkflowUpdateFailedError`) is surfaced immediately.
-6. The two handoffs are the `escalate_fix` (review lane to owning lane) and `escalate_review` (owning lane back to review lane) activities, mirroring the conflict-resolution escalation. The round lives in the job source (`fix-pr-<n>-r<k>` / `pr-<n>-r<k>`) and is capped by `max_fix_rounds` (default 3). A repeat start of a live or finished round is a no-op the server refuses, while a failed round may retry on a later sweep. Off by default (`enable_fix_loop`). Covered by time-skipping tests; the live run passed seven checks of seven, full output in the evidence repository. Six leaf steps are stubbed (the agent chunk, the transcript export, the review post, the merge, the push, and the human-review read), and the two handoffs are stubbed to start their real sibling workflow on the same server.
+6. The two handoffs are the `escalate_fix` (review lane to owning lane) and `escalate_review` (owning lane back to review lane) activities, mirroring the conflict-resolution escalation. The round lives in the job source (`fix-pr-<n>-r<k>` / `pr-<n>-r<k>`) and is capped by `max_fix_rounds` (default 3). A repeat start of a live or finished round is a no-op the server refuses, while a failed round may retry on a later sweep. Off by default (`enable_fix_loop`). Covered by time-skipping tests; the live run passed seven checks of seven, full output in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Six leaf steps are stubbed (the agent chunk, the transcript export, the review post, the merge, the push, and the human-review read), and the two handoffs are stubbed to start their real sibling workflow on the same server.

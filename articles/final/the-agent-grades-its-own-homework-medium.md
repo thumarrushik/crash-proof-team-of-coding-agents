@@ -2,13 +2,11 @@
 
 ### An agent team's merge gate turns on a single self-reported boolean: tests_passed. We measured that boolean against the truth, and it failed three times in ten. Not in the direction anyone feared.
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire.*
-
 ---
 
 ![Two cards grade the same work. The agent's own report card reads tests_passed: false; beside it the harness's re-run of the identical code shows every test passing under a VERIFIED GREEN stamp: a false alarm caught by one re-run, not a lie](../../assets/medium-heroes/the-agent-grades-its-own-homework.png)
 
-There is one line in this family's [flagship](a-crash-proof-team-of-coding-agents.md) that a careful reader should refuse to walk past. A team of coding agents builds, reviews, and merges its own pull requests, and the merge turns on a single self-reported field: a pass/fail boolean the review agent writes about its own run. The schema guarantees the field exists and has a type. Nothing anywhere checks whether it is true. The flagship owns this and calls it a placeholder. This companion is the measurement that was missing behind it.¹
+A team of coding agents builds, reviews, and merges its own pull requests, and the merge turns on a single self-reported field: a pass/fail boolean the review agent writes about its own run. The schema guarantees the field exists and has a type. Nothing anywhere checks whether it is true. That is the one line in this family's [flagship](a-crash-proof-team-of-coding-agents.md) a careful reader should refuse to walk past; the flagship owns it and calls it a placeholder. This piece is the measurement that was missing behind it.¹
 
 The reason to be suspicious is not cynicism; it is the series' own data. ([How It's Built](how-its-built.md) is the team's anatomy.) The lab notebook (the running experiment log behind this series) has a tournament chapter that ran three independent agents that each wrote tests for their own code. They came back "green and confident" at 42, 36, and 37 tests passing. A shared suite told a different story. The lesson got a law: an agent and the test suite it writes for itself co-evolve until they agree, right or wrong. No agent grades its own homework.² And then the team's review lane does exactly that, at the exact moment that decides a merge.
 
@@ -61,13 +59,24 @@ Third, the co-evolution result is bounded by the design. This task *hands* the a
 - If a verdict was formed before the last edit, it is stale; re-run after the final write, not after the first.
 - A schema can guarantee a field exists. It cannot make the field true.
 
+## The Family
+
+This is one branch of a family of articles on running a team of Claude Code agents autonomously without setting your codebase on fire. The rest, in reading order:
+
+- [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), the trunk: the kill, the team, the conflict that resolved itself
+- [How It's Built](how-its-built.md), the rivets: the settings, the tuning, the lane plumbing, the details the story skips
+- [Mechanics Cost Cents, Behavior Costs Dollars](mechanics-cost-cents.md), the bill: every boundary priced, and the canary that re-checks the numbers on a schedule
+- [Flag, Block, or Beg](flag-block-or-beg.md), the tool-call boundary: what a prompt, a flag, and a block each buy, measured
+- [Done Is Not a Claim](done-is-not-a-claim.md), the finish boundary: the same hard deny, moved to the exit, inverts the result
+- [The Human Is a Durable Object](the-human-is-a-durable-object.md), the person: the one human decision, modeled as durable state, deny-safe on silence
+
 ---
 
-*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), closing the unverified half of its merge-gate limitation. The measured runs, the seeded project, the frozen-reference scorer, and its offline tests are reproducible from the evidence repository. Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
+*A companion to [A Crash-Proof Team of Coding Agents](a-crash-proof-team-of-coding-agents.md), closing the unverified half of its merge-gate limitation. The measured runs, the seeded project, the frozen-reference scorer, and its offline tests are reproducible from the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). Disclaimer: the views expressed here are my own and do not necessarily reflect those of my employer. This is a personal project, not affiliated with or endorsed by Anthropic or Temporal.*
 
 ## Notes
 
-1. The merge switch: the review workflow reads `tests_passed = bool(report.get("tests_passed"))` and merges on it (plus the optional human gate, the companion [The Human Is a Durable Object](the-human-is-a-durable-object.md)); the review prompt instructs the agent to set the field; the workflow and poller code are in the evidence repository. The main article's merge-gate limitation names this a placeholder.
-2. The tournament evidence: three self-graded agents "green and confident" at 42/36/37 passing tests versus a shared harness-run suite, and the resulting rule that the harness runs the suite on every branch itself. The tournament results file, transcribed from the lab notebook's tournament chapter, is in the evidence repository.
-3. The self-grade runner, model `claude-haiku-4-5-20251001`, five runs per arm, isolated with `--setting-sources project`; the claim scored against the suite as-left and a frozen reference suite; taxonomy and seed ground truth pinned by offline tests. Full numbers in the evidence repository. The manual precedent (suites independently re-run after the recorded live demos) is in the conflict run's record (10/10, independently re-run).
+1. The merge switch: the review workflow reads `tests_passed = bool(report.get("tests_passed"))` and merges on it (plus the optional human gate, the companion [The Human Is a Durable Object](the-human-is-a-durable-object.md)); the review prompt instructs the agent to set the field; the workflow and poller code are in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The main article's merge-gate limitation names this a placeholder.
+2. The tournament evidence: three self-graded agents "green and confident" at 42/36/37 passing tests versus a shared harness-run suite, and the resulting rule that the harness runs the suite on every branch itself. The tournament results file, transcribed from the lab notebook's tournament chapter, is in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents).
+3. The self-grade runner, model `claude-haiku-4-5-20251001`, five runs per arm, isolated with `--setting-sources project`; the claim scored against the suite as-left and a frozen reference suite; taxonomy and seed ground truth pinned by offline tests. Full numbers in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The manual precedent (suites independently re-run after the recorded live demos) is in the conflict run's record (10/10, independently re-run).
 4. After the live fleet run, the review lane's verdict must cite its final suite run, command and output tail; and reviewer edits to code are a watched rule the review lane commits for itself.
