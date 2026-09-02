@@ -129,11 +129,9 @@ Read the deny rules as architecture, not only safety. Deleting a tree and escala
 
 None of this is a bespoke protocol. It is a stock Claude Code project (settings, hooks, skills, memory), assembled fresh every chunk; the bolt-by-bolt detail lives in the engineering companion, [How It's Built](how-its-built.md). This shape was not our first answer. The first answer is worth showing precisely because it *worked*, until measurement talked us out of it.
 
-## The Wrong Design That Worked
+## Three Numbers and a Slot Machine
 
 An activity's result is all-or-nothing: nothing it learned reaches the history until it returns. So the first design made every turn-cap boundary a **savepoint**: finish a capped chunk, and its progress, cost, and session ID are written into the history. It worked; a savepoint-era kill test recovered on a restarted worker and finished all ten of its tests, one session end to end. But once heartbeat recovery existed, those completed-boundary checkpoints were buying a durability we already had, and each one was another resume. (The full detour, savepoint diagram and all, is in [How It's Built](how-its-built.md).) Worse, they were quietly doing something to the cost we did not see coming.
-
-## Three Numbers and a Slot Machine
 
 So we measured the whole bill, holding one task constant across every scenario on the small fast model, observing everything rather than modeling it, strictly one run at a time. Three numbers carry the result.[^9]
 
@@ -233,7 +231,7 @@ Then the part that turns an incident into a system. A frontend issue had been si
 
 A claim that size earns a question: how would you even know it is true? You would read the record, and every run leaves one.
 
-## Every Run Leaves Evidence, and the Evidence Improves the Team
+## Every Run Leaves Evidence
 
 Because the agent runs under a policy the workspace owns, every run leaves *two* planes of evidence, joined on one key: the session ID, the same ID that rode the heartbeat on the first page. Temporal owns the record of the **job**: every activity, attempt, failure, heartbeat timeout, and recorded cost, queryable long after the run is over. The workspace owns the record of the **hands**: the tool-call log the hooks keep, and the whole conversation exported to readable Markdown, filed under the session ID.
 
