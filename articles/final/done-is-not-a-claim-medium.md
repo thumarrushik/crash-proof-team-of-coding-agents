@@ -72,9 +72,9 @@ A rule steers; only hooks enforce. And the one thing you most need to enforce ab
 
 **Practical rule:** gate "done" with a `Stop` hook on a check the agent cannot talk its way around. Make the check satisfiable and costly to fake, and let the block cap keep it a forcing function rather than a jail. Persuasion asks the agent to finish; the gate refuses to let it leave until it has.
 
-One honest boundary: these are single-digit runs on one cheap model against one skippable step, point estimates reproducible from the repo, not a benchmark. And the gate's edge over the baseline is a two-run gap widened by a consistent mechanism, not a proof. But the mechanism is the point, and it is the same one the companion found from the other side. A hard *no* is neither good nor bad on its own. Where you place it decides whether it saves the task or costs it.
+One honest boundary: these are single-digit runs on one cheap model against one skippable step, point estimates, recorded run by run, not a benchmark. And the gate's edge over the baseline is a two-run gap widened by a consistent mechanism, not a proof. But the mechanism is the point, and it is the same one the companion found from the other side. A hard *no* is neither good nor bad on its own. Where you place it decides whether it saves the task or costs it.
 
-*The measured runs, the `Stop`-gate hook, and its offline tests are reproducible from the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). The gate's production descendant guards every lane of the team built in [How It's Built](how-its-built.md); this is the benchmark behind it.*
+*The measured runs, the `Stop`-gate hook, and its offline tests are recorded in the evidence archive. The gate's production descendant guards every lane of the team built in [How It's Built](how-its-built.md); this is the benchmark behind it.*
 
 ## The Family
 
@@ -94,6 +94,6 @@ This is one branch of a family of articles on running a team of Claude Code agen
 ## Sources
 
 - **Claude Code hooks: the `Stop` event and its block-decision contract (a `Stop` hook can veto the finish; the reason is fed back and the turn continues), and the consecutive-block cap that keeps the gate bounded.** `code.claude.com/docs/en/hooks`. Checked 2026-08-06. **Vendor/canonical.**
-- **The gate's production descendant: the per-lane `Stop`-hook phase gate and the live fleet run that exercised it (including the two-dialect fix).** The per-lane gate hook and the fleet-run results, in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
-- **The measured runs.** Three arms times five headless runs on `claude-haiku-4-5-20251001`, isolated to workspace policy (`--setting-sources project`), each run scored for the skipped step and task completion. The runner, the `Stop`-gate hook, the results file, and its offline tests live in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
-- **The tool-boundary companion (beg / flag / block; the finding that a mid-flight block finished the task 1 in 5) this piece answers from the finish boundary.** [Flag, Block, or Beg](flag-block-or-beg.md) and its results file in the [evidence repository](https://github.com/thumarrushik/crash-proof-team-of-coding-agents). **Practitioner.**
+- **The gate's production descendant: the per-lane `Stop`-hook phase gate and the live fleet run that exercised it (including the two-dialect fix).** The per-lane gate hook and the fleet-run results, in the evidence archive. **Practitioner.**
+- **The measured runs.** Three arms times five headless runs on `claude-haiku-4-5-20251001`, isolated to workspace policy (`--setting-sources project`), each run scored for the skipped step and task completion. The runner, the `Stop`-gate hook, the results file, and its offline tests live in the evidence archive. **Practitioner.**
+- **The tool-boundary companion (beg / flag / block; the finding that a mid-flight block finished the task 1 in 5) this piece answers from the finish boundary.** [Flag, Block, or Beg](flag-block-or-beg.md) and its results file in the evidence archive. **Practitioner.**

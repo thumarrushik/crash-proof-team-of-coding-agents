@@ -1,0 +1,5 @@
+# slug<TAB>live Medium URL, one line per published article.
+# Add a line the day an article goes live, then re-run ./stage-release.sh
+# for the slugs the staging script names, so earlier posts can be updated.
+# Example:
+# a-crash-proof-team-of-coding-agents	https://medium.com/@thumar.rushik/...
