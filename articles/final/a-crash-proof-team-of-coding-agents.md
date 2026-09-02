@@ -8,7 +8,7 @@ There is a moment in every infrastructure demo where you stop trusting the slide
 
 For about two minutes, nothing happened at all. Then a different process, on a restarted worker, noticed the silence. It picked up the same half-finished conversation and ran it to completion: the same session, remembering everything it had learned. The total bill was four cents. Keep the four cents; the receipt shows up later. And the staged kill is only the legible version of what happens uninvited every week: an API overload, a rate limit, a deploy that restarts the worker.
 
-How that session survived is the first half of this article. The bigger half is what survival buys once you have it: a durable team. The work splits into single-purpose durable jobs. Only one kind of step runs Claude Code itself, and it does all the judgment work: building the feature, reviewing the diff, resolving the conflict. The rest carry the delivery pipeline around it, each job governed by playbooks it actually follows and rules re-asserted before every slice of work. That team carried a filed GitHub issue all the way to a merged pull request, resolving a real merge conflict along the way, with no human decision in the loop. One mechanical asterisk rides on that sentence, footnoted where the story is told.
+How that session survived is the first half of this article. The bigger half is what survival buys once you have it: a durable team. The work splits into single-purpose durable jobs. Only one kind of step runs Claude Code itself, and it does all the judgment work: building the feature, reviewing the diff, resolving the conflict. The rest carry the delivery pipeline around it. That team carried a filed GitHub issue all the way to a merged pull request, resolving a real merge conflict along the way, with no human decision in the loop. One mechanical asterisk rides on that sentence, footnoted where the story is told.
 
 *The fine print, up front: one engineer ran everything here, and the "we" is editorial. Every measured run used `haiku`, Claude's cheap fast tier, in July and August 2026; the run counts are single-digit, so every number is a point estimate that traces to a results file in the project's evidence archive. Dollar figures are haiku-priced; a stronger tier scales them up. And "crash-proof" here means process and worker crashes, the staged kill included; a machine that never comes back is an admitted gap, covered in What This Doesn't Solve.*
 
@@ -16,7 +16,7 @@ How that session survived is the first half of this article. The bigger half is 
 
 Start with the crime scene, and take inventory of what the kill failed to destroy. The first survivor is a file. Run Claude Code headless and it executes the whole agent, prints a result, and exits. The result carries a **session ID**: hand it back later with a resume flag and the agent reopens that exact conversation, because the transcript is an ordinary file on disk, filed under the directory the agent ran in. The *conversation* is already durable, and not as a toy mode: the official GitHub Action ships the same headless agent into continuous integration to review pull requests and turn issues into them.[^1][^2]
 
-The second survivor is the guardrail harness, which matters the moment you hand an agent a shell: dangerous commands (deleting a tree, escalating privileges, pushing to a remote) are denied by the tool itself rather than discouraged in a prompt, hooks fire around every tool call, the operating system sandboxes what the process can touch, and a required output schema shapes what the agent must return.[^3] A line in a prompt is a suggestion; a deny rule is a fact, identical on the first attempt and the sixth.
+The second survivor is the guardrail harness, which matters the moment you hand an agent a shell: dangerous commands (deleting a tree, escalating privileges, pushing to a remote) are denied by the tool itself rather than discouraged in a prompt, hooks fire around every tool call, the operating system sandboxes what the process can touch, and a required output schema shapes what the agent must return.[^3] A line in a prompt is a suggestion; a deny rule is a fact.
 
 Then the inventory comes up one item short. A resumed session is local to the machine it was born on, a limit the documentation itself concedes. There is no way to move it across machines, no lease, nothing that notices the machine died and carries the work elsewhere.[^4] The agent remembers the conversation. **Nothing remembers the job.**
 
@@ -28,7 +28,7 @@ The obvious way to drive a headless agent is a loop. Ask it to continue, refresh
 while :; do claude -p "continue" --resume "$SID" --max-turns 6; done
 ```
 
-The real thing parses each run's output to keep the session ID current, but that is the shape. Two terms fall out of it. A **turn** is one round of the agent's loop: one model reply plus the tool calls it makes, so `--max-turns 6` stops the run after six rounds. And each capped run is a **chunk**, a bounded slice of the session that stops cleanly with its transcript intact. The loop works right up until the process holding it dies. And when that process dies, exactly one thing survives: the transcript. Everything else was memory. The current session ID. The retry count. The instruction someone typed an hour ago. The bare fact that a job was running at all.
+The real thing parses each run's output to keep the session ID current, but that is the shape. Two terms fall out of it. A **turn** is one round of the agent's loop: one model reply plus the tool calls it makes, so `--max-turns 6` stops the run after six rounds. And each capped run is a **chunk**, a bounded slice of the session that stops cleanly with its transcript intact. The loop works right up until the process holding it dies, and then exactly one thing survives: the transcript. Everything else was memory. The current session ID. The retry count. The instruction someone typed an hour ago. The bare fact that a job was running at all.
 
 An agent run is exactly the kind of job you cannot afford to forget. It runs for hours and bills by the token, it carries context a fresh start cannot get back (the explored codebase, the failed approaches, the half-written fix), and because it runs unattended against real systems, it fails at two in the morning, in exactly the state you least want to reconstruct from logs. Try to remember all of this yourself and the shopping list writes itself: durable state, a single-writer lock, a retry taxonomy, a liveness probe, a status endpoint. Somewhere around the third item you are hand-building a distributed system you never meant to own. Or you can give the job the one thing the conversation already has: a record that outlives the process.
 
@@ -51,7 +51,7 @@ That last capability is the mechanism the rest of this design rests on.
 
 ## A Room Where Chaos Is Legal
 
-Now the plan hits the part that looks fatal. A workflow has to be deterministic, and an AI coding agent is the least deterministic software you will ever run: same prompt, different transcript, every time. Put the agent inside workflow code and the first replay diverges on the first token. That is a category error, not a knob you can tune; for a moment the whole idea looks dead on arrival.
+Now the plan hits the part that looks fatal. A workflow has to be deterministic, and an AI coding agent is the least deterministic software you will ever run: same prompt, different transcript, every time. Put the agent inside workflow code and the first replay diverges on the first token. That is a category error, not a knob you can tune.
 
 But durable execution already has a room where non-determinism is not just tolerated but expected: the activity. Seal the entire agent inside an activity and the workflow never sees the chaos. All it sees is what crosses back as plain data (a session ID, an outcome, a dollar cost, a validated pass/fail report), and its own logic collapses to something a database could run: read a typed result, decide *continue or stop*, repeat.
 
@@ -68,7 +68,10 @@ The whole mechanism fits on a clock. Here is the kill from the top of this artic
 
 Step 4 works because the kill could not reach the two things that matter. Process memory died with the worker, but the transcript lives on disk, the last heartbeat lives on the server, and the session ID in that pulse is the *name* of the transcript. One link, and it is the entire recovery.
 
-No completed checkpoint is required; the last heartbeat is the checkpoint. Every durable-execution engine can resume a *completed* step by replaying its recorded result; this resumes a *live* agent from an attempt that *returned* nothing at all. The unit of recovery is not a finished step; it is a coding agent's conversation, caught mid-thought.
+![The rescue drawn on a clock: Attempt 1 pulsing the session ID, the worker killed, two silent minutes, the server declaring the attempt dead; below, the two survivors the kill could not reach, the last pulse on the server and the transcript on disk, both feeding a green Attempt 2 that resumes the same conversation](../../assets/diagrams/heartbeat-rescue.png)
+*The rescue on a clock. The kill reaches process memory but not the two survivors. The session ID in the last pulse is the one link, and it carries the work to Attempt 2. Color key for the family: indigo is the durable machinery, amber is judgment, purple is the durable record, green is a good exit, red is failure, dashed crosses a boundary.*
+
+No completed checkpoint is required; the last heartbeat is the checkpoint. Every durable-execution engine can resume a *completed* step by replaying its recorded result; this resumes a *live* agent from an attempt that *returned* nothing at all.
 
 And here, at last, is the receipt promised on the first page, one line the recovered run left in its workspace:
 
@@ -87,15 +90,18 @@ The first is the one you just watched, and it is the hard one: **the whole worke
 
 The second is smaller and far more common, so it earns its own test: **the agent process alone dies** while its worker keeps running. We SIGKILLed the Claude child outright, mid-chunk. Nothing global was lost, so the worker caught the agent's output stream breaking, retried the chunk, and resumed the same session from the last heartbeat within seconds (the retry's first backoff), the worker itself never restarting.[^childkill]
 
-A silent worker is not the only way to be stuck, which is why there are two alarms, not one. The heartbeat timeout above catches silence; a wedged agent needs the other alarm, because it loops forever and pulses the whole time, so the heartbeat timeout never fires, and only a longer, hard ceiling on the whole chunk stops it.
+A silent worker is not the only way to be stuck. The heartbeat timeout catches silence; a wedged agent loops forever and pulses the whole time, so only a second alarm, a hard ceiling on the whole chunk, stops it.
 
-The everyday value is not that deliberate kill; a worker rarely dies outright. What actually stops a headless run is the API on the other end: an overload during a busy hour, a rate limit, a dropped stream. The agent surfaces those on its result; the activity raises them as typed, retryable failures; the retry policy backs off (five seconds, doubling to a two-minute cap, six attempts), and every retry *resumes* the conversation instead of restarting the task. An overload window becomes added latency rather than a failed run: the same fast path the killed agent process took above, reached far more often by an API error than by a crash.
+The everyday value is not that deliberate kill; a worker rarely dies outright. What actually stops a headless run is the API on the other end: an overload during a busy hour, a rate limit, a dropped stream. The agent surfaces those on its result; the activity raises them as typed, retryable failures; the retry policy backs off (five seconds, doubling to a two-minute cap, six attempts), and every retry *resumes* the conversation instead of restarting the task. An overload window becomes added latency rather than a failed run.
 
-Every failure, from a rate limit to a dead worker, converges on that same cheap resume. All of it happens inside the sealed box you watched recover, so it is worth opening that box to see exactly how one chunk is built.
+Every failure, from a rate limit to a dead worker, converges on that same cheap resume, inside the sealed box you watched recover. Time to open the box.
 
 ## Inside the Box
 
 Open the box and one chunk is a single ordinary function. The workflow calls it, the function runs the agent, and what comes back is a typed record (a session ID, an outcome, a cost, a turn count, the validated report) and nothing else. And the record leaves the workflow exactly three exits, which are nearly the whole control logic: a retryable failure resumes the same session under the declared retry policy; out of turns schedules the next chunk; anything genuinely terminal stops the job, loudly.
+
+![Inside the box: a deterministic workflow runs a bounded chunk in a sealed activity where the agent thinks and calls tools and is never replayed; only one typed record crosses back, and the workflow switches it to three exits, resume the same session, schedule the next chunk, or stop loudly](../../assets/diagrams/chunk-and-exits.png)
+*Inside the box. The agent's chaos stays sealed in the activity; the workflow reads one typed record and switches on three exits, outcomes a database could run.*
 
 Launching the agent is a short list of settings: configuration from the project directory only, so the rules ride inside the workspace and the same agent runs identically on every worker; resume the prior session; cap the turns; auto-accept file edits, with every other tool behind an explicit allow-list; and a closing report that must match a schema, so the workflow reads a real pass/fail value instead of parsing prose.
 
@@ -159,6 +165,9 @@ One more primitive and one structural catch finish the picture. **One owner per 
 ## One Issue Walks the Whole Loop
 
 Put the conductors and the team together and one issue travels a full loop, every box along the way a durable step in the history.
+
+![One issue walked clockwise through four beats: intake routes it to a team and starts a durable job; build runs the agent in resumable chunks and opens a pull request; review and merge lands the change on a passing test suite; escalate, resolve, and unblock hands a real conflict to the owning team and frees whatever was blocked, then the next poll closes the loop](../../assets/diagrams/issue-to-merge.png)
+*One issue, the whole loop. Every box is a durable step; the conflict detour and the unblock are not special cases, just the same machinery running once more.*
 
 **Intake.** A schedule fires the poll on an interval. The poll reads the repository (open issues, open pull requests, which issues have closed), routes each item to a team by its label, and starts one durable job per ready item with a deterministic ID: the first of the two client-from-inside-an-activity crossings. An issue marked *blocked by* another is held until that other issue closes.
 

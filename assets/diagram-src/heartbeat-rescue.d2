@@ -1,0 +1,50 @@
+# The rescue on a clock: a killed attempt, two silent minutes, and the single
+# link (the session ID) that carries the work to a fresh attempt.
+# NEW for the flagship; not one of the earlier removed sixteen.
+direction: down
+horizontal-gap: 90
+vertical-gap: 90
+
+clock: "The Clock" {
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  direction: right
+  near: top-center
+
+  pulse: "Attempt 1\nPulses Every 30s,\nCarrying Session 698c..." {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  kill: "T+0:00\nWorker Killed,\nPulses Stop" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  silence: "T+0:00 to T+2:00\nTwo Silent Minutes" {
+    style: {fill: "#f8fafc"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+  }
+  declared: "T+2:00\nServer Declares\nthe Attempt Dead" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  pulse -> kill -> silence -> declared
+}
+
+survivors: "What the Kill Could Not Reach" {
+  style: {fill: "#ffffff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  direction: right
+
+  server: "On the Server:\nthe Last Pulse,\nCarrying 698c..." {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+  disk: "On Disk:\nthe Transcript,\nFiled Under 698c..." {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+}
+
+resume: "T+2:01\nAttempt 2 Reads the Last Pulse,\nTakes the Session ID, and Resumes\nthe SAME Conversation Mid-Thought" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+clock.declared -> resume
+survivors.server -> resume: "The Session ID:\nthe One Link" {
+  style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+survivors.disk -> resume: "Reopened" {
+  style: {stroke-dash: 5; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}

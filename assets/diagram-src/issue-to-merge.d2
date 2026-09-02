@@ -1,0 +1,28 @@
+# One issue, durably driven from filed to merged. Four beats, matching the
+# article's own four bold headers, laid clockwise so the unblock closes the loop.
+# NEW for the flagship; a leaner take than the earlier removed pipeline figure.
+# grid-rows:2 fills row-major: intake,build on top; escalate,review below, so
+# the cycle intake -> build -> review -> escalate -> intake is a clean rectangle.
+grid-rows: 2
+horizontal-gap: 150
+vertical-gap: 130
+
+intake: "1 · Intake\nA Scheduled Poll Routes Each Issue\nto a Team by Its Label and Starts\nOne Durable Job per Ready Item" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+build: "2 · Build\nThe Agent Works in Resumable,\nHeartbeated Chunks; Then the Harness\nOpens a Pull Request" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+escalate: "4 · Escalate, Resolve, Unblock\nA Real Conflict Goes to the Team That\nOwns the Code; the Closed Issue Frees\nWhatever Was Blocked on It" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+review: "3 · Review and Merge\nA Tests-Pass Boolean IS the Merge Switch.\nA Stale Branch Self-Updates and Retries;\nthe Approved Change Lands, Squashed" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+intake -> build: "Filed, Routed"
+build -> review: "Handed Over on\nthe Next Poll"
+review -> escalate: "Approve and Merge" {style: {stroke: "#16a34a"; font-color: "#14532d"}}
+escalate -> intake: "The Next Poll Picks Up the Freed Work; the Loop Runs Again" {
+  style: {stroke-dash: 3; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}

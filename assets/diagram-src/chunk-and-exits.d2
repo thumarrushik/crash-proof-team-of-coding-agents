@@ -1,0 +1,36 @@
+# Inside the box: the agent sealed in an activity hands back one typed record,
+# and the workflow switches on exactly three exits, nothing else.
+# NEW for the flagship; folds the old seam + three-exits idea into one picture.
+direction: right
+horizontal-gap: 120
+vertical-gap: 55
+
+wf: "The Workflow\nDeterministic, Replayable" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+box: "The Sealed Box: an Activity\nHeadless Claude Code Runs Here.\nTool Calls, Thinking, Dice on\nEvery Token. Never Replayed." {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+
+record: "One Typed Record\nSession ID · Outcome · Cost ·\nTurns · Validated Report" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+resume: "Exit 1 · Retryable Error\nAn API Drop, a Mid-Run Crash:\nResume the SAME Session" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+next: "Exit 2 · Out of Turns\nA Checkpoint, Not an Error:\nSchedule the Next Chunk" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+stop: "Exit 3 · Terminal\nNon-Retryable:\nStop the Job, Loudly" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+wf -> box: "Run a\nBounded Chunk"
+box -> record: "Only Typed Data\nCrosses Back" {
+  style: {stroke-dash: 3; stroke: "#4f46e5"; font-color: "#4c1d95"; bold: true}
+}
+record -> resume
+record -> next
+record -> stop
