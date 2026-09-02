@@ -19,4 +19,4 @@ Weekly checklist:
 3. Publish, then add the live URL to `articles/final/published-urls.tsv`.
 4. Re-run `./stage-release.sh` for the earlier slugs the script names, and edit those live Medium posts so their links to the new article light up.
 
-The release copies flatten links to not-yet-published siblings into plain text (titles stay, links drop) and point links to already-published siblings at their live URLs. The canonical articles and the plain `-medium.md` exports keep the full cross-links; only the `articles/release/` copies know about the schedule.
+The release copies flatten links to not-yet-published siblings into plain text marked "(coming soon)", so the reader knows the reference is part of the series, and point links to already-published siblings at their live URLs. The canonical articles and the plain `-medium.md` exports keep the full cross-links; only the `articles/release/` copies know about the schedule.

@@ -6,7 +6,7 @@
 #
 # Reads published-urls.tsv (slug<TAB>live-url). Cross-article links whose
 # target is already live are rewritten to the live URL; links to articles
-# not yet published are flattened to plain text. Output lands in
+# not yet published are flattened to plain text marked "(coming soon)". Output lands in
 # ../release/<slug>-medium-release.md. Re-run after any canonical edit
 # (export-medium.sh first) or after adding a URL to published-urls.tsv.
 set -euo pipefail
@@ -41,7 +41,7 @@ def rewrite(m):
         live.add(target)
         return f"[{label}]({published[target]})"
     flattened.add(target)
-    return label
+    return f"{label} (coming soon)"
 
 pattern = re.compile(
     r"\[([^\]]+)\]\((" + "|".join(re.escape(s) for s in slugs) + r")\.md\)"
