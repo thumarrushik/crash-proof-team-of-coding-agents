@@ -1,0 +1,39 @@
+# The hand-rolled loop dies and exactly one thing survives: the transcript.
+# Everything else was process memory. NEW for the flagship (2026-09-02):
+# replaces the evaporation enumeration in Nothing Remembers the Job.
+direction: down
+horizontal-gap: 100
+vertical-gap: 65
+
+loop: "The Obvious Driver: a Bash Loop\nAsk to Continue, Refresh the ID, Repeat" {
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}
+
+mem: "Process Memory · Gone the Instant the Loop Dies" {
+  style: {fill: "#ffffff"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  grid-columns: 2
+  horizontal-gap: 60
+  vertical-gap: 40
+
+  sid: "The Current\nSession ID" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  retry: "The Retry\nCount" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  instr: "The Instruction\nTyped an Hour Ago" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+  fact: "That a Job Was\nRunning at All" {
+    style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+  }
+}
+
+disk: "The Lone Survivor: the Transcript\nAn Ordinary File on Disk,\nReopenable by Its Session ID" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+loop -> mem: "Everything It Knows Lives Here"
+loop -> disk: "What the Session Leaves on Disk" {
+  style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}

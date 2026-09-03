@@ -1,0 +1,27 @@
+# The crime-scene inventory: what the kill failed to destroy (the conversation
+# on disk, the guardrail harness) and the one item missing (nothing remembers
+# the job). NEW for the flagship (2026-09-02): replaces the enumerated
+# survivor paragraphs in The Agent Remembers the Conversation.
+direction: down
+horizontal-gap: 100
+vertical-gap: 70
+
+survivors: "What the Kill Failed to Destroy" {
+  style: {fill: "#ffffff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  direction: right
+
+  transcript: "SURVIVOR 1 · THE CONVERSATION\nThe Transcript Is an Ordinary File on Disk.\nHand Its Session ID Back with a Resume Flag\nand the Agent Reopens It Mid-Thought" {
+    style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+  }
+  guardrails: "SURVIVOR 2 · THE GUARDRAILS\nDeny Rules Enforced by the Tool, Not the Prompt.\nHooks on Every Call · an OS Sandbox ·\na Required Output Schema" {
+    style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+  }
+}
+
+missing: "MISSING · THE JOB\nA Session Is Local to the Machine It Was Born On.\nNo Lease, No Transport, Nothing That Notices\na Dead Machine and Carries the Work Elsewhere" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+
+survivors -> missing: "The Inventory Comes Up One Item Short" {
+  style: {stroke-dash: 5; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
