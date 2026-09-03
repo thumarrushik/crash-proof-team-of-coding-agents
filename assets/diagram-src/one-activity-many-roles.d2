@@ -1,0 +1,31 @@
+# One agent-running activity, many roles: the build, review, and resolve jobs
+# all call the SAME sealed function with different arguments (prompt, skills,
+# queue); every other specialist is a mechanical git/API command with no model.
+# NEW for the flagship (2026-09-02): drawn for the "a role is a set of
+# arguments" passage in Nine Specialists. 3+2 grid, callers on top.
+grid-rows: 2
+horizontal-gap: 170
+vertical-gap: 130
+
+build: "The Build Job\nBackend or Frontend Lane" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+review: "The Review Job\nReview Lane" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+resolve: "The Resolve Job\nThe Owning Team's Lane" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+
+agent: "THE ONE AGENT-RUNNING ACTIVITY\nWorkspace + Prompt + Session In;\nLaunches Claude Code, Heartbeats;\nOne Typed Record Out" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+mech: "EVERY OTHER SPECIALIST\nPush · Open PR · Merge · Poll · Export\nOne Git or API Command Each, No Model" {
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}
+
+# No caller->mech edges: they crossed the solid arrows and their labels
+# collided; the mech box stands as the contrast panel, its text carrying it.
+build -> agent: "\"Implement\nThis Issue\""
+review -> agent: "\"Read the Diff,\nReport Pass or Fail\""
+resolve -> agent: "\"Keep Both\nFeatures\""
