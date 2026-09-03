@@ -41,7 +41,10 @@ resume: "T+2:01\nAttempt 2 Reads the Last Pulse,\nTakes the Session ID, and Resu
   style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
 }
 
-clock.declared -> resume
+# No clock -> resume edge: any routing (nested anchor or container) either
+# swept a long curve or plowed through the survivors container. The T+2:00 ->
+# T+2:01 timestamps carry the sequence, and the resume box's own text states
+# the causality ("reads the last pulse").
 survivors.server -> resume: "The Session ID:\nthe One Link" {
   style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }

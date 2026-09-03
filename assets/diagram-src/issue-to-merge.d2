@@ -3,8 +3,10 @@
 # NEW for the flagship; a leaner take than the earlier removed pipeline figure.
 # grid-rows:2 fills row-major: intake,build on top; escalate,review below, so
 # the cycle intake -> build -> review -> escalate -> intake is a clean rectangle.
+# Wide horizontal gaps: at 150 the "Filed, Routed" / "Approve and Merge"
+# labels filled the whole gap and hid the arrow direction.
 grid-rows: 2
-horizontal-gap: 150
+horizontal-gap: 280
 vertical-gap: 130
 
 intake: "1 · Intake\nA Scheduled Poll Routes Each Issue\nto a Team by Its Label and Starts\nOne Durable Job per Ready Item" {
@@ -23,6 +25,6 @@ review: "3 · Review and Merge\nA Tests-Pass Boolean IS the Merge Switch.\nA Sta
 intake -> build: "Filed, Routed"
 build -> review: "Handed Over on\nthe Next Poll"
 review -> escalate: "Approve and Merge" {style: {stroke: "#16a34a"; font-color: "#14532d"}}
-escalate -> intake: "The Next Poll Picks Up the Freed Work; the Loop Runs Again" {
+escalate -> intake: "The Next Poll Picks Up the\nFreed Work; the Loop Runs Again" {
   style: {stroke-dash: 3; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
 }
