@@ -48,7 +48,7 @@ The reconstruction is **deterministic replay**: re-run the job's code from the f
 
 That constraint forces a clean split, and four plain words carry the rest of this article:
 
-![Five boxes in a vertical loop. A WORKFLOW (the deterministic decider) runs on a WORKER (an ordinary, mortal process); the worker executes an ACTIVITY (a sealed box for network, files, and dice, never replayed); the live activity emits a HEARTBEAT (a liveness pulse carrying the session ID), which the server persists into the EVENT HISTORY (the durable ledger of every step). A dashed arrow runs from the event history back to the workflow, replaying to rebuild after any crash](../../assets/diagrams/durable-terms.png)
+![Five boxes in one loop. A WORKFLOW (the deterministic decider) runs on a WORKER (an ordinary, mortal process); the worker executes an ACTIVITY (a sealed box for network, files, and dice, never replayed); the live activity emits a HEARTBEAT (a liveness pulse carrying the session ID), which the server persists into the EVENT HISTORY (the durable ledger of every step). A dashed arrow runs from the event history back up to the workflow, replaying to rebuild after any crash](../../assets/diagrams/durable-terms.png)
 *The four plain words, and how they connect. A deterministic workflow runs on a mortal worker, which executes sealed activities; a live activity heartbeats the session ID to the server's event history, and that ledger replays to rebuild the job after any crash.*
 
 That last capability, the heartbeat that outlives the attempt that sent it, is the mechanism the rest of this design rests on.[^6]

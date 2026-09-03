@@ -1,31 +1,35 @@
 # The four plain words of durable execution, as one anchor: a workflow decides,
 # a mortal worker runs it, activities are sealed boxes, a heartbeat pulses the
 # server, and the event-history ledger replays to rebuild after any crash.
-# NEW for the flagship (2026-09-02, take three): no earlier figure named the
-# four terms; this one replaces the four-bullet glossary. Vertical so the five
-# boxes stay legible at the family's fixed 1600px width.
-direction: down
-horizontal-gap: 110
-vertical-gap: 55
+# NEW for the flagship (2026-09-02): replaces the four-bullet glossary.
+# Folded as a 3+2 grid loop (top row L->R, bottom row R->L, dashed replay
+# closing the cycle): the single-column chain rendered 1600x2221 and towered
+# over the article column. grid-rows:2 fills row-major, so the bottom row is
+# DECLARED reversed (history, heartbeat) to put heartbeat under activity.
+grid-rows: 2
+horizontal-gap: 180
+vertical-gap: 130
 
-workflow: "WORKFLOW\nThe decider: what runs next.\nDeterministic, replayable, never flips a coin." {
+workflow: "WORKFLOW\nThe Decider: What Runs Next.\nDeterministic, Replayable,\nNever Flips a Coin" {
   style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
 }
-worker: "WORKER\nAn ordinary, mortal process on some machine.\nMeant to die: that is the whole trick." {
+worker: "WORKER\nAn Ordinary, Mortal Process\non Some Machine. Meant to Die:\nThat Is the Whole Trick" {
   style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
 }
-activity: "ACTIVITY\nA sealed box: network, files, dice, anything.\nNever replayed; retries under a policy you declare." {
+activity: "ACTIVITY\nA Sealed Box: Network, Files,\nDice, Anything. Never Replayed;\nRetries Under a Declared Policy" {
   style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
 }
-heartbeat: "HEARTBEAT\nA liveness pulse every few seconds,\ncarrying a little data: the session ID." {
-  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
-}
-history: "EVENT HISTORY\nThe durable ledger on the server.\nEvery step the job ever took." {
+history: "EVENT HISTORY\nThe Durable Ledger on the Server.\nEvery Step the Job Ever Took" {
   style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
 }
+heartbeat: "HEARTBEAT\nA Liveness Pulse Every Few Seconds,\nCarrying a Little Data:\nthe Session ID" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
 
-workflow -> worker: "runs on"
-worker -> activity: "executes"
-activity -> heartbeat: "emits, while alive"
-heartbeat -> history: "persisted by the server" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
-history -> workflow: "replays to rebuild, after any crash" {style: {stroke-dash: 5; stroke: "#0891b2"; font-color: "#164e63"; bold: true}}
+workflow -> worker: "Runs On"
+worker -> activity: "Executes"
+activity -> heartbeat: "Emits,\nWhile Alive"
+heartbeat -> history: "Persisted by\nthe Server" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
+history -> workflow: "Replays to Rebuild,\nAfter Any Crash" {
+  style: {stroke-dash: 5; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
