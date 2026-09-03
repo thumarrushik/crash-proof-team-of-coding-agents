@@ -1,0 +1,19 @@
+# Two planes of evidence, joined on one key: Temporal owns the job record, the
+# workspace owns the hands record, and the session ID is the join.
+# NEW for the flagship (2026-09-02, take three): replaces the two-planes sentence.
+direction: right
+horizontal-gap: 120
+vertical-gap: 80
+
+job: "TEMPORAL OWNS THE JOB\nEvery Activity · Attempt · Failure\nHeartbeat Timeout · Recorded Cost\nQueryable Long After the Run" {
+  style: {fill: "#eef2ff"; stroke: "#4f46e5"; font-color: "#312e81"; bold: true}
+}
+hands: "THE WORKSPACE OWNS THE HANDS\nThe Tool-Call Log the Hooks Keep\nThe Whole Transcript, Exported\nto Readable Markdown" {
+  style: {fill: "#ecfeff"; stroke: "#0891b2"; font-color: "#164e63"; bold: true}
+}
+key: "THE SESSION ID\nThe One Key That Joins Them\n(the Same ID the Heartbeat Carried)" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+
+job -> key: "Filed Under" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}
+hands -> key: "Filed Under" {style: {stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}}

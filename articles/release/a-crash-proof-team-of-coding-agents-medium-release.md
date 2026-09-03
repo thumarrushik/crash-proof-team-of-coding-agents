@@ -42,12 +42,10 @@ The reconstruction is **deterministic replay**: re-run the job's code from the f
 
 That constraint forces a clean split, and four plain words carry the rest of this article:
 
-- A **workflow** is the code that decides what a job does next: the deterministic, replayable layer, the part that must never flip a coin.
-- A **worker** is an ordinary process on some machine that physically does the work, and it is meant to be mortal; that is the whole trick.
-- An **activity** is a single step the engine treats as a sealed box: it may call the network, write files, roll dice, anything, because its insides are never replayed, and it retries under a policy you declare rather than code.
-- A **heartbeat** is a small liveness pulse a running step sends, and it may carry a little data with it. If the pulses stop for too long, the server declares that attempt dead and starts a retry that can read the last pulse the dead attempt sent.⁶
+![Five boxes in a vertical loop. A WORKFLOW (the deterministic decider) runs on a WORKER (an ordinary, mortal process); the worker executes an ACTIVITY (a sealed box for network, files, and dice, never replayed); the live activity emits a HEARTBEAT (a liveness pulse carrying the session ID), which the server persists into the EVENT HISTORY (the durable ledger of every step). A dashed arrow runs from the event history back to the workflow, replaying to rebuild after any crash](../../assets/diagrams/durable-terms.png)
+*The four plain words, and how they connect. A deterministic workflow runs on a mortal worker, which executes sealed activities; a live activity heartbeats the session ID to the server's event history, and that ledger replays to rebuild the job after any crash.*
 
-That last capability is the mechanism the rest of this design rests on.
+That last capability, the heartbeat that outlives the attempt that sent it, is the mechanism the rest of this design rests on.⁶
 
 ## A Room Where Chaos Is Legal
 
@@ -158,9 +156,12 @@ The reason this deserves the word *design* is that adding to the team is mechani
 
 The team scales by giving each *kind* of work its own lane, and every "team" noun here is a concrete primitive underneath. A **namespace** is an isolated partition of the Temporal server. A **lane** is this article's word for one team's namespace plus everything the team owns inside it: its own work queue, and its own bundle of skills bound into the workspace before each chunk runs. The teams in these runs were backend, frontend, and review; the system runs six lanes today. Workers listen only to the lane they own.
 
-A backend worker is trusted to do backend work not because its prompt says *act like a backend engineer*, but because it listens on the backend queue, runs under the backend team's committed playbooks, emits backend audit artifacts, and answers to the same retry, cancel, query, and cost machinery as every other lane. **It is trusted by the queue it polls, not by the prompt it was handed.** The skill bundle is a contract the lane owns (test-first, review-your-own-diff, the required report format), and the load-bearing rule inside it says a change in one layer has to prove it did not break the others before review will approve it.
+A backend worker is trusted to do backend work not because its prompt says *act like a backend engineer*, but because it listens on the backend queue and runs under the backend team's committed playbooks. **It is trusted by the queue it polls, not by the prompt it was handed.** The load-bearing rule inside that skill bundle: a change in one layer has to prove it did not break the others before review will approve it.
 
-The formula for a team member, then, is short. **A mandate**: the one job it owns. **Skills**: the playbooks for how it operates. **Hooks**: the rules enforced on every tool call. **And a settings file stamped from human-committed harness code.** All four ride in version control; none of them lives in the model. You could swap the model tomorrow and the team would still be the team.
+![The anatomy of one team member as four inputs feeding a single box. MANDATE (the one job it owns), SKILLS (the playbooks: test-first, review-your-diff, the report format), HOOKS (rules enforced on every tool call), and SETTINGS (stamped from human-committed harness code) all point into ONE TEAM MEMBER, a single-purpose durable job trusted by the queue it polls, not the prompt it was handed. An arrow labeled because leads to a green box: all four ride in version control, none lives in the model, so swap the model tomorrow and the team is still the team](../../assets/diagrams/team-formula.png)
+*The formula for one team member: a mandate, skills, hooks, and a settings file stamped from committed harness code. All four ride in version control; none of them lives in the model.*
+
+You could swap the model tomorrow and the team would still be the team.
 
 One more primitive and one structural catch finish the picture. **One owner per piece of work** comes from deriving each job's ID deterministically from the issue and starting it with an "allow duplicates only after failure" policy: a second attempt at a running or completed job is rejected by the server, while a failed job may retry on a later sweep. That single fact is *why* the poller can be completely stateless, and why a transient failure heals itself instead of deadlocking an issue forever. A workflow can only start child workflows inside its own namespace. So when the intake or an escalation has to cross a lane, it goes through an activity instead: an activity may do arbitrary I/O, so it opens a client to the target namespace and starts the job there. Remember that move; you are about to see it twice.
 
@@ -203,7 +204,10 @@ A claim that size earns a question: how would you even know it is true? You woul
 
 ## Every Run Leaves Evidence
 
-Because the agent runs under a policy the workspace owns, every run leaves *two* planes of evidence, joined on one key: the session ID, the same ID that rode the heartbeat on the first page. Temporal owns the record of the **job**: every activity, attempt, failure, heartbeat timeout, and recorded cost, queryable long after the run is over. The workspace owns the record of the **hands**: the tool-call log the hooks keep, and the whole conversation exported to readable Markdown, filed under the session ID.
+Because the agent runs under a policy the workspace owns, every run leaves *two* planes of evidence, joined on one key: the session ID, the same ID that rode the heartbeat on the first page.
+
+![Two evidence planes joined on one key. On the left, an indigo box: Temporal owns the job, every activity, attempt, failure, heartbeat timeout, and recorded cost, queryable long after the run. Below it, a cyan box: the workspace owns the hands, the tool-call log the hooks keep and the whole transcript exported to readable Markdown. Both are filed under a central purple box, the session ID, the same ID the heartbeat carried](../../assets/diagrams/two-planes.png)
+*Two planes, one key. Temporal owns the record of the job; the workspace owns the record of the hands. The session ID files both, so a cost in one plane and a tool call in the other belong to the same run.*
 
 Collect those exports and you have a corpus of how your agents actually behave, shipped to a bucket, one folder per run. And a corpus is a feedback loop waiting to be closed, so we closed it. A reviewer read the tool-call logs across the cost-experiment runs and found one consistent waste: the agent kept re-checking work it had already done, listing a directory to confirm a file it had just written, re-running tests that were already green. We codified the lesson two ways, a written rule and a deterministic hook, and re-ran. The rule bought a modest ~20% drop (half an instance per run, inside run-to-run noise) and one run ignored it entirely; the hook flagged every remaining instance, twelve out of twelve. **A line in a prompt is a suggestion; a hook is a law.** And a mined corpus is how the laws get written. The loop has held since: on an overnight run of the full team, the audit trail those hooks write was the record that debugged five live failures into five same-evening commits, one of them the dedup-deadlock fix you will meet in the defaults below. The system's job is not to avoid failure; it is to convert failure into a commit.
 
