@@ -2,13 +2,12 @@
 <!--
   Hero source for articles/final/a-crash-proof-team-of-coding-agents.md.
   Render: assets/hero-src/render.sh -> assets/medium-heroes/a-crash-proof-team-of-coding-agents.png
-  Editorial style, single metaphor taken from the article's own line "the other
-  eight carry the delivery pipeline around it": an amber core (Claude Code, the
-  judgment work) inside one indigo orbit carrying eight satellite jobs, nine in
-  all. A red Kill -9 bolt snaps the orbit; a green heartbeat weld re-closes it.
-  The woven conversation/job thread enters from the left and leaves the system
-  to a merged ring. Plain-text wordmarks; Title Case labels; tag is only the
-  parallel line.
+  From-scratch redesign (2026-09-02, replaces the orbit metaphor): the article's
+  own signature scene drawn as a monitor trace. Indigo pulses cross the canvas,
+  a red kill snaps the trace, two silent minutes flatline, and the SAME session
+  resumes green to a merged ring; the purple session-ID chip bridges the gap,
+  the one link, carried by the last heartbeat. Ledger ticks run along the base.
+  Plain-text wordmarks; family palette; tag is only the parallel line.
 -->
 <html>
 <head>
@@ -19,6 +18,7 @@
     --amber:#fbbf24; --amber2:#f59e0b;
     --indigo:#818cf8; --indigo2:#6366f1;
     --pulse:#34d399; --red:#f87171;
+    --purple:#a78bfa; --purple2:#7c3aed;
     --t1:#f8fafc; --t2:#cbd5e1; --t3:#94a3b8;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -26,8 +26,9 @@
   body{
     font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
     background:
-      radial-gradient(1100px 520px at 78% 46%, rgba(99,102,241,.22), transparent 60%),
-      radial-gradient(900px 480px at 12% 78%, rgba(245,158,11,.14), transparent 62%),
+      radial-gradient(1100px 520px at 76% 62%, rgba(99,102,241,.20), transparent 60%),
+      radial-gradient(760px 420px at 88% 40%, rgba(52,211,153,.10), transparent 65%),
+      radial-gradient(900px 480px at 10% 30%, rgba(245,158,11,.12), transparent 62%),
       linear-gradient(135deg,#0b1120 0%, var(--slate) 46%, var(--ink) 100%);
     overflow:hidden;
   }
@@ -37,7 +38,7 @@
     background-size:26px 26px;mask-image:linear-gradient(90deg,transparent,#000 30%,#000 100%);}
   svg{position:absolute;inset:0}
   .scrim{position:absolute;inset:0;
-    background:linear-gradient(90deg, rgba(2,6,23,.90) 0%, rgba(2,6,23,.72) 32%, rgba(2,6,23,0) 55%);}
+    background:linear-gradient(90deg, rgba(2,6,23,.92) 0%, rgba(2,6,23,.74) 30%, rgba(2,6,23,0) 52%);}
   .text{position:absolute;left:84px;top:0;height:100%;width:740px;
     display:flex;flex-direction:column;justify-content:center;z-index:3}
   /* plain text wordmarks, deliberately no vendor logo lockup */
@@ -53,9 +54,22 @@
   .tag{font-size:28px;line-height:1.42;color:var(--t1);font-weight:600;max-width:640px}
   .cap{position:absolute;z-index:3;font-family:"SF Mono",Menlo,monospace;
     font-size:16px;letter-spacing:.04em;font-weight:600}
-  .cap.crash{left:1288px;top:96px;color:var(--red)}
-  .cap.beat{left:1146px;top:242px;color:var(--pulse)}
-  .cap.ship{left:1496px;top:252px;color:var(--t1)}
+  .cap.crash{left:952px;top:180px;color:var(--red)}
+  .cap.silent{left:1046px;top:470px;color:var(--t3)}
+  .cap.same{left:1250px;top:180px;color:var(--pulse)}
+  .cap.ship{left:1494px;top:352px;color:var(--t1)}
+  /* the session-ID chip: the durable record, the one link */
+  .chip{position:absolute;left:1042px;top:236px;z-index:3;
+    font-family:"SF Mono",Menlo,monospace;font-size:17px;font-weight:700;
+    color:#ddd6fe;background:rgba(124,58,237,.18);
+    border:1.5px solid var(--purple2);border-radius:10px;
+    padding:9px 16px;letter-spacing:.05em;
+    box-shadow:0 0 24px rgba(124,58,237,.35)}
+  /* sits under the Same Session caption: clear sky, and the two lines read
+     as one sentence; at the chip it collided with the dotted arc */
+  .chipnote{position:absolute;left:1252px;top:208px;z-index:3;
+    font-family:"SF Mono",Menlo,monospace;font-size:13px;color:var(--purple);
+    letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -71,86 +85,58 @@
         <feGaussianBlur stdDeviation="3.5" result="b"/>
         <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
       </filter>
-      <radialGradient id="coreglow" cx=".5" cy=".5" r=".5">
-        <stop offset="0" stop-color="#fbbf24" stop-opacity=".28"/>
-        <stop offset="1" stop-color="#fbbf24" stop-opacity="0"/>
-      </radialGradient>
     </defs>
 
     <!-- faint event-history ledger ticks along the base -->
-    <g opacity=".22" stroke="#334155" stroke-width="2">
-      <path d="M120 560 h1360" stroke="#1e293b" stroke-width="2"/>
-      <g stroke="#475569">
-        <path d="M160 548 v24"/><path d="M240 548 v24"/><path d="M320 548 v24"/><path d="M400 548 v24"/>
-        <path d="M480 548 v24"/><path d="M560 548 v24"/><path d="M640 548 v24"/><path d="M720 548 v24"/>
-        <path d="M800 548 v24"/><path d="M880 548 v24"/><path d="M960 548 v24"/><path d="M1040 548 v24"/>
-        <path d="M1120 548 v24"/><path d="M1200 548 v24"/><path d="M1280 548 v24"/><path d="M1360 548 v24"/><path d="M1440 548 v24"/>
+    <g opacity=".22">
+      <path d="M120 572 h1360" stroke="#1e293b" stroke-width="2"/>
+      <g stroke="#475569" stroke-width="2">
+        <path d="M160 560 v24"/><path d="M240 560 v24"/><path d="M320 560 v24"/><path d="M400 560 v24"/>
+        <path d="M480 560 v24"/><path d="M560 560 v24"/><path d="M640 560 v24"/><path d="M720 560 v24"/>
+        <path d="M800 560 v24"/><path d="M880 560 v24"/><path d="M960 560 v24"/><path d="M1040 560 v24"/>
+        <path d="M1120 560 v24"/><path d="M1200 560 v24"/><path d="M1280 560 v24"/><path d="M1360 560 v24"/><path d="M1440 560 v24"/>
       </g>
     </g>
 
-    <!-- incoming woven thread: conversation (amber) + job (indigo) -->
-    <g filter="url(#glow)" fill="none" stroke-linecap="round">
-      <path d="M70 322 C 340 292, 640 356, 893 330" stroke="#f59e0b" stroke-width="5" opacity=".95"/>
-      <path d="M70 344 C 340 372, 640 308, 893 336" stroke="#818cf8" stroke-width="5" opacity=".95"/>
-    </g>
-    <!-- outgoing thread to the merged ring -->
-    <g filter="url(#glow)" fill="none" stroke-linecap="round">
-      <path d="M1266 328 C 1352 314, 1468 342, 1546 332" stroke="#f59e0b" stroke-width="5" opacity=".95"/>
-      <path d="M1266 336 C 1352 350, 1468 322, 1546 332" stroke="#818cf8" stroke-width="5" opacity=".95"/>
+    <!-- ALIVE: indigo trace with steady pulses, dimmed under the text scrim -->
+    <g filter="url(#glow)" fill="none" stroke="#818cf8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M70 400
+               L 240 400 l 12 -22 l 12 22 L 380 400 l 12 -22 l 12 22
+               L 540 400 l 12 -22 l 12 22 L 700 400 l 12 -22 l 12 22
+               L 850 400 l 14 -30 l 14 30 L 936 400 l 16 -44 l 14 44 l 8 0"/>
     </g>
 
-    <!-- ambient glow behind the system -->
-    <circle cx="1080" cy="332" r="250" fill="url(#coreglow)"/>
-
-    <!-- the orbit: one ring, snapped at the strike and welded by the heartbeat.
-         Long elliptical arc from the gap edge at 320deg clockwise to 295deg. -->
-    <path d="M 1222 237 A 185 148 0 1 1 1158 198"
-          stroke="#6366f1" stroke-width="4" opacity=".85" fill="none" filter="url(#soft)"/>
-    <!-- heartbeat weld bridging the snapped orbit -->
-    <polyline filter="url(#soft)" fill="none" stroke="#34d399" stroke-width="4"
-      stroke-linecap="round" stroke-linejoin="round" opacity=".95"
-      points="1222,237 1207,230 1200,210 1188,244 1178,214 1168,204 1158,198"/>
-
-    <!-- eight satellite jobs riding the orbit -->
-    <g filter="url(#soft)">
-      <g fill="#818cf8">
-        <circle cx="1254" cy="383" r="9"/><circle cx="1158" cy="466" r="9"/>
-        <circle cx="1017" cy="471" r="9"/><circle cx="912" cy="395" r="9"/>
-        <circle cx="906" cy="281" r="9"/><circle cx="1002" cy="198" r="9"/>
-        <circle cx="1143" cy="193" r="9"/><circle cx="1248" cy="269" r="9"/>
-      </g>
-      <g fill="none" stroke="#6366f1" stroke-width="1.6" opacity=".55">
-        <circle cx="1254" cy="383" r="15"/><circle cx="1158" cy="466" r="15"/>
-        <circle cx="1017" cy="471" r="15"/><circle cx="912" cy="395" r="15"/>
-        <circle cx="906" cy="281" r="15"/><circle cx="1002" cy="198" r="15"/>
-        <circle cx="1143" cy="193" r="15"/><circle cx="1248" cy="269" r="15"/>
-      </g>
+    <!-- THE KILL: the trace snaps; red jag falls dead -->
+    <g filter="url(#soft)" fill="none" stroke="#f87171" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M974 400 l 10 -14 l 8 14 l 6 0"/>
     </g>
-
-    <!-- the core: Claude Code, the judgment work -->
-    <g filter="url(#glow)">
-      <circle cx="1080" cy="332" r="44" fill="#fbbf24"/>
-      <circle cx="1080" cy="332" r="58" fill="none" stroke="#f59e0b" stroke-width="2" opacity=".55"/>
-      <g stroke="#78350f" stroke-width="5" stroke-linecap="round">
-        <path d="M1080 308 v48"/>
-        <path d="M1059 320 l42 24"/>
-        <path d="M1101 320 l-42 24"/>
-      </g>
-    </g>
-
-    <!-- the kill bolt striking the orbit -->
-    <g transform="translate(1180,98)" filter="url(#soft)">
-      <path d="M64 20 L44 66 h20 l-8 34 34-48 h-22 z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"/>
+    <!-- kill bolt above the snap -->
+    <g transform="translate(942,208)" filter="url(#soft)">
+      <path d="M40 0 L20 46 h20 l-8 34 34-48 H44 z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"/>
       <g stroke="#fca5a5" stroke-width="3" stroke-linecap="round">
-        <path d="M28 44 l-20 -8"/><path d="M96 30 l20 -12"/><path d="M92 92 l18 12"/>
+        <path d="M8 30 l-18 -8"/><path d="M70 16 l18 -10"/><path d="M66 80 l16 10"/>
       </g>
+    </g>
+
+    <!-- TWO SILENT MINUTES: dashed flatline -->
+    <path d="M1002 400 H 1238" stroke="#475569" stroke-width="4" stroke-dasharray="10 12" stroke-linecap="round"/>
+
+    <!-- THE ONE LINK: purple arc from the last live pulse, through the chip, to the revival -->
+    <path d="M958 352 C 1000 256, 1220 256, 1258 352"
+          stroke="#7c3aed" stroke-width="3.5" stroke-dasharray="2 9" stroke-linecap="round" fill="none" filter="url(#soft)"/>
+    <path d="M1252 340 l6 12 l-13 3" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- RESUMED: the SAME session picks up green and finishes -->
+    <g filter="url(#glow)" fill="none" stroke="#34d399" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1238 400 l 14 -44 l 14 44
+               L 1330 400 l 12 -22 l 12 22 L 1420 400 l 12 -22 l 12 22 L 1512 400"/>
     </g>
 
     <!-- merged / shipped node -->
-    <circle cx="1546" cy="332" r="12" fill="#e2e8f0" filter="url(#glow)"/>
-    <circle cx="1546" cy="332" r="22" fill="none" stroke="#34d399" stroke-width="2.5" opacity=".8"/>
+    <circle cx="1524" cy="400" r="12" fill="#e2e8f0" filter="url(#glow)"/>
+    <circle cx="1524" cy="400" r="22" fill="none" stroke="#34d399" stroke-width="2.5" opacity=".8"/>
     <!-- origin node: the filed issue -->
-    <circle cx="70" cy="332" r="7" fill="#94a3b8"/>
+    <circle cx="70" cy="400" r="7" fill="#94a3b8"/>
   </svg>
 
   <div class="scrim"></div>
@@ -167,8 +153,11 @@
   </div>
 
   <div class="cap crash">Kill&nbsp;-9</div>
-  <div class="cap beat">Heartbeat</div>
+  <div class="cap silent">Two&nbsp;Silent&nbsp;Minutes</div>
+  <div class="cap same">Same&nbsp;Session</div>
   <div class="cap ship">Merged</div>
+  <div class="chip">session&nbsp;698c…</div>
+  <div class="chipnote">carried&nbsp;by&nbsp;the&nbsp;last&nbsp;heartbeat</div>
 </div>
 </body>
 </html>
