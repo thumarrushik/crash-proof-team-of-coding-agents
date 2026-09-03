@@ -1,6 +1,6 @@
 # A Crash-Proof Team of Coding Agents
 
-### Claude Code remembers the conversation; Temporal remembers the job. Kill the worker mid-task and the agent finishes anyway: the same session, resumed from its last heartbeat rather than any saved checkpoint. First that makes one job crash-proof. Then many such jobs, each a single-purpose durable step with its own mandate, compose into a governed team, most of them never touching the agent at all.
+### Claude Code remembers the conversation; Temporal remembers the job. Kill the worker mid-task and the agent finishes anyway: the same session, resumed from its last heartbeat rather than any saved checkpoint. First that makes one job crash-proof. Then many such jobs, each a single-purpose durable step with its own mandate, compose into a governed team.
 
 ---
 
