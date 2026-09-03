@@ -236,7 +236,7 @@ If you build any version of this, on any stack, these are the settled defaults t
 
 ## The Harness Was the Hard Part All Along
 
-One practitioner teardown of Claude Code's own codebase estimates that roughly **1.6%** of it is the AI decision logic. The other **98.4%** is operational harness: permissions, state, recovery, tools.[^11] Set that next to the hand-built list from the start of this article (and the table that mapped it, item by item, to existing primitives) and the overlap is hard to miss. The harness every agent team is rebuilding is, almost line for line, what durable-execution engines have provided for a decade.
+Most of what an agent system needs is not the AI at all; it is operational harness: permissions, state, recovery, tools. Set that against the hand-built list from the start of this article (and the table that mapped it, item by item, to existing primitives) and the overlap is hard to miss. The harness every agent team is rebuilding is, almost line for line, what durable-execution engines have provided for a decade.
 
 The two sides are already circling each other. Temporal's own AI cookbook wraps model *API calls* in activities; a production write-up wraps the agent framework the same stateless way; another project built durable checkpointing around whole Claude Code runs on its own runtime.[^12][^13][^14] In the sources we checked, none composes the two the way this project does: headless Claude Code *sessions*, the session ID carried in heartbeat details mid-chunk and in workflow state after a completed one. That claim has a short shelf life, so re-check it before you build.
 
@@ -261,7 +261,7 @@ This article is the trunk; six companions each own one branch, and they read in 
 
 - **Vendor documentation** for every Claude Code behavior cited (headless mode, sessions, the CI action, permissions, hooks, sandboxing) and every Temporal behavior (durable execution, activities, heartbeats and their throttling, versioning): [code.claude.com/docs](https://code.claude.com/docs), [docs.temporal.io](https://docs.temporal.io), [python.temporal.io](https://python.temporal.io); specifics footnoted inline. *Vendor/canonical.* Checked 2026-08-20.
 - **Measured runs.** The heartbeat recovery, the conflict run, and the learn-loop are recorded in the project's evidence archive: each has a results file there; the heartbeat and learn-loop runs keep their runners and analyzers beside it, and the conflict run's original artifacts stay with the project's lab notebook. Agent model `haiku`, July and August 2026. The cost measurements live with the economics companion, *Mechanics Cost Cents, Behavior Costs Dollars* (coming soon).
-- **Practitioner and adjacent sources** (the 1.6%/98.4% teardown, the Temporal AI cookbook, and the two adjacent durable-agent write-ups) are footnoted inline.
+- **Practitioner and adjacent sources** (the Temporal AI cookbook and the two adjacent durable-agent write-ups) are footnoted inline.
 
 [^1]: [Claude Code headless mode](https://code.claude.com/docs/en/headless): `--output-format json` returns `session_id`, cost, and (with a JSON schema) structured output; `--resume <id>` continues a stored session; transcripts are stored under `~/.claude/projects/<cwd-slug>/<session-id>.jsonl`, the working-directory path with non-alphanumerics replaced. Checked 2026-08-20. *Vendor/canonical.*
 
@@ -282,8 +282,6 @@ This article is the trunk; six companions each own one branch, and they read in 
 [^9]: The four-cost experiment, model `haiku`, 2026-07-15, run strictly sequentially, everything observed rather than modeled; the method and per-run detail are in the economics companion, *Mechanics Cost Cents, Behavior Costs Dollars* (coming soon).
 
 [^10]: The asterisk: PR #4 predated the escalation feature, so its review was re-triggered against the new code, and this run's polls were hand-triggered rather than waited out on the timer. The scheduled poll and the first-pass routing are proven across the other recorded runs; this run isolates the resolution chain. The full run record is in the evidence archive.
-
-[^11]: [*Dive into Claude Code*](https://arxiv.org/abs/2604.14228) (arXiv 2604.14228): ~1.6% of the codebase is AI decision logic; ~98.4% operational harness. *Practitioner/academic.*
 
 [^12]: [Temporal AI cookbook](https://docs.temporal.io/ai-cookbook/agentic-loop-tool-call-claude-python): the "Basic agentic loop with Claude" uses model Messages API calls as activities; no Claude Code CLI, no session resume. *Vendor/canonical.*
 
