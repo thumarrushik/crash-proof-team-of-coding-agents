@@ -1,0 +1,33 @@
+# The PR #4 incident as a concrete vertical timeline: two backend PRs collide,
+# #4 goes stale, the update hits a content conflict, the review lane escalates
+# across lanes to the owning team, the agent keeps both and the harness merges,
+# and the blocked frontend is released. NEW for the flagship (2026-09-02): the
+# specific incident, distinct from issue-to-merge's generic loop.
+direction: down
+horizontal-gap: 110
+vertical-gap: 48
+
+collide: "Two Backend PRs Collide by Design (Same Lines).\nThe Search PR Merges First; PR #4 (Delete) Goes Stale" {
+  style: {fill: "#ffffff"; stroke: "#94a3b8"; font-color: "#475569"; bold: true}
+}
+refused: "PR #4 Is Approved on Its Merits,\nbut the Merge Is Refused: the Branch Is Behind" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+conflict: "The Boring Fix, Update the Branch,\nHits a CONTENT CONFLICT.\nKeeping Both Is a Judgment Call" {
+  style: {fill: "#fee2e2"; stroke: "#dc2626"; font-color: "#7f1d1d"; bold: true}
+}
+escalate: "Handed to the Team That Owns the Code:\na Resolve Job in the BACKEND Namespace\n(a Client Call From Inside an Activity)" {
+  style: {fill: "#f5f3ff"; stroke: "#7c3aed"; font-color: "#4c1d95"; bold: true}
+}
+resolve: "The Backend Agent Keeps BOTH Features,\nTests 10 of 10 Green; the Harness Merges #4.\nThe Issue Closes Itself" {
+  style: {fill: "#fff7ed"; stroke: "#d97706"; font-color: "#7c2d12"; bold: true}
+}
+unblock: "The BLOCKED Frontend Issue Is Released,\nShips a Delete Button + Browser Test.\nNo Human Decision in the Whole Chain" {
+  style: {fill: "#dcfce7"; stroke: "#16a34a"; font-color: "#14532d"; bold: true}
+}
+
+collide -> refused
+refused -> conflict
+conflict -> escalate: "escalated across lanes" {style: {stroke-dash: 5; stroke: "#0891b2"; font-color: "#164e63"; bold: true}}
+escalate -> resolve
+resolve -> unblock: "the closed issue frees the blocked work" {style: {stroke-dash: 5; stroke: "#0891b2"; font-color: "#164e63"; bold: true}}
