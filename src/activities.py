@@ -204,11 +204,17 @@ def _bootstrap_workspace(work_dir: Path, team: str) -> None:
         if guard not in deny:
             deny.append(guard)
     (claude_dir / "settings.json").write_text(json.dumps(settings, indent=2))
-    for name in ("flag-rules.py", "rules.json", "phase-gate.py"):
+    for name in ("flag-rules.py", "rules.json", "phase-gate.py", "mirror-signal.py"):
         (claude_dir / name).write_text((team_claude / name).read_text())
     # Fresh chunk, fresh deadlock budget: without this, a run that burned its
     # 3 phase-gate blocks leaves every later chunk with a disarmed gate.
     (claude_dir / "phase-gate-blocks").unlink(missing_ok=True)
+    # With commits mirrored to the remote as they land, the scratch exclusion
+    # has to hold from the FIRST commit, not from PR time: stamp it here, every
+    # chunk, so nothing the agent commits can carry workspace scratch outward.
+    git_info = work_dir / ".git" / "info"
+    if git_info.is_dir():
+        (git_info / "exclude").write_text(_PR_EXCLUDE)
 
     # -- knowledge: bind live --
     ws_skills = claude_dir / "skills"
@@ -264,6 +270,37 @@ async def _prepare_repo(work_dir: Path, repo: str | None, branch: str | None) ->
             await _git(["checkout", "-B", branch], cwd=str(work_dir))
     await _git(["config", "user.email", "claude-agent@users.noreply.github.com"], cwd=str(work_dir))
     await _git(["config", "user.name", "Claude Agent"], cwd=str(work_dir))
+
+
+async def _mirror_branch(
+    work_dir: Path, remote_url: str, branch: str, last_head: str
+) -> str:
+    """The harness's half of the commit mirror: push the workspace's HEAD to
+    the remote work branch, so a commit is never only on this machine. The
+    agent's half is the mirror-signal hook — it can only leave a marker,
+    because the agent env holds no credential and its `git push` is denied;
+    the credentialed push happens here, in the activity's own process.
+
+    Returns the head that is now mirrored (or `last_head` unchanged when there
+    was nothing new or the push failed). Never raises: a failed mirror is a
+    delayed one — the next marker or the chunk-end sweep retries, and the PR
+    activities still push the full history at the end.
+    """
+    code, head = await _git(["rev-parse", "HEAD"], cwd=str(work_dir))
+    head = head.strip()
+    if code != 0 or not head or head == last_head:
+        return last_head
+    code, out = await _git(
+        ["push", remote_url, f"HEAD:{branch}"], cwd=str(work_dir)
+    )
+    if code != 0:
+        safe = re.sub(r"x-access-token:[^@]+@", "x-access-token:***@", out)
+        _append_jsonl(
+            work_dir / "recovery-log.jsonl",
+            {"ts": time.time(), "event": "mirror_push_failed", "detail": safe[-300:]},
+        )
+        return last_head
+    return head
 
 
 def _gh_post(path: str, token: str, body: dict) -> tuple[int, dict]:
@@ -593,6 +630,41 @@ async def run_claude_chunk(input: ChunkInput) -> ChunkResult:
     _bootstrap_workspace(work_dir, input.team)
     rule_flags_before = _count_rule_flags(work_dir)
 
+    # Commit mirror: the mirror-signal hook (agent side, no credential) leaves
+    # a marker on every `git commit`; this activity (harness side, worker
+    # token) pushes the work branch in its own step, so a commit is never only
+    # on this machine. The mirrored head starts from what the remote already
+    # has, so a retried chunk heals any tail a dead attempt committed but never
+    # mirrored.
+    mirror_marker = work_dir / ".claude" / "mirror-request"
+    mirror_marker.unlink(missing_ok=True)
+    mirror_remote = ""
+    mirrored_head = ""
+    if input.repo and input.branch:
+        token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+        if token:
+            mirror_remote = f"https://x-access-token:{token}@github.com/{input.repo}.git"
+            _, listed = await _git(["ls-remote", mirror_remote, input.branch])
+            mirrored_head = (listed.split() or [""])[0]
+            if mirrored_head:
+                mirrored_head = await _mirror_branch(
+                    work_dir, mirror_remote, input.branch, mirrored_head
+                )
+            else:
+                # Branch not on the remote yet — nothing to heal; the first
+                # commit's marker will create it.
+                _, head0 = await _git(["rev-parse", "HEAD"], cwd=str(work_dir))
+                mirrored_head = head0.strip()
+
+    async def _sweep_mirror() -> None:
+        nonlocal mirrored_head
+        if not mirror_remote:
+            return
+        mirror_marker.unlink(missing_ok=True)
+        mirrored_head = await _mirror_branch(
+            work_dir, mirror_remote, input.branch, mirrored_head
+        )
+
     info = activity.info()
     heartbeat_session_id = _session_id_from_heartbeat(info.heartbeat_details)
     resume_session_id = heartbeat_session_id or input.session_id
@@ -669,6 +741,12 @@ async def run_claude_chunk(input: ChunkInput) -> ChunkResult:
             # Claude session ID in the Temporal UI and retry heartbeat details.
             _heartbeat(f"{type(message).__name__}:{getattr(message, 'subtype', '')}")
 
+            # The commit's PostToolUse hook ran before its tool-result message
+            # streamed here, so the marker check per message mirrors each
+            # commit within moments of it landing.
+            if mirror_marker.exists():
+                await _sweep_mirror()
+
             if isinstance(message, ResultMessage):
                 if message.is_error and message.subtype == "success":
                     # API-level failure (429/500/529) — the most common way a
@@ -726,4 +804,11 @@ async def run_claude_chunk(input: ChunkInput) -> ChunkResult:
         raise
     finally:
         heartbeater.cancel()
+        try:
+            # Chunk-end backstop: mirror any commit whose marker the loop never
+            # processed (error exits included). Best-effort — this must never
+            # mask the real exit, and a cancelled task must still disconnect.
+            await asyncio.wait_for(asyncio.shield(_sweep_mirror()), timeout=30)
+        except BaseException:
+            pass
         await client.disconnect()

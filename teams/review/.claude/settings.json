@@ -26,6 +26,15 @@
             "command": "python3 .claude/flag-rules.py"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/mirror-signal.py"
+          }
+        ]
       }
     ],
     "Stop": [

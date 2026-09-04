@@ -51,11 +51,14 @@ and note it in REPORT.md — never stall waiting for a human.
 
 ## Harness contract
 
-Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), the `flag-rules` hook script, and the `phase-gate` Stop hook (the run cannot finish until the mandated phase task list exists and every phase is completed) — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
+Policy: this team's `.claude/` carries its full governance unit — `settings.json` (permissions plus the audit and rules hooks), `rules.json` (the lane's behavioral rules), the `flag-rules` hook script, the `mirror-signal` hook (every `git commit` leaves a marker the harness reads to mirror the work branch to the remote), and the `phase-gate` Stop hook (the run cannot finish until the mandated phase task list exists and every phase is completed) — all human-committed and stamped into the workspace before every chunk. The agent never edits them.
 
 The harness owns the remote: never `git push` (it is denied). Commit as you
-work — small commits at meaningful checkpoints (a phase completed, a suite
-green), each with a message that says why — and leave anything uncommitted at
-the end; the harness sweeps leftovers into a final commit, pushes your full
-commit history, and opens the PR in its own recorded steps. The worker exports
+work — end every phase with a commit, plus small commits at meaningful
+checkpoints (a suite green, a decision made), each with a message that says
+why. Every commit is mirrored as it lands: a hook leaves a marker and the
+harness pushes the work branch to the remote in its own step, with its own
+credential, so finished work is never only on this machine. Leave anything
+uncommitted at the end; the harness sweeps leftovers into a final commit and
+opens the PR in its own recorded steps. The worker exports
 the readable session transcript after the workflow completes.

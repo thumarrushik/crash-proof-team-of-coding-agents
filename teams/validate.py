@@ -59,7 +59,7 @@ def validate() -> int:
             assert isinstance(rules, list) and all("name" in r and "kind" in r for r in rules)
         except Exception as e:
             failures.append(f"{name}: rules.json invalid ({e})")
-        for script in ("flag-rules.py", "phase-gate.py"):
+        for script in ("flag-rules.py", "phase-gate.py", "mirror-signal.py"):
             hook = claude / script
             if not hook.exists():
                 failures.append(f"{name}: {script} missing")
